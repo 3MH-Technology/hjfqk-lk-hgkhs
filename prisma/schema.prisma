@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("user")
+  isBanned  Boolean  @default(false)
+  maxBots   Int      @default(5)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bots      Bot[]
+}
+
+model Bot {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  language    String   @default("python")
+  status      String   @default("stopped")
+  containerId String?  @unique
+  port        Int?
+  cpuLimit    Float    @default(0.5)
+  ramLimit    Int      @default(256)
+  autoRestart Boolean  @default(true)
+  githubUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files       BotFile[]
+  logs        BotLog[]
+  envVars     BotEnv[]
+}
+
+model BotFile {
+  id        String   @id @default(cuid())
+  botId     String
+  path      String
+  content   String
+  size      Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+}
+
+model BotLog {
+  id        String   @id @default(cuid())
+  botId     String
+  level     String   @default("info")
+  message   String
+  createdAt DateTime @default(now())
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+}
+
+model BotEnv {
+  id        String   @id @default(cuid())
+  botId     String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@unique([botId, key])
+}
