@@ -109,6 +109,11 @@ const BotComparison = dynamic(
   { loading: () => loadingFallback }
 );
 
+const BotAnalytics = dynamic(
+  () => import('@/components/wolf/bots/bot-analytics').then((m) => m.BotAnalytics),
+  { loading: () => loadingFallback }
+);
+
 const HelpCenter = dynamic(
   () => import('@/components/wolf/help-center'),
   { loading: () => loadingFallback }
@@ -149,6 +154,8 @@ function PageContent() {
       return <AdminBots />;
     case 'bot-comparison':
       return <BotComparison />;
+    case 'bot-analytics':
+      return <BotAnalytics />;
     default:
       return <Dashboard />;
   }

@@ -1,6 +1,7 @@
 'use client';
 
-import { Menu, Search } from 'lucide-react';
+import { Sun, Moon, Menu, Search } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useAppStore, type Page } from '@/store/app-store';
 import { NotificationDropdown } from '../notification-dropdown';
@@ -24,11 +25,13 @@ const pageTitles: Record<Page, string> = {
   'admin-users': 'إدارة المستخدمين',
   'admin-bots': 'إدارة البوتات العامة',
   'bot-comparison': 'مقارنة البوتات',
+  'bot-analytics': 'تحليلات البوتات',
   '404': 'الصفحة غير موجودة',
 };
 
 export function Header() {
-  const { currentPage, toggleSidebar, user } = useAppStore();
+  const { currentPage, toggleSidebar, user, theme, setTheme } = useAppStore();
+  const { resolvedTheme, setTheme: setNextTheme } = useTheme();
 
   const pageTitle = pageTitles[currentPage] || 'لوحة التحكم';
   const avatarLetter =
@@ -36,13 +39,33 @@ export function Header() {
     user?.email?.charAt(0) ||
     'م';
 
+  const handleToggleTheme = () => {
+    const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+    setNextTheme(newTheme);
+    setTheme(newTheme === 'dark' ? 'dark' : 'light');
+  };
+
   return (
     <header className="glass fixed left-0 right-0 top-0 z-50 flex h-16 items-center justify-between px-4 md:pr-[17rem]">
-      {/* Left: User Avatar */}
-      <div className="flex items-center gap-3">
+      {/* Left: User Avatar + Theme Toggle */}
+      <div className="flex items-center gap-2">
         <div className="flex size-9 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
           {avatarLetter}
         </div>
+        {/* Theme Toggle Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleToggleTheme}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={resolvedTheme === 'dark' ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن'}
+        >
+          {resolvedTheme === 'dark' ? (
+            <Sun className="size-4" />
+          ) : (
+            <Moon className="size-4" />
+          )}
+        </Button>
         {/* Notification Dropdown - visible when authenticated */}
         {user && <NotificationDropdown />}
       </div>

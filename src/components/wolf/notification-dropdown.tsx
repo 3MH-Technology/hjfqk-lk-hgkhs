@@ -125,7 +125,7 @@ const listItemVariants = {
     transition: {
       delay: i * 0.04,
       duration: 0.25,
-      ease: 'easeOut',
+      ease: 'easeOut' as const,
     },
   }),
   exit: {

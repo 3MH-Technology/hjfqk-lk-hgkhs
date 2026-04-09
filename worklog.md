@@ -356,3 +356,246 @@ Stage Summary:
 - Active bots quick list with clickable rows
 - Version footer "استضافة الذئب v0.2"
 - Zero lint errors, clean dev server compilation
+
+---
+Task ID: 9
+Agent: Bot List Styling Enhancement Agent
+Task: Enhance the bot-list.tsx component with detailed styling, animations, and visual polish.
+
+Work Log:
+- Rewrote bot-list.tsx (~580 lines) with comprehensive visual enhancements
+- Added framer-motion staggered card entrance animations with containerVariants (staggerChildren: 0.08) and cardVariants (spring physics: stiffness 260, damping 24)
+- Added status-based gradient overlays on bot cards: green glow for running, amber for building, red for error, gray for stopped
+- Added pulsing border + box-shadow effects on running/building/error bot cards using CSS keyframe animations
+- Added glassmorphism card styling with backdrop-blur-sm, bg-card/60, and relative positioning for gradient overlays
+- Added search/filter bar with glassmorphism container:
+  - Text search input with search icon (filters by bot name)
+  - Status filter dropdown (All/Running/Stopped/Building/Error) using shadcn/ui Select
+  - Language filter dropdown (All/Python/PHP) using shadcn/ui Select
+  - Grid/List view toggle with icon buttons and tooltip hints
+- Added card count summary ("عرض X من Y بوتات") with filtered count indicator
+- Enhanced empty state with animated SVG wolf head silhouette:
+  - Wolf head path with linear gradient fill (amber to stone)
+  - Pointed ears, glowing amber eyes with opacity pulse animation
+  - Nose and mouth details
+  - Floating animation (y: 0 → -8 → 0, 3s loop)
+  - Ambient glow blur behind wolf head
+- Added animated action buttons (ActionButton component) with:
+  - framer-motion whileHover scale(1.05) and whileTap scale(0.95)
+  - Tooltip on hover for each action button
+  - Labels hidden on mobile, visible on sm+ breakpoints
+- Added list view mode alongside grid view:
+  - Horizontal layout with bot icon, info, status, container ID, action buttons
+  - whileHover x: 4 slide animation for list items
+  - Eye button for viewing bot details
+  - Compact container ID display with copy button (desktop only)
+- Enhanced container ID display with CopyButton component:
+  - Clipboard API integration with success/error toast
+  - Visual feedback: Copy → Check icon on success
+  - Tooltip: "نسخ المعرف" / "تم النسخ!"
+- Added "no results" filtered empty state with search icon and "مسح الفلاتر" link
+- Added clickable bot cards → navigate to bot-detail page via handleViewBot
+- All motion variants use `as const` for type/ease strings
+- Fixed err handling: replaced `any` with `unknown` + instanceof Error
+- All text in Arabic (RTL), zero lint errors, clean compilation
+
+Stage Summary:
+- 10 major styling enhancements applied to bot-list.tsx
+- Framer-motion animations: staggered entrance, hover lift, scale on tap
+- Status-based card glow effects (green/amber/red/gray gradients + pulsing borders)
+- Search/filter bar with text input, status dropdown, language dropdown
+- Grid/List view toggle with distinct layouts
+- Animated SVG wolf head empty state illustration
+- Copy-to-clipboard for container IDs with visual feedback
+- Tooltips on all action buttons
+- Card count summary with filter indicator
+- Zero lint errors, clean dev server compilation
+
+---
+Task ID: 10
+Agent: Bot Analytics Page Agent
+Task: Create a new comprehensive Bot Analytics page with detailed metrics, charts, and performance data.
+
+Work Log:
+- Created bot-analytics.tsx (~560 lines) with full analytics dashboard
+- Overview Cards: 4 metric cards (Total Requests, Avg Response Time, Error Rate, Uptime) each with SVG sparkline mini-charts and trend indicators
+- Performance Timeline: recharts LineChart with 3 lines (requests, response time, errors) over last 7 days with Arabic day labels
+- Resource Distribution: recharts PieChart (donut) showing CPU/Memory/Network/Disk allocation with color legend
+- Bot Health Grid: 6 bot health cards in responsive grid showing status badge, uptime %, requests/min, error count with color-coded indicators (green/yellow/red)
+- Top Error Messages: List of 8 most common errors with severity icons, frequency count badges, and truncated monospace messages
+- Response Time Distribution: recharts BarChart with 4 buckets (0-100ms, 100-500ms, 500ms-1s, >1s) with color-coded bars and summary legend
+- Activity Heatmap: CSS grid-based heatmap (7 days x 24 hours) with color intensity scale (6 levels from muted to red), realistic activity patterns (low at night, peak during work hours)
+- Custom tooltip component for recharts with RTL Arabic styling
+- Sparkline SVG component for overview cards
+- Added 'bot-analytics' to Page type union in app-store.ts
+- Added lazy import and switch case in app-layout.tsx
+- Added page title 'تحليلات البوتات' in header.tsx
+- Added sidebar navigation item with BarChart3 icon placed after "مراقبة الأداء" in sidebar.tsx
+- All text in Arabic (RTL), framer-motion animations with `as const` on ease/type strings
+- Zero lint errors, clean dev server compilation
+
+Stage Summary:
+- New Bot Analytics page with 7 dashboard sections
+- 3 recharts visualizations (LineChart, PieChart, BarChart) + SVG sparklines + CSS heatmap
+- 6 bot health cards with clickable navigation to bot-detail
+- 8 top error messages with severity indicators
+- Responsive layout with dark wolf theme consistency
+- Zero lint errors
+
+---
+Task ID: 11
+Agent: Auth Forms Enhancement & Theme Toggle Agent
+Task: Enhance login/register forms styling and add a theme toggle feature.
+
+Work Log:
+- Added 270+ lines of new CSS to globals.css:
+  - Auth form gradient mesh background (5 layered radial gradients)
+  - Enhanced glassmorphism card (blur 20px, saturate 180%, glow box-shadow, inset highlight)
+  - Animated input gradient underline (width 0 → 100% on focus with cubic-bezier timing)
+  - 5 wolf silhouette float keyframe animations (varied paths, rotations, opacity)
+  - 5 wolf particle class assignments with 12-20s durations and staggered delays
+  - Auth form entrance animation (translateY 24px → 0 with scale, 0.6s)
+  - Auth branding panel entrance animation (translateX 20px → 0)
+  - Wolf logo glow container with radial gradient pulse
+- Added complete light theme CSS variables (.light selector):
+  - 30+ CSS variable overrides for backgrounds, foregrounds, borders, sidebar, charts
+  - 15+ component-specific light overrides (glass, navbar-glass, auth-glass-card, wolf-paw-bg, etc.)
+  - Scrollbar, selection, tooltip, and focus-visible light theme styles
+- Rewrote login-form.tsx with all enhancements:
+  - WolfLogo SVG component (wolf head silhouette with glowing eyes, nose, ear details)
+  - WolfSilhouetteParticle SVG component (smaller wolf head for floating particles)
+  - 5 floating wolf silhouette particles on the form panel background
+  - Gradient mesh background on the form side
+  - Enhanced glassmorphism card (auth-glass-card class)
+  - Animated input wrappers with gradient underline on focus
+  - Framer-motion entrance animation (formVariants + staggerContainer + itemVariants)
+  - Branding panel entrance animation with motion.div
+  - GitHub inline SVG icon + Telegram Send icon in social login buttons
+  - Divider text changed to "أو تابع باستخدام"
+  - Social buttons in flex row (GitHub + Telegram side by side)
+- Rewrote register-form.tsx with all enhancements:
+  - Same WolfLogo + WolfSilhouetteParticle components
+  - Same 5 floating wolf particles, gradient mesh, glassmorphism card
+  - Same framer-motion entrance and stagger animations
+  - GitHub + Telegram social login buttons in flex row (replacing text-only hint)
+  - Divider text changed to "أو تابع باستخدام"
+- Updated app-store.ts:
+  - Added `Theme` type export ('dark' | 'light')
+  - Added `theme: Theme` field to AppState interface
+  - Added `setTheme: (theme: Theme) => void` action
+  - Default theme set to 'dark'
+- Updated header.tsx:
+  - Added Sun/Moon theme toggle button between avatar and notifications
+  - Uses `useTheme()` from next-themes for resolvedTheme and setTheme
+  - Syncs Zustand store theme state with next-themes
+  - Added page title for 'bot-analytics': 'تحليلات البوتات'
+  - Replaced GitHub lucide icon with inline SVG
+- All text in Arabic (RTL), framer-motion with `as const` on ease/type strings
+- Zero lint errors, clean dev server compilation
+
+Stage Summary:
+- Auth forms completely redesigned with 10 major enhancements
+- Wolf SVG logo (head silhouette with eyes, nose, ears) replacing emoji
+- 5 floating wolf silhouette particles on form panel
+- Decorative gradient mesh background (5 radial gradients)
+- Enhanced glassmorphism card (blur 20px + glow + inset highlight)
+- Animated gradient underline on input focus
+- Framer-motion entrance animations (slide up + fade in + stagger)
+- Social login buttons (GitHub + Telegram) on both forms
+- Light theme support with 30+ CSS variable overrides
+- Theme toggle button (Sun/Moon) in header
+- Zero lint errors
+
+---
+Task ID: 12
+Agent: Main Orchestrator Agent
+Task: Session QA Review — Bug Fixes, Styling Improvements, New Features
+
+Work Log:
+- Read worklog.md to understand full project history (11 previous tasks)
+- Ran ESLint: zero errors
+- Ran TypeScript compiler: found 3 files with framer-motion ease/type string errors
+  - Fixed bot-templates.tsx: added `as const` to `ease: 'easeOut'` and `type: 'spring'` in variant objects
+  - Fixed notification-dropdown.tsx: added `as const` to `ease: 'easeOut'` in listItemVariants
+  - Fixed landing.tsx: added `as const` to `ease: 'easeOut'` in fadeInUp variant function
+- Visual QA via agent-browser:
+  - Tested landing page (all sections render correctly)
+  - Tested bot templates page (filters, cards working)
+  - Tested bot monitoring page (health dashboard working)
+  - Tested settings page (forms working)
+  - Tested dashboard (stats, charts, activity timeline working)
+  - Tested notification dropdown (expand/collapse working)
+  - Registered new test user, logged in successfully
+  - Zero browser console errors throughout all pages
+- Launched 3 parallel subagents for enhancement work:
+  - Agent 9: Bot List Styling Enhancement (completed)
+  - Agent 10: Bot Analytics Page (completed)
+  - Agent 11: Auth Forms Enhancement + Theme Toggle (completed)
+- Fixed TypeScript error in auth forms: WolfSilhouetteParticle missing `style` prop
+- Verified: zero lint errors, zero TypeScript errors, zero browser errors
+- Final visual QA on new features:
+  - Bot Analytics page renders with all 7 sections (overview cards, timeline, pie chart, health grid, errors, response distribution, heatmap)
+  - Enhanced bot list renders with search/filter bar, grid/list toggle, animated cards
+  - Theme toggle (dark/light) works correctly from header
+  - Sidebar now shows "تحليلات البوتات" navigation item
+
+Stage Summary:
+- 3 TypeScript bugs fixed (framer-motion ease/type string types)
+- 1 TypeScript bug fixed (WolfSilhouetteParticle missing style prop)
+- 3 major new features delivered via parallel subagents
+- All QA verified: zero lint errors, zero TS errors, zero browser errors
+- Project is in excellent shape for next phase
+
+---
+## Current Project Status (Updated)
+
+### Assessment
+The White Wolf Hosting platform is highly stable with zero errors across all checks (ESLint, TypeScript, browser console). 19 pages/features are now available with comprehensive functionality. The visual design is polished with the dark wolf theme (amber/gold accents), RTL Arabic layout, framer-motion animations, and now supports both dark and light themes.
+
+### Completed in This Phase
+1. **3 TypeScript bugs fixed**: framer-motion `ease`/`type` string type issues in bot-templates.tsx, notification-dropdown.tsx, landing.tsx
+2. **Bot List Enhancement**: Search/filter bar, grid/list view toggle, animated wolf empty state, status-based card glow effects, copy-to-clipboard container IDs
+3. **Bot Analytics Page**: 7-section analytics dashboard with line chart, pie chart, bar chart, SVG sparklines, CSS heatmap, bot health grid, top errors list
+4. **Auth Forms Enhancement**: Wolf SVG logo, floating wolf particles, gradient mesh background, glassmorphism cards, animated input underlines, social login buttons
+5. **Theme Toggle**: Dark/light mode switching with 30+ CSS variable overrides, Sun/Moon toggle button in header
+
+### Total Pages/Features (Updated)
+- Landing page (hero with particles + pricing + FAQ)
+- Login / Register (enhanced with wolf branding)
+- Dashboard (stats, sparklines, charts, activity timeline)
+- Bot list (enhanced with search, filter, grid/list toggle)
+- Bot detail
+- Bot templates (8 templates)
+- Bot monitoring
+- **Bot analytics (NEW)** — 7-section analytics dashboard
+- Bot console (terminal simulation)
+- Bot comparison
+- File manager
+- Log viewer
+- Activity center
+- Help center
+- Settings
+- Admin panel / User management
+- Command palette (Ctrl+K)
+- Notification dropdown
+- **Theme toggle (NEW)** — Dark/Light mode
+
+### Unresolved Issues & Risks
+- Bot analytics uses mock data (no real metrics API)
+- Bot templates use mock data (no actual template files)
+- Activity center uses mock notifications (no notification API)
+- Bot monitoring uses simulated metrics (no Docker stats API)
+- Social login buttons (GitHub/Telegram) are UI-only (non-functional)
+- Register form submit may need testing with form validation flow
+
+### Priority Recommendations for Next Phase
+1. Implement real notification system with database persistence
+2. Add bot template API + actual template file storage
+3. Integrate Docker stats API for real monitoring metrics
+4. Add WebSocket for real-time log streaming
+5. Add file upload with drag-and-drop in file manager
+6. Implement real analytics API with actual bot performance data
+7. Add bot deployment history tracker with timestamps
+8. Add webhook configuration for bot events
+9. Implement team collaboration features (multi-user bot access)
+10. Add API key management for external integrations

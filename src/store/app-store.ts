@@ -20,7 +20,10 @@ export type Page =
   | "admin-users"
   | "admin-bots"
   | "bot-comparison"
+  | "bot-analytics"
   | "404";
+
+export type Theme = 'dark' | 'light';
 
 interface AppState {
   currentPage: Page;
@@ -36,6 +39,7 @@ interface AppState {
   unreadNotifications: number;
   notificationPanelOpen: boolean;
   commandPaletteOpen: boolean;
+  theme: Theme;
   setCurrentPage: (page: Page) => void;
   setSelectedBotId: (id: string | null) => void;
   setUser: (user: any | null) => void;
@@ -45,6 +49,7 @@ interface AppState {
   setUnreadNotifications: (count: number) => void;
   setNotificationPanelOpen: (open: boolean) => void;
   setCommandPaletteOpen: (open: boolean) => void;
+  setTheme: (theme: Theme) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -56,6 +61,7 @@ export const useAppStore = create<AppState>((set) => ({
   unreadNotifications: 5,
   notificationPanelOpen: false,
   commandPaletteOpen: false,
+  theme: 'dark',
   setCurrentPage: (page) => set({ currentPage: page }),
   setSelectedBotId: (id) => set({ selectedBotId: id }),
   setUser: (user) => set({ user, isLoading: false }),
@@ -65,4 +71,5 @@ export const useAppStore = create<AppState>((set) => ({
   setUnreadNotifications: (count) => set({ unreadNotifications: count }),
   setNotificationPanelOpen: (open) => set({ notificationPanelOpen: open }),
   setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+  setTheme: (theme) => set({ theme }),
 }));

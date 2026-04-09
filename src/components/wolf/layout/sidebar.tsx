@@ -20,6 +20,7 @@ import {
   MemoryStick,
   ChevronDown,
   Clock,
+  BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -65,6 +66,11 @@ const navItems: NavItem[] = [
     id: 'bot-monitoring',
     label: 'مراقبة الأداء',
     icon: <MonitorDot className="size-5" />,
+  },
+  {
+    id: 'bot-analytics',
+    label: 'تحليلات البوتات',
+    icon: <BarChart3 className="size-5" />,
   },
   {
     id: 'files',
