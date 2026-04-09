@@ -11,6 +11,10 @@ import {
   Shield,
   LogOut,
   X,
+  Bell,
+  Activity,
+  Package,
+  MonitorDot,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -19,6 +23,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 import { useAppStore, type Page } from '@/store/app-store';
 
 interface NavItem {
@@ -26,6 +31,7 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   adminOnly?: boolean;
+  badge?: number;
 }
 
 const navItems: NavItem[] = [
@@ -40,6 +46,16 @@ const navItems: NavItem[] = [
     icon: <Bot className="size-5" />,
   },
   {
+    id: 'bot-templates',
+    label: 'قوالب البوتات',
+    icon: <Package className="size-5" />,
+  },
+  {
+    id: 'bot-monitoring',
+    label: 'مراقبة الأداء',
+    icon: <MonitorDot className="size-5" />,
+  },
+  {
     id: 'files',
     label: 'مدير الملفات',
     icon: <FolderOpen className="size-5" />,
@@ -48,6 +64,11 @@ const navItems: NavItem[] = [
     id: 'logs',
     label: 'السجلات',
     icon: <ScrollText className="size-5" />,
+  },
+  {
+    id: 'activity',
+    label: 'النشاط',
+    icon: <Activity className="size-5" />,
   },
   {
     id: 'settings',
@@ -83,7 +104,7 @@ function SidebarContent({
   onNavigate?: () => void;
   isMobile?: boolean;
 }) {
-  const { currentPage, setCurrentPage, user, setSidebarOpen, setUser } =
+  const { currentPage, setCurrentPage, user, setSidebarOpen, setUser, unreadNotifications } =
     useAppStore();
 
   const handleNavigate = (page: Page) => {
@@ -102,7 +123,10 @@ function SidebarContent({
     }
   };
 
-  const filteredNavItems = navItems.filter(
+  const filteredNavItems = navItems.map((item) => ({
+    ...item,
+    badge: item.id === 'activity' ? unreadNotifications : undefined,
+  })).filter(
     (item) => !item.adminOnly || user?.role === 'admin'
   );
 
@@ -163,7 +187,17 @@ function SidebarContent({
                 <span className={isActive ? 'text-primary' : ''}>
                   {item.icon}
                 </span>
-                <span>{item.label}</span>
+                <span className="flex-1 text-right">{item.label}</span>
+                {item.badge && item.badge > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className={`h-5 min-w-5 px-1.5 text-[10px] font-bold flex items-center justify-center ${
+                      !isActive ? 'notification-badge-pulse' : ''
+                    }`}
+                  >
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </Badge>
+                )}
               </button>
             );
 
@@ -177,8 +211,13 @@ function SidebarContent({
               <li key={item.id}>
                 <Tooltip>
                   <TooltipTrigger asChild>{button}</TooltipTrigger>
-                  <TooltipContent side="left" sideOffset={12}>
+                  <TooltipContent side="left" sideOffset={12} className="sidebar-tooltip">
                     <p>{item.label}</p>
+                    {item.badge && item.badge > 0 && (
+                      <p className="text-xs text-destructive mt-1">
+                        {item.badge} إشعار جديد
+                      </p>
+                    )}
                   </TooltipContent>
                 </Tooltip>
               </li>
@@ -205,6 +244,14 @@ function SidebarContent({
               {user?.email || ''}
             </p>
           </div>
+          {user?.role === 'admin' && (
+            <Badge
+              variant="outline"
+              className="text-[9px] px-1.5 py-0 border-primary/30 text-primary bg-primary/5"
+            >
+              مدير
+            </Badge>
+          )}
         </div>
         <Button
           variant="outline"

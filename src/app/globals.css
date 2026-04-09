@@ -353,3 +353,273 @@ html {
   background: oklch(0.78 0.15 75 / 40%);
   animation: float-particle 6s ease-in-out infinite;
 }
+
+/* ─── Enhanced Visual Effects ─── */
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0.22 0.007 270) 25%,
+    oklch(0.28 0.008 270) 50%,
+    oklch(0.22 0.007 270) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Glow ring for active/focused elements */
+.glow-ring {
+  box-shadow: 0 0 0 2px oklch(0.78 0.15 75 / 20%), 0 0 12px oklch(0.78 0.15 75 / 10%);
+}
+
+/* Neon text effect for special headings */
+.neon-text {
+  text-shadow:
+    0 0 7px oklch(0.78 0.15 75 / 50%),
+    0 0 20px oklch(0.78 0.15 75 / 30%),
+    0 0 40px oklch(0.78 0.15 75 / 15%);
+}
+
+/* Card spotlight effect on hover */
+.card-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-spotlight::after {
+  content: '';
+  position: absolute;
+  top: var(--mouse-y, 50%);
+  left: var(--mouse-x, 50%);
+  width: 300px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    oklch(0.78 0.15 75 / 6%) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.card-spotlight:hover::after {
+  opacity: 1;
+}
+
+/* Breathing animation for status indicators */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.7; }
+}
+
+.breathe-animation {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Slide up entrance animation */
+@keyframes slide-up-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up-enter {
+  animation: slide-up-enter 0.4s ease-out forwards;
+}
+
+/* Fade in scale animation */
+@keyframes fade-in-scale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.fade-in-scale {
+  animation: fade-in-scale 0.3s ease-out forwards;
+}
+
+/* Notification badge pulse */
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.65 0.22 25 / 40%); }
+  50% { box-shadow: 0 0 0 4px oklch(0.65 0.22 25 / 0%); }
+}
+
+.notification-badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* Progress bar animation */
+@keyframes progress-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
+}
+
+.progress-glow {
+  animation: progress-glow 2s ease-in-out infinite;
+}
+
+/* Ripple effect for buttons */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: oklch(0.95 0.01 270 / 20%);
+  transform: scale(0);
+  opacity: 1;
+}
+
+/* Morphing blob background */
+@keyframes morph-blob {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50% { border-radius: 50% 60% 30% 60% / 40% 70% 60% 30%; }
+  75% { border-radius: 60% 40% 60% 30% / 70% 40% 50% 60%; }
+}
+
+.morph-blob {
+  animation: morph-blob 8s ease-in-out infinite;
+}
+
+/* Terminal cursor blink */
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: oklch(0.78 0.15 75);
+  animation: cursor-blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+/* Status indicator rings */
+.status-ring-running {
+  box-shadow: 0 0 0 3px oklch(0.70 0.18 160 / 20%);
+}
+
+.status-ring-stopped {
+  box-shadow: 0 0 0 3px oklch(0.40 0.005 270 / 20%);
+}
+
+.status-ring-error {
+  box-shadow: 0 0 0 3px oklch(0.65 0.22 25 / 20%);
+}
+
+/* Subtle noise texture overlay */
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Focus visible enhancement */
+*:focus-visible {
+  outline: 2px solid oklch(0.78 0.15 75 / 50%);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection styling */
+::selection {
+  background: oklch(0.78 0.15 75 / 30%);
+  color: oklch(0.95 0.01 270);
+}
+
+/* Smooth page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Inner page card styling */
+.page-card {
+  background: oklch(0.17 0.006 270 / 60%);
+  border: 1px solid oklch(0.28 0.008 270 / 40%);
+  backdrop-filter: blur(8px);
+}
+
+/* Empty state container */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  min-height: 200px;
+}
+
+/* Sidebar tooltip */
+.sidebar-tooltip {
+  background: oklch(0.20 0.007 270 / 95%) !important;
+  border: 1px solid oklch(0.28 0.008 270 / 50%) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Drag handle cursor */
+.drag-handle {
+  cursor: grab;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Line numbers for code editor */
+.line-numbers {
+  counter-reset: line;
+}
+.line-numbers > span::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 3ch;
+  margin-left: 1.5ch;
+  text-align: right;
+  color: oklch(0.40 0.005 270);
+  user-select: none;
+}
+
+/* Skeleton shimmer for cards */
+.skeleton-card {
+  background: linear-gradient(
+    110deg,
+    oklch(0.20 0.007 270) 30%,
+    oklch(0.25 0.008 270) 50%,
+    oklch(0.20 0.007 270) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}

@@ -8,8 +8,11 @@ export type Page =
   | "dashboard"
   | "bots"
   | "bot-detail"
+  | "bot-templates"
+  | "bot-monitoring"
   | "files"
   | "logs"
+  | "activity"
   | "settings"
   | "admin"
   | "admin-users"
@@ -27,12 +30,16 @@ interface AppState {
   } | null;
   isLoading: boolean;
   sidebarOpen: boolean;
+  unreadNotifications: number;
+  notificationPanelOpen: boolean;
   setCurrentPage: (page: Page) => void;
   setSelectedBotId: (id: string | null) => void;
   setUser: (user: any | null) => void;
   setLoading: (loading: boolean) => void;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
+  setUnreadNotifications: (count: number) => void;
+  setNotificationPanelOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -41,10 +48,14 @@ export const useAppStore = create<AppState>((set) => ({
   user: null,
   isLoading: true,
   sidebarOpen: false,
+  unreadNotifications: 5,
+  notificationPanelOpen: false,
   setCurrentPage: (page) => set({ currentPage: page }),
   setSelectedBotId: (id) => set({ selectedBotId: id }),
   setUser: (user) => set({ user, isLoading: false }),
   setLoading: (loading) => set({ isLoading: loading }),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setUnreadNotifications: (count) => set({ unreadNotifications: count }),
+  setNotificationPanelOpen: (open) => set({ notificationPanelOpen: open }),
 }));

@@ -49,6 +49,18 @@ const BotDetail = dynamic(
   { loading: () => loadingFallback }
 );
 
+const BotTemplates = dynamic(
+  () =>
+    import('@/components/wolf/bots/templates/bot-templates'),
+  { loading: () => loadingFallback }
+);
+
+const BotMonitoring = dynamic(
+  () =>
+    import('@/components/wolf/bots/bot-monitoring'),
+  { loading: () => loadingFallback }
+);
+
 const FileManager = dynamic(
   () => import('@/components/wolf/files/file-manager'),
   { loading: () => loadingFallback }
@@ -56,6 +68,12 @@ const FileManager = dynamic(
 
 const LogViewer = dynamic(
   () => import('@/components/wolf/logs/log-viewer'),
+  { loading: () => loadingFallback }
+);
+
+const ActivityCenter = dynamic(
+  () =>
+    import('@/components/wolf/notifications/activity-center'),
   { loading: () => loadingFallback }
 );
 
@@ -90,10 +108,16 @@ function PageContent() {
       return <BotList />;
     case 'bot-detail':
       return <BotDetail />;
+    case 'bot-templates':
+      return <BotTemplates />;
+    case 'bot-monitoring':
+      return <BotMonitoring />;
     case 'files':
       return <FileManager />;
     case 'logs':
       return <LogViewer />;
+    case 'activity':
+      return <ActivityCenter />;
     case 'settings':
       return <AccountSettings />;
     case 'admin':
@@ -117,7 +141,6 @@ export function AppLayout() {
       <Header />
 
       {/* Main Content Area */}
-      {/* On mobile: full width. On desktop: offset from right sidebar (w-64) */}
       <main className="pt-16 min-h-screen md:mr-64">
         <div className="p-4 md:p-6 lg:p-8">
           <PageContent />
