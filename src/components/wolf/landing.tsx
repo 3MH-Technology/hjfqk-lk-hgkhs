@@ -27,11 +27,21 @@ import {
   MessageSquare,
   Activity,
   Clock,
+  Check,
+  Crown,
+  Sparkles,
+  Building2,
 } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { useState, useCallback } from 'react';
 
 /* ─── Data ────────────────────────────────────────────── */
@@ -161,6 +171,99 @@ const trustBadges = [
   { emoji: '🛡️', text: 'حماية متقدمة' },
 ];
 
+const pricingPlans = [
+  {
+    name: 'مجاني',
+    icon: Sparkles,
+    price: '0',
+    currency: 'ر.س',
+    period: '/شهرياً',
+    description: 'مثالي للمبتدئين والمشاريع الصغيرة',
+    badge: null,
+    highlighted: false,
+    features: [
+      { text: '3 بوتات', included: true },
+      { text: '512MB ذاكرة RAM', included: true },
+      { text: 'دعم أساسي', included: true },
+      { text: '1GB مساحة تخزين', included: true },
+      { text: 'مراقبة متقدمة', included: false },
+      { text: 'نطاقات مخصصة', included: false },
+      { text: 'ضمان SLA', included: false },
+    ],
+    ctaLabel: 'ابدأ مجاناً',
+    ctaVariant: 'outline' as const,
+  },
+  {
+    name: 'احترافي',
+    icon: Crown,
+    price: '29',
+    currency: 'ر.س',
+    period: '/شهرياً',
+    description: 'الأفضل للمطورين المحترفين',
+    badge: 'الأكثر شعبية',
+    highlighted: true,
+    features: [
+      { text: '15 بوت', included: true },
+      { text: '2GB ذاكرة RAM', included: true },
+      { text: 'دعم ذو أولوية', included: true },
+      { text: '10GB مساحة تخزين', included: true },
+      { text: 'مراقبة متقدمة', included: true },
+      { text: 'نطاقات مخصصة', included: false },
+      { text: 'ضمان SLA', included: false },
+    ],
+    ctaLabel: 'اشترك الآن',
+    ctaVariant: 'default' as const,
+  },
+  {
+    name: 'مؤسسات',
+    icon: Building2,
+    price: '99',
+    currency: 'ر.س',
+    period: '/شهرياً',
+    description: 'للشركات والمشاريع الكبيرة',
+    badge: null,
+    highlighted: false,
+    features: [
+      { text: 'بوتات غير محدودة', included: true },
+      { text: '8GB ذاكرة RAM', included: true },
+      { text: 'دعم مخصص 24/7', included: true },
+      { text: '100GB مساحة تخزين', included: true },
+      { text: 'مراقبة متقدمة', included: true },
+      { text: 'نطاقات مخصصة', included: true },
+      { text: 'ضمان SLA', included: true },
+    ],
+    ctaLabel: 'تواصل معنا',
+    ctaVariant: 'outline' as const,
+  },
+];
+
+const faqItems = [
+  {
+    question: 'كيف أبدأ باستضافة بوت على المنصة؟',
+    answer: 'يمكنك البدء بإنشاء حساب مجاني في أقل من دقيقة، ثم رفع ملفات البوت الخاص بك وإعداد متغيرات البيئة. بعد ذلك، شغّل بوتك بنقرة واحدة وسيبدأ العمل فوراً على خوادمنا الآمنة والمستقرة.',
+  },
+  {
+    question: 'ما اللغات البرمجية المدعومة؟',
+    answer: 'ندعم حالياً Python 3.11+ مع المكتبات الشائعة و PHP 8.2+ مع إضافات متقدمة. نعمل باستمرار على إضافة لغات جديدة مثل JavaScript/Node.js و Rust لتلبية احتياجات جميع المطورين.',
+  },
+  {
+    question: 'هل بيانات بوتاتي آمنة على المنصة؟',
+    answer: 'نعم، نستخدم عزل حاويات كامل (Container Isolation) لكل بوت مع حماية متعددة الطبقات. بياناتك مشفرة ومحمية بأحدث تقنيات الأمان، ولا يمكن لأي بوت آخر الوصول إلى بيانات بوتك.',
+  },
+  {
+    question: 'ما الفرق بين الخطط المدفوعة والمجانية؟',
+    answer: 'الخطة المجانية توفر 3 بوتات مع 512MB RAM و 1GB تخزين. الخطة الاحترافية توفر 15 بوتاً مع 2GB RAM و 10GB تخزين ودعم ذو أولوية ومراقبة متقدمة. خطة المؤسسات توفر بوتات غير محدودة مع 8GB RAM و 100GB تخزين ودعم مخصص 24/7 ونطاقات مخصصة وضمان SLA.',
+  },
+  {
+    question: 'كيف يمكنني التواصل مع فريق الدعم؟',
+    answer: 'يمكنك التواصل معنا عبر قنوات تيليجرام المخصصة للدعم الفني. نوفر دعماً فنياً متواصلاً على مدار الساعة للمستخدمين المدفوعين، ودعماً أساسياً خلال ساعات العمل للمستخدمين المجانيين.',
+  },
+  {
+    question: 'هل يوجد حد أقصى لعدد البوتات؟',
+    answer: 'يعتمد ذلك على خطتك. الخطة المجانية تسمح بـ 3 بوتات، والخطة الاحترافية تسمح بـ 15 بوتاً. أما خطة المؤسسات فلا يوجد بها حد أقصى لعدد البوتات. يمكنك الترقية في أي وقت لزيادة عدد البوتات.',
+  },
+];
+
 /* ─── Animation Variants ──────────────────────────────── */
 
 const containerVariants = {
@@ -232,10 +335,22 @@ export default function Landing() {
               المميزات
             </button>
             <button
+              onClick={() => scrollToSection('pricing')}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              الأسعار
+            </button>
+            <button
               onClick={() => scrollToSection('languages')}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               اللغات
+            </button>
+            <button
+              onClick={() => scrollToSection('faq')}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              الأسئلة الشائعة
             </button>
             <button
               onClick={() => scrollToSection('contact')}
@@ -293,10 +408,22 @@ export default function Landing() {
                 المميزات
               </button>
               <button
+                onClick={() => scrollToSection('pricing')}
+                className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
+              >
+                الأسعار
+              </button>
+              <button
                 onClick={() => scrollToSection('languages')}
                 className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
               >
                 اللغات
+              </button>
+              <button
+                onClick={() => scrollToSection('faq')}
+                className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
+              >
+                الأسئلة الشائعة
               </button>
               <button
                 onClick={() => scrollToSection('contact')}
@@ -775,6 +902,202 @@ export default function Landing() {
           </motion.div>
         </section>
 
+        {/* ──────── PRICING SECTION ──────── */}
+        <section id="pricing" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
+            {/* Section header decoration */}
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+              </div>
+              <div className="h-px w-8 bg-gradient-to-l from-primary/30 to-transparent" />
+              <div className="h-px w-8 bg-gradient-to-r from-primary/30 to-transparent" />
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">خطط الأسعار</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              اختر الخطة المناسبة لك وابدأ استضافة بوتاتك بأسعار تنافسية
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto"
+          >
+            {pricingPlans.map((plan) => (
+              <motion.div
+                key={plan.name}
+                variants={itemVariants}
+                className={`relative rounded-xl border p-6 flex flex-col backdrop-blur-sm transition-all duration-300 ${
+                  plan.highlighted
+                    ? 'bg-card/80 border-primary/40 shadow-lg shadow-primary/10 ring-1 ring-primary/20'
+                    : 'bg-card/50 border-border/50 hover:border-border hover:bg-card/70'
+                }`}
+              >
+                {/* Badge */}
+                {plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-primary text-primary-foreground shadow-md shadow-primary/20 text-xs px-3">
+                      {plan.badge}
+                    </Badge>
+                  </div>
+                )}
+
+                {/* Plan header */}
+                <div className="text-center space-y-3 mb-6">
+                  <div
+                    className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center ${
+                      plan.highlighted
+                        ? 'bg-primary/15 border border-primary/30'
+                        : 'bg-primary/10 border border-primary/20'
+                    }`}
+                  >
+                    <plan.icon
+                      className={`h-7 w-7 ${
+                        plan.highlighted ? 'text-primary' : 'text-primary/70'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">{plan.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {plan.description}
+                    </p>
+                  </div>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-3xl font-bold gradient-text">
+                      {plan.price}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {plan.currency}{plan.period}
+                    </span>
+                  </div>
+                </div>
+
+                <Separator className="mb-5" />
+
+                {/* Feature list */}
+                <ul className="space-y-3 flex-1 mb-6">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={feature.text}
+                      className="flex items-center gap-2.5 text-sm"
+                    >
+                      <div
+                        className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
+                          feature.included
+                            ? 'bg-primary/15 text-primary'
+                            : 'bg-muted/50 text-muted-foreground/40'
+                        }`}
+                      >
+                        <Check className="h-3 w-3" />
+                      </div>
+                      <span
+                        className={
+                          feature.included
+                            ? 'text-foreground/80'
+                            : 'text-muted-foreground/40'
+                        }
+                      >
+                        {feature.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA Button */}
+                <Button
+                  variant={plan.ctaVariant}
+                  className={`w-full ${
+                    plan.highlighted
+                      ? 'shadow-lg shadow-primary/20'
+                      : 'border-primary/30 hover:bg-primary/10 hover:border-primary/50'
+                  }`}
+                  onClick={() =>
+                    plan.name === 'مؤسسات'
+                      ? scrollToSection('contact')
+                      : setCurrentPage('register')
+                  }
+                >
+                  {plan.ctaLabel}
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </motion.div>
+            ))}
+          </motion.div>
+        </section>
+
+        {/* ──────── FAQ SECTION ──────── */}
+        <section id="faq" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
+            {/* Section header decoration */}
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+              </div>
+              <div className="h-px w-8 bg-gradient-to-l from-primary/30 to-transparent" />
+              <div className="h-px w-8 bg-gradient-to-r from-primary/30 to-transparent" />
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">الأسئلة الشائعة</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              إجابات على أكثر الأسئلة شيوعاً حول استضافة الذئب
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="max-w-2xl mx-auto"
+          >
+            <Accordion type="single" collapsible className="space-y-0">
+              {faqItems.map((item, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`faq-${index}`}
+                  className="border-border/40 bg-card/30 rounded-lg px-4 mb-2 data-[state=open]:bg-card/60 transition-colors"
+                >
+                  <AccordionTrigger className="text-right font-semibold text-sm md:text-base hover:no-underline hover:text-primary/90 py-4">
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-4">
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </motion.div>
+        </section>
+
         {/* ──────── CTA SECTION ──────── */}
         <section className="cta-gradient-bg border-y border-border/30">
           <div className="max-w-6xl mx-auto px-4 py-16 md:py-24">
@@ -841,7 +1164,9 @@ export default function Landing() {
               <ul className="space-y-2.5">
                 {[
                   { label: 'المميزات', action: () => scrollToSection('features') },
+                  { label: 'خطط الأسعار', action: () => scrollToSection('pricing') },
                   { label: 'اللغات المدعومة', action: () => scrollToSection('languages') },
+                  { label: 'الأسئلة الشائعة', action: () => scrollToSection('faq') },
                   { label: 'كيف تبدأ', action: () => {} },
                   { label: 'تسجيل الدخول', action: () => setCurrentPage('login') },
                   { label: 'إنشاء حساب', action: () => setCurrentPage('register') },

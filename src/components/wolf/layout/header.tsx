@@ -1,9 +1,9 @@
 'use client';
 
-import { Menu, Bell } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useAppStore, type Page } from '@/store/app-store';
+import { NotificationDropdown } from '../notification-dropdown';
 
 const pageTitles: Record<Page, string> = {
   landing: 'الرئيسية',
@@ -18,6 +18,7 @@ const pageTitles: Record<Page, string> = {
   logs: 'السجلات',
   activity: 'مركز النشاط',
   settings: 'الإعدادات',
+  help: 'مركز المساعدة',
   admin: 'لوحة المدير',
   'admin-users': 'إدارة المستخدمين',
   'admin-bots': 'إدارة البوتات العامة',
@@ -25,7 +26,7 @@ const pageTitles: Record<Page, string> = {
 };
 
 export function Header() {
-  const { currentPage, toggleSidebar, user, setCurrentPage, unreadNotifications } = useAppStore();
+  const { currentPage, toggleSidebar, user } = useAppStore();
 
   const pageTitle = pageTitles[currentPage] || 'لوحة التحكم';
   const avatarLetter =
@@ -40,23 +41,8 @@ export function Header() {
         <div className="flex size-9 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
           {avatarLetter}
         </div>
-        {/* Notification Bell - visible when authenticated */}
-        {user && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCurrentPage('activity')}
-            className="relative text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="الإشعارات"
-          >
-            <Bell className="size-5" />
-            {unreadNotifications > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white notification-badge-pulse min-w-[18px] h-[18px] px-1">
-                {unreadNotifications > 9 ? '9+' : unreadNotifications}
-              </span>
-            )}
-          </Button>
-        )}
+        {/* Notification Dropdown - visible when authenticated */}
+        {user && <NotificationDropdown />}
       </div>
 
       {/* Center: Page Title */}
@@ -64,8 +50,28 @@ export function Header() {
         {pageTitle}
       </h1>
 
-      {/* Right: Hamburger Menu */}
+      {/* Right: Command Palette Hint + Hamburger Menu */}
       <div className="flex items-center gap-2">
+        <button
+          onClick={() => useAppStore.getState().setCommandPaletteOpen(true)}
+          className="hidden items-center gap-1.5 rounded-lg border border-border/50 bg-muted/30 px-2.5 py-1.5 text-xs text-muted-foreground transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 hover:text-foreground md:flex"
+          aria-label="افتح لوحة الأوامر"
+        >
+          <Search className="size-3" />
+          <span>بحث...</span>
+          <kbd className="inline-flex items-center justify-center rounded border border-border/60 bg-background/60 px-1.5 py-0.5 font-mono text-[10px] leading-none">
+            ⌘K
+          </kbd>
+        </button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => useAppStore.getState().setCommandPaletteOpen(true)}
+          className="text-muted-foreground hover:text-foreground md:hidden"
+          aria-label="البحث"
+        >
+          <Search className="size-5" />
+        </Button>
         <Button
           variant="ghost"
           size="icon"

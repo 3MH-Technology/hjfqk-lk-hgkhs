@@ -14,6 +14,7 @@ export type Page =
   | "logs"
   | "activity"
   | "settings"
+  | "help"
   | "admin"
   | "admin-users"
   | "admin-bots"
@@ -32,6 +33,7 @@ interface AppState {
   sidebarOpen: boolean;
   unreadNotifications: number;
   notificationPanelOpen: boolean;
+  commandPaletteOpen: boolean;
   setCurrentPage: (page: Page) => void;
   setSelectedBotId: (id: string | null) => void;
   setUser: (user: any | null) => void;
@@ -40,6 +42,7 @@ interface AppState {
   setSidebarOpen: (open: boolean) => void;
   setUnreadNotifications: (count: number) => void;
   setNotificationPanelOpen: (open: boolean) => void;
+  setCommandPaletteOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -50,6 +53,7 @@ export const useAppStore = create<AppState>((set) => ({
   sidebarOpen: false,
   unreadNotifications: 5,
   notificationPanelOpen: false,
+  commandPaletteOpen: false,
   setCurrentPage: (page) => set({ currentPage: page }),
   setSelectedBotId: (id) => set({ selectedBotId: id }),
   setUser: (user) => set({ user, isLoading: false }),
@@ -58,4 +62,5 @@ export const useAppStore = create<AppState>((set) => ({
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setUnreadNotifications: (count) => set({ unreadNotifications: count }),
   setNotificationPanelOpen: (open) => set({ notificationPanelOpen: open }),
+  setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
 }));

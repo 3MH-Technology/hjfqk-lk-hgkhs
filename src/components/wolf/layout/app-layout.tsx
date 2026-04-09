@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from './header';
 import { Sidebar } from './sidebar';
+import { CommandPalette } from '../command-palette';
 import { useAppStore } from '@/store/app-store';
 
 // Loading skeleton for lazy-loaded pages
@@ -97,6 +98,11 @@ const AdminBots = dynamic(
   { loading: () => loadingFallback }
 );
 
+const HelpCenter = dynamic(
+  () => import('@/components/wolf/help-center'),
+  { loading: () => loadingFallback }
+);
+
 // Page renderer based on currentPage state
 function PageContent() {
   const { currentPage } = useAppStore();
@@ -120,6 +126,8 @@ function PageContent() {
       return <ActivityCenter />;
     case 'settings':
       return <AccountSettings />;
+    case 'help':
+      return <HelpCenter />;
     case 'admin':
       return <AdminPanel />;
     case 'admin-users':
@@ -139,6 +147,9 @@ export function AppLayout() {
 
       {/* Header - fixed at top, full width */}
       <Header />
+
+      {/* Command Palette */}
+      <CommandPalette />
 
       {/* Main Content Area */}
       <main className="pt-16 min-h-screen md:mr-64">

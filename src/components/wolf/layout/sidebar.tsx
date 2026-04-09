@@ -15,6 +15,7 @@ import {
   Activity,
   Package,
   MonitorDot,
+  LifeBuoy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -32,6 +33,7 @@ interface NavItem {
   icon: React.ReactNode;
   adminOnly?: boolean;
   badge?: number;
+  separator?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -74,6 +76,12 @@ const navItems: NavItem[] = [
     id: 'settings',
     label: 'الإعدادات',
     icon: <Settings className="size-5" />,
+  },
+  {
+    id: 'help',
+    label: 'مركز المساعدة',
+    icon: <LifeBuoy className="size-5" />,
+    separator: true,
   },
   {
     id: 'admin',
@@ -203,12 +211,16 @@ function SidebarContent({
 
             if (isMobile) {
               return (
-                <li key={item.id}>{button}</li>
+                <li key={item.id}>
+                  {item.separator && <Separator className="bg-sidebar-border mb-2" />}
+                  {button}
+                </li>
               );
             }
 
             return (
               <li key={item.id}>
+                {item.separator && <Separator className="bg-sidebar-border mb-2" />}
                 <Tooltip>
                   <TooltipTrigger asChild>{button}</TooltipTrigger>
                   <TooltipContent side="left" sideOffset={12} className="sidebar-tooltip">
