@@ -15,6 +15,7 @@ import {
   Save,
   Plus,
   X,
+  Terminal,
 } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
@@ -244,6 +245,15 @@ export function BotDetail() {
               </Button>
             </>
           )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2 text-primary border-primary/30 hover:bg-primary/10"
+            onClick={() => setCurrentPage('bot-console')}
+          >
+            <Terminal className="h-4 w-4" />
+            وحدة التحكم
+          </Button>
           <Button size="sm" variant="outline" className="gap-2 text-red-400" onClick={() => setDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />
             حذف

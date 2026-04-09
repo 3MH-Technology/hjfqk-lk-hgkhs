@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   FileText,
   ChevronLeft,
+  GitCompareArrows,
 } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
@@ -201,6 +202,15 @@ export function BotList() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage('bot-comparison')}
+            className="gap-2 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
+          >
+            <GitCompareArrows className="h-4 w-4" />
+            مقارنة البوتات
+          </Button>
           <Button
             variant="outline"
             size="sm"

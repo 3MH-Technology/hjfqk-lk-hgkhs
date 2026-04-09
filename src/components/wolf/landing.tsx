@@ -457,12 +457,13 @@ export default function Landing() {
       {/* ═══════════ MAIN CONTENT ═══════════ */}
       <main className="flex-1">
         {/* ──────── HERO SECTION ──────── */}
-        <section className="relative overflow-hidden">
-          {/* Animated gradient mesh / particles */}
+        <section className="relative overflow-hidden min-h-[85vh] md:min-h-[90vh] flex flex-col">
+          {/* ── Background Layers ── */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="mesh-particle-1 absolute top-[10%] right-[15%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[100px]" />
-            <div className="mesh-particle-2 absolute bottom-[5%] left-[10%] w-[400px] h-[400px] rounded-full bg-primary/8 blur-[80px]" />
-            <div className="mesh-particle-3 absolute top-[40%] left-[50%] w-[350px] h-[350px] rounded-full bg-primary/4 blur-[90px]" />
+            {/* Gradient mesh blobs */}
+            <div className="mesh-particle-1 absolute top-[8%] right-[12%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[100px]" />
+            <div className="mesh-particle-2 absolute bottom-[5%] left-[8%] w-[400px] h-[400px] rounded-full bg-primary/8 blur-[80px]" />
+            <div className="mesh-particle-3 absolute top-[45%] left-[50%] w-[350px] h-[350px] rounded-full bg-primary/4 blur-[90px]" />
 
             {/* Subtle grid overlay */}
             <div
@@ -473,74 +474,170 @@ export default function Landing() {
                 backgroundSize: '60px 60px',
               }}
             />
+
+            {/* ── Floating Geometric Particles ── */}
+            {/* 1 - Circle, top-right */}
+            <div className="hero-particle hero-particle-1 rounded-full bg-primary/20 w-3 h-3 md:w-4 md:h-4" style={{ top: '12%', right: '18%' }} />
+            {/* 2 - Hexagon, upper-left */}
+            <div className="hero-particle hero-particle-2 particle-hexagon bg-primary/15 w-4 h-4 md:w-5 md:h-5" style={{ top: '18%', left: '12%' }} />
+            {/* 3 - Circle, mid-right */}
+            <div className="hero-particle hero-particle-3 rounded-full bg-primary/25 w-2 h-2 md:w-3 md:h-3" style={{ top: '35%', right: '8%' }} />
+            {/* 4 - Diamond, lower-left */}
+            <div className="hero-particle hero-particle-4 particle-diamond bg-primary/20 w-3 h-3 md:w-4 md:h-4" style={{ top: '55%', left: '6%' }} />
+            {/* 5 - Hexagon, top-center */}
+            <div className="hero-particle hero-particle-5 particle-hexagon bg-primary/10 w-5 h-5 md:w-6 md:h-6" style={{ top: '8%', left: '45%' }} />
+            {/* 6 - Circle, bottom-right */}
+            <div className="hero-particle hero-particle-6 rounded-full bg-primary/18 w-2.5 h-2.5 md:w-3 md:h-3" style={{ top: '70%', right: '14%' }} />
+            {/* 7 - Triangle, mid-left */}
+            <div className="hero-particle hero-particle-7 particle-triangle bg-primary/15 w-3 h-3 md:w-4 md:h-4" style={{ top: '42%', left: '18%' }} />
+            {/* 8 - Circle, bottom-center */}
+            <div className="hero-particle hero-particle-8 rounded-full bg-primary/12 w-2 h-2 md:w-3 md:h-3" style={{ top: '80%', left: '55%' }} />
+            {/* 9 - Diamond, upper area */}
+            <div className="hero-particle hero-particle-9 particle-diamond bg-primary/10 w-3.5 h-3.5 md:w-4 md:h-4" style={{ top: '22%', right: '38%' }} />
+            {/* 10 - Hexagon, lower area */}
+            <div className="hero-particle hero-particle-10 particle-hexagon bg-primary/14 w-2.5 h-2.5 md:w-3 md:h-3" style={{ top: '65%', left: '32%' }} />
+            {/* 11 - Circle, far right */}
+            <div className="hero-particle hero-particle-11 rounded-full bg-primary/20 w-1.5 h-1.5 md:w-2 md:h-2" style={{ top: '48%', right: '4%' }} />
+            {/* 12 - Triangle, bottom-left */}
+            <div className="hero-particle hero-particle-12 particle-triangle bg-primary/12 w-4 h-4 md:w-5 md:h-5" style={{ top: '75%', left: '8%' }} />
           </div>
 
-          <div className="relative max-w-6xl mx-auto px-4 py-20 md:py-32">
+          {/* ── Main Hero Content ── */}
+          <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-28 flex-1 flex flex-col justify-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="text-center space-y-6"
+              className="text-center space-y-6 md:space-y-8"
             >
-              {/* Logo & Brand — with floating + glow */}
+              {/* ═══ Wolf Logo Centerpiece ═══ */}
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
+                initial={{ scale: 0.7, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
                 className="flex flex-col items-center gap-4"
               >
-                <div className="relative float-animation">
-                  {/* Glow behind logo */}
-                  <div className="absolute inset-0 rounded-3xl glow-effect" />
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center text-4xl md:text-5xl shadow-lg shadow-primary/10">
-                    🐺
+                <div className="relative float-animation w-[140px] h-[140px] md:w-[180px] md:h-[180px]">
+                  {/* Outer orbit ring */}
+                  <div className="wolf-orbit-ring absolute inset-0 rounded-full" style={{ border: '1.5px dashed oklch(0.78 0.15 75 / 15%)' }}>
+                    {/* Orbiting dot */}
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/60" />
                   </div>
-                  <div className="absolute -top-1 -left-1 w-4 h-4 bg-primary rounded-full pulse-dot" />
-                  <div
-                    className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary/60 rounded-full pulse-dot"
-                    style={{ animationDelay: '1s' }}
-                  />
+
+                  {/* Inner orbit ring (reverse) */}
+                  <div className="wolf-orbit-ring-reverse absolute rounded-full" style={{ inset: '18px', border: '1px solid oklch(0.78 0.15 75 / 10%)' }}>
+                    {/* Orbiting dot */}
+                    <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/40" />
+                  </div>
+
+                  {/* Pulsing glow behind logo */}
+                  <div className="wolf-glow-enhanced absolute rounded-full" style={{ inset: '30px' }} />
+
+                  {/* Wolf Head SVG Silhouette */}
+                  <div className="wolf-svg-glow absolute inset-0 flex items-center justify-center">
+                    <svg
+                      viewBox="0 0 100 100"
+                      className="w-20 h-20 md:w-24 md:h-24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <defs>
+                        <linearGradient id="wolfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="oklch(0.78 0.15 75)" />
+                          <stop offset="50%" stopColor="oklch(0.85 0.12 85)" />
+                          <stop offset="100%" stopColor="oklch(0.78 0.15 75)" />
+                        </linearGradient>
+                      </defs>
+                      {/* Wolf head silhouette - stylized */}
+                      <path
+                        d="M50 8 L38 28 L30 22 L25 35 L20 32 L22 42 L18 48 L24 50 L26 56 L32 62 L36 68 L38 72 L42 75 L48 78 L52 78 L58 75 L62 72 L64 68 L68 62 L74 56 L76 50 L82 48 L78 42 L80 32 L75 35 L70 22 L62 28 Z"
+                        fill="url(#wolfGrad)"
+                        opacity="0.9"
+                      />
+                      {/* Eyes */}
+                      <ellipse cx="38" cy="42" rx="3.5" ry="2.5" fill="oklch(0.15 0.02 270)" />
+                      <ellipse cx="62" cy="42" rx="3.5" ry="2.5" fill="oklch(0.15 0.02 270)" />
+                      {/* Eye glow */}
+                      <ellipse cx="38" cy="42" rx="2" ry="1.2" fill="oklch(0.78 0.15 75)" opacity="0.6" />
+                      <ellipse cx="62" cy="42" rx="2" ry="1.2" fill="oklch(0.78 0.15 75)" opacity="0.6" />
+                      {/* Nose */}
+                      <ellipse cx="50" cy="52" rx="2.5" ry="1.8" fill="oklch(0.15 0.02 270)" opacity="0.7" />
+                    </svg>
+                  </div>
+
+                  {/* Corner accent dots */}
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full pulse-dot" />
+                  <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-primary/60 rounded-full pulse-dot" style={{ animationDelay: '1s' }} />
+                  <div className="absolute top-1/2 -right-2 w-2 h-2 bg-primary/30 rounded-full pulse-dot" style={{ animationDelay: '1.5s' }} />
                 </div>
               </motion.div>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-4xl md:text-6xl font-bold gradient-text"
-              >
-                استضافة الذئب
-              </motion.h1>
-
-              <motion.p
+              {/* ═══ Title + Version Badge ═══ */}
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-xl md:text-2xl text-primary/80 font-medium"
+                className="flex flex-col items-center gap-3"
               >
-                منصة استضافة احترافية لبوتات تيليجرام
-              </motion.p>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold hero-gradient-text">
+                    استضافة الذئب
+                  </h1>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] md:text-xs px-2 py-0 h-5 md:h-6 border-primary/25 bg-primary/5 text-primary/70 font-mono self-start mt-2"
+                  >
+                    v0.2
+                  </Badge>
+                </div>
+
+                {/* Subtitle with typewriter reveal */}
+                <p className="typewriter-reveal text-lg md:text-2xl text-primary/80 font-medium">
+                  منصة استضافة احترافية لبوتات تيليجرام
+                </p>
+              </motion.div>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
                 className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
               >
                 استضف بوتاتك على بيئة آمنة ومستقرة مع دعم كامل للغات البرمجة
                 الشائعة. تحكم كامل في بوتاتك مع واجهة سهلة الاستخدام وإدارة متقدمة.
               </motion.p>
 
-              {/* CTA Buttons */}
+              {/* ═══ Stats Inline Badges ═══ */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="flex flex-wrap justify-center gap-2 md:gap-3"
+              >
+                <div className="stat-badge-inline flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs md:text-sm text-primary/80 font-medium">
+                  <Bot className="h-3.5 w-3.5" />
+                  <span>+1000 بوت</span>
+                </div>
+                <div className="stat-badge-inline flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs md:text-sm text-primary/80 font-medium">
+                  <Activity className="h-3.5 w-3.5" />
+                  <span>99.9% وقت تشغيل</span>
+                </div>
+                <div className="stat-badge-inline flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs md:text-sm text-primary/80 font-medium">
+                  <Headphones className="h-3.5 w-3.5" />
+                  <span>24/7 دعم</span>
+                </div>
+              </motion.div>
+
+              {/* ═══ CTA Buttons ═══ */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className="flex flex-col sm:flex-row gap-3 justify-center pt-4"
+                transition={{ duration: 0.5, delay: 0.7 }}
+                className="flex flex-col sm:flex-row gap-3 justify-center pt-2"
               >
                 <Button
                   size="lg"
-                  className="h-12 px-8 text-base font-medium shadow-lg shadow-primary/20"
+                  className="cta-gradient-border h-12 px-8 text-base font-medium shadow-lg shadow-primary/20"
                   onClick={() => setCurrentPage('login')}
                 >
                   تسجيل الدخول
@@ -549,29 +646,66 @@ export default function Landing() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+                  className="btn-shimmer-effect h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50"
                   onClick={() => setCurrentPage('register')}
                 >
                   إنشاء حساب
                 </Button>
               </motion.div>
 
-              {/* Trust Indicators */}
+              {/* Watch Demo decorative link */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.85 }}
+                className="pt-1"
+              >
+                <button className="demo-link-animated inline-flex items-center gap-1.5 text-xs md:text-sm text-muted-foreground/60 hover:text-primary/70 transition-colors">
+                  <PlayCircle className="h-3.5 w-3.5" />
+                  <span>مشاهدة العرض التوضيحي</span>
+                  <span className="text-[10px]">▶</span>
+                </button>
+              </motion.div>
+
+              {/* ═══ Trust Indicators (Enhanced) ═══ */}
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.65 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
                 className="flex flex-wrap justify-center gap-3 pt-4"
               >
-                {trustBadges.map((badge) => (
-                  <div
-                    key={badge.text}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10 text-xs text-muted-foreground"
-                  >
-                    <span>{badge.emoji}</span>
-                    <span>{badge.text}</span>
+                {/* SSL Security */}
+                <div className="trust-badge-animated flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/40 backdrop-blur-sm">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
+                    <Lock className="h-3.5 w-3.5 text-primary" />
                   </div>
-                ))}
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-foreground/80">حماية SSL</p>
+                    <p className="text-[10px] text-muted-foreground">تشفير متقدم</p>
+                  </div>
+                </div>
+
+                {/* Uptime */}
+                <div className="trust-badge-animated flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/40 backdrop-blur-sm">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
+                    <Clock className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-foreground/80">وقت تشغيل عالي</p>
+                    <p className="text-[10px] text-muted-foreground">99.9% ضمان</p>
+                  </div>
+                </div>
+
+                {/* Support */}
+                <div className="trust-badge-animated flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/40 backdrop-blur-sm">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
+                    <Headphones className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-foreground/80">دعم فني متواصل</p>
+                    <p className="text-[10px] text-muted-foreground">24/7 جاهزون</p>
+                  </div>
+                </div>
               </motion.div>
             </motion.div>
 
@@ -579,8 +713,8 @@ export default function Landing() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 1.2 }}
-              className="flex justify-center pt-12"
+              transition={{ duration: 1, delay: 1.4 }}
+              className="flex justify-center pt-10 md:pt-14"
             >
               <motion.div
                 animate={{ y: [0, 8, 0] }}

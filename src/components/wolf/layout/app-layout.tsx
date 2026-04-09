@@ -56,6 +56,12 @@ const BotTemplates = dynamic(
   { loading: () => loadingFallback }
 );
 
+const BotConsole = dynamic(
+  () =>
+    import('@/components/wolf/bots/bot-console').then((m) => m.BotConsole),
+  { loading: () => loadingFallback }
+);
+
 const BotMonitoring = dynamic(
   () =>
     import('@/components/wolf/bots/bot-monitoring'),
@@ -98,6 +104,11 @@ const AdminBots = dynamic(
   { loading: () => loadingFallback }
 );
 
+const BotComparison = dynamic(
+  () => import('@/components/wolf/bots/bot-comparison').then((m) => m.BotComparison),
+  { loading: () => loadingFallback }
+);
+
 const HelpCenter = dynamic(
   () => import('@/components/wolf/help-center'),
   { loading: () => loadingFallback }
@@ -114,6 +125,8 @@ function PageContent() {
       return <BotList />;
     case 'bot-detail':
       return <BotDetail />;
+    case 'bot-console':
+      return <BotConsole />;
     case 'bot-templates':
       return <BotTemplates />;
     case 'bot-monitoring':
@@ -134,6 +147,8 @@ function PageContent() {
       return <UserManagement />;
     case 'admin-bots':
       return <AdminBots />;
+    case 'bot-comparison':
+      return <BotComparison />;
     default:
       return <Dashboard />;
   }

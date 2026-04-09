@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -11,11 +12,14 @@ import {
   Shield,
   LogOut,
   X,
-  Bell,
   Activity,
   Package,
   MonitorDot,
   LifeBuoy,
+  Cpu,
+  MemoryStick,
+  ChevronDown,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -25,6 +29,11 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from '@/components/ui/collapsible';
 import { useAppStore, type Page } from '@/store/app-store';
 
 interface NavItem {
@@ -105,6 +114,49 @@ function MobileBackdrop({ onClick }: { onClick: () => void }) {
   );
 }
 
+interface SystemMetrics {
+  cpu: number;
+  ram: number;
+  activeBots: number;
+  totalBots: number;
+  uptime: number;
+}
+
+interface ActiveBot {
+  id: string;
+  name: string;
+  status: string;
+}
+
+// Simulated system metrics hook
+function useSystemMetrics() {
+  const [mounted, setMounted] = useState(false);
+  const [metrics] = useState<SystemMetrics>(() => ({
+    cpu: Math.floor(Math.random() * 30) + 10,
+    ram: 55 + Math.floor(Math.random() * 15),
+    activeBots: 2,
+    totalBots: 5,
+    uptime: 99.9,
+  }));
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return { metrics, mounted };
+}
+
+// Active bots hook with lazy-initialized mock data
+function useActiveBots() {
+  const [bots] = useState<ActiveBot[]>([
+    { id: '1', name: 'بوت الدعم الفني', status: 'running' },
+    { id: '2', name: 'بوت الإشعارات', status: 'running' },
+  ]);
+
+  return { bots };
+}
+
 function SidebarContent({
   onNavigate,
   isMobile,
@@ -112,11 +164,22 @@ function SidebarContent({
   onNavigate?: () => void;
   isMobile?: boolean;
 }) {
-  const { currentPage, setCurrentPage, user, setSidebarOpen, setUser, unreadNotifications } =
+  const { currentPage, setCurrentPage, user, setSidebarOpen, setUser, unreadNotifications, setSelectedBotId } =
     useAppStore();
+  const [systemOpen, setSystemOpen] = useState(false);
+  const { metrics, mounted } = useSystemMetrics();
+  const { bots } = useActiveBots();
 
   const handleNavigate = (page: Page) => {
     setCurrentPage(page);
+    if (isMobile && onNavigate) {
+      onNavigate();
+    }
+  };
+
+  const handleBotClick = (botId: string) => {
+    setSelectedBotId(botId);
+    setCurrentPage('bot-detail');
     if (isMobile && onNavigate) {
       onNavigate();
     }
@@ -240,30 +303,167 @@ function SidebarContent({
 
       <Separator className="bg-sidebar-border" />
 
-      {/* User Info & Logout */}
+      {/* System Status Section (Collapsible) */}
+      <Collapsible open={systemOpen} onOpenChange={setSystemOpen}>
+        <div className="px-4 pt-3 pb-1">
+          <CollapsibleTrigger asChild>
+            <button className="flex w-full items-center justify-between text-[11px] font-medium text-sidebar-foreground/50 hover:text-sidebar-foreground/70 transition-colors">
+              <span className="flex items-center gap-1.5">
+                <Activity className="size-3" />
+                حالة النظام
+              </span>
+              <motion.div
+                animate={{ rotate: systemOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="size-3" />
+              </motion.div>
+            </button>
+          </CollapsibleTrigger>
+        </div>
+        <CollapsibleContent>
+          <div className="px-4 pb-3">
+            {/* 2x2 Metrics Grid */}
+            <div className="grid grid-cols-2 gap-2">
+              {/* CPU */}
+              <div className="rounded-md bg-sidebar-accent/50 px-2.5 py-2">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Cpu className="size-3 text-emerald-400" />
+                  <span className="text-[10px] text-sidebar-foreground/50">CPU</span>
+                </div>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                >
+                  <div className="h-1.5 w-full rounded-full bg-sidebar-border overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full bg-emerald-400"
+                      initial={{ width: 0 }}
+                      animate={{ width: mounted ? `${metrics.cpu}%` : '0%' }}
+                      transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
+                    />
+                  </div>
+                </motion.div>
+                <span className="text-[10px] font-medium text-sidebar-foreground/60 mt-1 block">{mounted ? `${metrics.cpu}%` : '--'}%</span>
+              </div>
+
+              {/* RAM */}
+              <div className="rounded-md bg-sidebar-accent/50 px-2.5 py-2">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <MemoryStick className="size-3 text-amber-400" />
+                  <span className="text-[10px] text-sidebar-foreground/50">RAM</span>
+                </div>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                >
+                  <div className="h-1.5 w-full rounded-full bg-sidebar-border overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full bg-amber-400"
+                      initial={{ width: 0 }}
+                      animate={{ width: mounted ? `${metrics.ram}%` : '0%' }}
+                      transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
+                    />
+                  </div>
+                </motion.div>
+                <span className="text-[10px] font-medium text-sidebar-foreground/60 mt-1 block">{mounted ? `${metrics.ram}%` : '--'}%</span>
+              </div>
+
+              {/* Active Bots */}
+              <div className="rounded-md bg-sidebar-accent/50 px-2.5 py-2">
+                <div className="flex items-center gap-1.5">
+                  <Bot className="size-3 text-primary" />
+                  <span className="text-[10px] text-sidebar-foreground/50">البوتات النشطة</span>
+                </div>
+                <span className="text-[13px] font-bold text-sidebar-foreground/80 mt-0.5 block">
+                  {mounted ? `${metrics.activeBots}/${metrics.totalBots}` : '--'}
+                </span>
+              </div>
+
+              {/* Uptime */}
+              <div className="rounded-md bg-sidebar-accent/50 px-2.5 py-2">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="size-3 text-emerald-400" />
+                  <span className="text-[10px] text-sidebar-foreground/50">وقت التشغيل</span>
+                </div>
+                <span className="text-[13px] font-bold text-emerald-400 mt-0.5 block">
+                  {mounted ? `${metrics.uptime}%` : '--'}
+                </span>
+              </div>
+            </div>
+
+            {/* Active Bots Quick List */}
+            {bots.length > 0 && (
+              <div className="mt-2.5 space-y-0.5">
+                <span className="text-[10px] text-sidebar-foreground/40 px-1">البوتات يعمل حالياً</span>
+                {bots.map((bot) => (
+                  <button
+                    key={bot.id}
+                    onClick={() => handleBotClick(bot.id)}
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground/80 transition-colors"
+                  >
+                    <span className="relative flex size-2 shrink-0">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                    </span>
+                    <span className="flex-1 truncate text-right">{bot.name}</span>
+                    <span className="text-[9px] text-emerald-400">يعمل</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Separator className="bg-sidebar-border" />
+
+      {/* Enhanced User Profile Card */}
       <div className="p-4">
         <div className="mb-3 flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
-            {user?.email?.charAt(0)?.toUpperCase() ||
-              user?.name?.charAt(0)?.toUpperCase() ||
-              'م'}
+          {/* Avatar with animated gradient border and online indicator */}
+          <div className="relative shrink-0">
+            <div className="relative rounded-full p-[2px] bg-gradient-to-tr from-primary/40 via-amber-500/40 to-primary/40 transition-all duration-500 hover:from-primary hover:via-amber-500 hover:to-primary hover:shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+              <div className="flex size-10 items-center justify-center rounded-full bg-sidebar text-sm font-bold text-primary">
+                {user?.email?.charAt(0)?.toUpperCase() ||
+                  user?.name?.charAt(0)?.toUpperCase() ||
+                  'م'}
+              </div>
+            </div>
+            {/* Online status pulsing dot */}
+            <span className="absolute -bottom-0.5 -left-0.5 flex size-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex size-3 rounded-full border-2 border-sidebar bg-emerald-500" />
+            </span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-sidebar-foreground">
-              {user?.name || 'مستخدم'}
-            </p>
-            <p className="truncate text-xs text-sidebar-foreground/50">
+            <div className="flex items-center gap-1.5">
+              <p className="truncate text-sm font-bold text-sidebar-foreground">
+                {user?.name || 'مستخدم'}
+              </p>
+              <Badge
+                variant="outline"
+                className={`text-[8px] px-1 py-0 shrink-0 ${
+                  user?.role === 'admin'
+                    ? 'border-primary/40 text-primary bg-primary/10'
+                    : 'border-sidebar-foreground/20 text-sidebar-foreground/40 bg-sidebar-foreground/5'
+                }`}
+              >
+                {user?.role === 'admin' ? 'مدير' : 'مستخدم'}
+              </Badge>
+            </div>
+            <p className="truncate text-[11px] text-sidebar-foreground/40 mt-0.5">
               {user?.email || ''}
             </p>
-          </div>
-          {user?.role === 'admin' && (
-            <Badge
-              variant="outline"
-              className="text-[9px] px-1.5 py-0 border-primary/30 text-primary bg-primary/5"
+            <button
+              onClick={() => handleNavigate('settings')}
+              className="text-[10px] text-primary/60 hover:text-primary transition-colors mt-0.5 block"
             >
-              مدير
-            </Badge>
-          )}
+              تعديل الملف الشخصي
+            </button>
+          </div>
         </div>
         <Button
           variant="outline"
@@ -273,6 +473,14 @@ function SidebarContent({
           <LogOut className="size-4" />
           <span className="text-sm">تسجيل الخروج</span>
         </Button>
+      </div>
+
+      {/* Footer */}
+      <Separator className="bg-sidebar-border" />
+      <div className="px-4 py-2 text-center">
+        <p className="text-[9px] text-sidebar-foreground/25">
+          استضافة الذئب v0.2
+        </p>
       </div>
     </div>
   );

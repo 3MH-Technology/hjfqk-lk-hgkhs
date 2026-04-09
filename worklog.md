@@ -221,3 +221,138 @@ The White Wolf Hosting platform is stable and fully functional with zero lint er
 6. Add file upload with drag-and-drop in file manager
 7. Add bot console/terminal feature
 8. Add dark/light theme toggle
+
+---
+Task ID: 5a
+Agent: Console Agent
+Task: Add Bot Console/Terminal Page
+
+Work Log:
+- Created bot-console.tsx with simulated terminal interface
+- Terminal features: boot sequence animation, command input, auto-scroll, blinking cursor
+- Simulated commands: /status, /help, /restart, /logs, /clear
+- Status bar with connection indicator, uptime counter, memory usage bar
+- Random log messages every 5-8 seconds
+- Memory fluctuation every 3 seconds
+- Uptime counter incrementing every second
+- Scanline overlay effect for terminal aesthetic
+- Command history navigation with arrow keys
+- Added 'bot-console' to Page type union in app-store.ts
+- Added lazy import and route case in app-layout.tsx
+- Added page title 'وحدة التحكم' in header.tsx
+- Added Terminal icon button in bot-detail.tsx header actions
+- All text in Arabic, monospace font, green/amber terminal colors
+- Framer-motion entrance animation (slide up)
+
+Stage Summary:
+- New Bot Console page with full terminal simulation
+- 5 working commands with animated responses
+- Real-time status indicators (uptime, memory, connection)
+- Zero lint errors on all modified files
+
+---
+Task ID: 4a
+Agent: Hero Section Redesign Agent
+Task: Redesign Landing Page Hero Section with Stunning Visuals
+
+Work Log:
+- Read existing landing.tsx (1060+ lines) and globals.css (778 lines) to understand current structure
+- Appended 280+ lines of new CSS keyframe animations to the END of globals.css:
+  - Wolf logo orbit ring spin (forward + reverse) animations
+  - Enhanced wolf glow pulse with multi-layer box-shadow
+  - Wolf SVG silhouette glow with drop-shadow filter
+  - 8 unique floating particle keyframe animations (particle-float-1 through 8)
+  - 12 particle class assignments with varied durations (12s-30s) and delays
+  - Particle shape classes: hexagon, diamond, triangle (CSS clip-path)
+  - Animated shifting gradient text (hero-gradient-text) with 300% background-size
+  - Typewriter reveal animation using clip-path inset
+  - CTA animated gradient border with shifting background-position
+  - Secondary button shimmer/shine effect on hover
+  - Trust badge staggered entrance animation
+  - Stats inline badge pulse animation
+  - Watch demo link glow animation
+- Completely redesigned hero section in landing.tsx:
+  - SVG wolf head silhouette with gradient fill, glowing eyes, and nose
+  - Two orbit rings (dashed outer + solid inner) rotating in opposite directions
+  - Enhanced pulsing glow behind the logo (4-layer box-shadow)
+  - 12 floating geometric particles (circles, hexagons, diamonds, triangles) scattered across hero
+  - Animated gradient title "استضافة الذئب" with shifting colors
+  - Version badge "v0.2" next to the title
+  - Subtitle with typewriter/reveal clip-path animation on load
+  - 3 inline stat badges (+1000 بوت, 99.9% وقت تشغيل, 24/7 دعم) with pulse animation
+  - Primary CTA button with animated gradient border (cta-gradient-border)
+  - Secondary CTA button with hover shimmer/shine effect (btn-shimmer-effect)
+  - Decorative "Watch Demo ▶" link below buttons with glow animation
+  - 3 enhanced trust indicators: SSL Security (Lock icon), Uptime (Clock icon), Support (Headphones icon)
+  - Trust badges with icon containers, two-line text, staggered entrance animation
+  - Full-height hero section (min-h-[85vh] md:min-h-[90vh]) with flex centering
+- Responsive design maintained (mobile + desktop via Tailwind responsive prefixes)
+- RTL-compatible (all animations use transform/opacity only, no layout-thrashing)
+- Dev server compiles successfully with zero errors
+- Lint check: only pre-existing errors in sidebar.tsx (not introduced by this task)
+
+Stage Summary:
+- Hero section completely redesigned with 12 floating particles, SVG wolf head, orbit rings
+- 280+ lines of CSS animations added to globals.css
+- 5 major visual enhancements: animated logo, particle background, gradient text, enhanced CTAs, styled trust badges
+- Zero new lint errors introduced
+
+---
+Task ID: 5b
+Agent: Bot Comparison Agent
+Task: Add Bot Comparison Feature
+
+Work Log:
+- Created bot-comparison.tsx with comprehensive comparison table component
+- Bot selection pills at top with animated check indicators (2-3 bot selection)
+- 5 comparison categories: Basic Info, Resources, Files, Logs, Settings
+- Color-coded values (green/red/amber) for status, errors, and resource levels
+- Status badges with animated dots for running/stopped/building/error states
+- Empty state with placeholder message when fewer than 2 bots selected
+- Falls back to 4 mock bots when no real bots exist from /api/bots
+- Framer Motion entrance animations (staggered children, AnimatePresence)
+- Responsive grid layout (columns adjust to selected bot count)
+- Alternating row backgrounds in comparison table
+- Added 'bot-comparison' to Page type union in app-store.ts
+- Added lazy import and switch case in app-layout.tsx
+- Added page title 'مقارنة البوتات' in header.tsx
+- Added GitCompareArrows button in bot-list.tsx header (navigates to comparison page)
+
+Stage Summary:
+- New Bot Comparison page with side-by-side comparison of 2-3 bots
+- 5 comparison categories with 12+ data points
+- Color-coded status indicators (green/red/amber)
+- Mock data fallback for demonstration
+- Zero lint errors on all modified files
+
+---
+Task ID: 4b
+Agent: Sidebar Enhancement Agent
+Task: Enhance Sidebar with Online Status, User Card, and System Status
+
+Work Log:
+- Enhanced user profile card with larger avatar (size-10), animated gradient border (from-primary/40 via-amber-500/40 to-primary), glow hover effect
+- Added green pulsing online status indicator dot (animate-ping + emerald-500) next to avatar
+- Role badge always visible (مدير for admin with gold styling, مستخدم for regular with muted styling)
+- User name in bold, email in smaller muted text, "تعديل الملف الشخصي" link navigating to settings
+- Added collapsible System Status section (حالة النظام) between nav and user card
+- 2x2 metrics grid with CPU/RAM progress bars + Active Bots/Uptime text metrics
+- Progress bars animate on mount using framer-motion (width 0 → value with easeOut)
+- CPU shown in emerald-400 green, RAM in amber-400 gold
+- Uptime shown in green (99.9%), Active Bots shown as "2/5"
+- Active Bots Quick List showing 2 mock running bots with pulsing green dots and "يعمل" text
+- Bot rows are clickable → navigate to bot-detail page via setSelectedBotId + setCurrentPage
+- Added footer at very bottom: separator line + "استضافة الذئب v0.2" in tiny muted text
+- Used shadcn/ui Collapsible for system status toggle with animated chevron
+- Custom hooks: useSystemMetrics (lazy-initialized random metrics), useActiveBots (mock data)
+- Removed unused imports (Bell, RefreshCw, Progress, useCallback)
+- Fixed react-hooks/set-state-in-effect lint errors by using lazy useState initializers
+- All text in Arabic, dark theme consistent, compact design to fit viewport
+
+Stage Summary:
+- Enhanced sidebar bottom section with 4 major additions
+- Animated gradient border avatar with online status pulsing dot
+- Collapsible system health dashboard (CPU/RAM bars + bots/uptime metrics)
+- Active bots quick list with clickable rows
+- Version footer "استضافة الذئب v0.2"
+- Zero lint errors, clean dev server compilation

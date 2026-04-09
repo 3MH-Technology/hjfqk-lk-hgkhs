@@ -12,6 +12,7 @@ const pageTitles: Record<Page, string> = {
   dashboard: 'لوحة التحكم',
   bots: 'إدارة البوتات',
   'bot-detail': 'تفاصيل البوت',
+  'bot-console': 'وحدة التحكم',
   'bot-templates': 'قوالب البوتات',
   'bot-monitoring': 'مراقبة الأداء',
   files: 'مدير الملفات',
@@ -22,6 +23,7 @@ const pageTitles: Record<Page, string> = {
   admin: 'لوحة المدير',
   'admin-users': 'إدارة المستخدمين',
   'admin-bots': 'إدارة البوتات العامة',
+  'bot-comparison': 'مقارنة البوتات',
   '404': 'الصفحة غير موجودة',
 };
 

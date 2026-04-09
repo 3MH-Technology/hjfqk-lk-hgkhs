@@ -8,6 +8,7 @@ export type Page =
   | "dashboard"
   | "bots"
   | "bot-detail"
+  | "bot-console"
   | "bot-templates"
   | "bot-monitoring"
   | "files"
@@ -18,6 +19,7 @@ export type Page =
   | "admin"
   | "admin-users"
   | "admin-bots"
+  | "bot-comparison"
   | "404";
 
 interface AppState {
