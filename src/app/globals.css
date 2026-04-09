@@ -158,3 +158,198 @@
 [dir="rtl"] .lucide-chevron-left {
   transform: rotate(180deg);
 }
+
+/* Floating animation for hero logo */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.float-animation {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Glow effect behind wolf logo */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 30px oklch(0.78 0.15 75 / 30%), 0 0 60px oklch(0.78 0.15 75 / 15%), 0 0 90px oklch(0.78 0.15 75 / 5%); }
+  50% { box-shadow: 0 0 40px oklch(0.78 0.15 75 / 40%), 0 0 80px oklch(0.78 0.15 75 / 20%), 0 0 120px oklch(0.78 0.15 75 / 10%); }
+}
+
+.glow-effect {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Gradient mesh background particles */
+@keyframes mesh-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  25% { transform: translate(80px, -60px) scale(1.2); opacity: 0.6; }
+  50% { transform: translate(-40px, 80px) scale(0.9); opacity: 0.3; }
+  75% { transform: translate(60px, 40px) scale(1.1); opacity: 0.5; }
+}
+
+@keyframes mesh-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  25% { transform: translate(-70px, 50px) scale(1.15); opacity: 0.5; }
+  50% { transform: translate(50px, -70px) scale(0.85); opacity: 0.4; }
+  75% { transform: translate(-30px, -40px) scale(1.1); opacity: 0.35; }
+}
+
+@keyframes mesh-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+  33% { transform: translate(60px, 70px) scale(1.3); opacity: 0.45; }
+  66% { transform: translate(-80px, -30px) scale(0.95); opacity: 0.3; }
+}
+
+.mesh-particle-1 {
+  animation: mesh-drift-1 15s ease-in-out infinite;
+}
+
+.mesh-particle-2 {
+  animation: mesh-drift-2 18s ease-in-out infinite;
+}
+
+.mesh-particle-3 {
+  animation: mesh-drift-3 20s ease-in-out infinite;
+}
+
+/* Gradient border on hover */
+.gradient-border-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-border-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(0.78 0.15 75 / 0%), oklch(0.78 0.15 75 / 0%));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: background 0.5s ease;
+  pointer-events: none;
+}
+
+.gradient-border-hover:hover::before {
+  background: linear-gradient(135deg, oklch(0.78 0.15 75 / 60%), oklch(0.78 0.15 75 / 20%), oklch(0.85 0.12 85 / 40%));
+}
+
+/* Stats gradient background */
+.stats-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.18 0.01 270), oklch(0.15 0.015 75 / 30%), oklch(0.18 0.01 270));
+}
+
+/* CTA gradient background */
+.cta-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.20 0.04 75 / 60%), oklch(0.15 0.01 270), oklch(0.18 0.03 60 / 40%));
+}
+
+/* Step connector line */
+.step-connector {
+  position: relative;
+}
+
+.step-connector::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to left, oklch(0.78 0.15 75 / 40%), oklch(0.78 0.15 75 / 5%));
+  pointer-events: none;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Sticky navbar glass */
+.navbar-glass {
+  background: oklch(0.13 0.005 270 / 70%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid oklch(0.28 0.008 270 / 40%);
+}
+
+/* Auth page animated grid background */
+.auth-grid-bg {
+  background-image:
+    linear-gradient(oklch(0.28 0.008 270 / 30%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.28 0.008 270 / 30%) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+/* Auth card gradient border on hover */
+.auth-card {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    oklch(0.78 0.15 75 / 0%),
+    oklch(0.85 0.12 85 / 0%),
+    oklch(0.78 0.15 75 / 0%)
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  transition: background 0.4s ease;
+  pointer-events: none;
+}
+
+.auth-card:hover::before {
+  background: linear-gradient(
+    135deg,
+    oklch(0.78 0.15 75 / 60%),
+    oklch(0.85 0.12 85 / 30%),
+    oklch(0.78 0.15 75 / 60%)
+  );
+}
+
+/* Wolf paw pattern for branding panel */
+.wolf-paw-bg {
+  background:
+    radial-gradient(circle at 20% 80%, oklch(0.78 0.15 75 / 8%) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, oklch(0.78 0.15 75 / 6%) 0%, transparent 50%),
+    radial-gradient(circle at 60% 60%, oklch(0.78 0.15 75 / 4%) 0%, transparent 50%),
+    linear-gradient(180deg, oklch(0.14 0.005 270) 0%, oklch(0.11 0.005 270) 100%);
+}
+
+/* Password strength bar colors */
+.strength-weak { background-color: oklch(0.65 0.22 25); }
+.strength-medium { background-color: oklch(0.78 0.15 75); }
+.strength-strong { background-color: oklch(0.65 0.20 160); }
+
+/* Auth left panel floating particles */
+@keyframes float-particle {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  50% { transform: translateY(-80px) translateX(20px); }
+}
+
+.auth-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: oklch(0.78 0.15 75 / 40%);
+  animation: float-particle 6s ease-in-out infinite;
+}
