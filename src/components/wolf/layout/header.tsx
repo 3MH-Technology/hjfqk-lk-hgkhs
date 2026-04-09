@@ -26,6 +26,9 @@ const pageTitles: Record<Page, string> = {
   'admin-bots': 'إدارة البوتات العامة',
   'bot-comparison': 'مقارنة البوتات',
   'bot-analytics': 'تحليلات البوتات',
+  'api-keys': 'مفاتيح API',
+  webhooks: 'وخدمات الويب',
+  'deployment-history': 'سجل النشر',
   '404': 'الصفحة غير موجودة',
 };
 

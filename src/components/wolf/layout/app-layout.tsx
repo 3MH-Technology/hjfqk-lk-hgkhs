@@ -114,6 +114,21 @@ const BotAnalytics = dynamic(
   { loading: () => loadingFallback }
 );
 
+const DeploymentHistory = dynamic(
+  () => import('@/components/wolf/bots/deployment-history').then((m) => m.DeploymentHistory),
+  { loading: () => loadingFallback }
+);
+
+const ApiKeysPage = dynamic(
+  () => import('@/components/wolf/settings/api-keys'),
+  { loading: () => loadingFallback }
+);
+
+const WebhooksPage = dynamic(
+  () => import('@/components/wolf/settings/webhooks'),
+  { loading: () => loadingFallback }
+);
+
 const HelpCenter = dynamic(
   () => import('@/components/wolf/help-center'),
   { loading: () => loadingFallback }
@@ -156,6 +171,12 @@ function PageContent() {
       return <BotComparison />;
     case 'bot-analytics':
       return <BotAnalytics />;
+    case 'deployment-history':
+      return <DeploymentHistory />;
+    case 'api-keys':
+      return <ApiKeysPage />;
+    case 'webhooks':
+      return <WebhooksPage />;
     default:
       return <Dashboard />;
   }

@@ -21,6 +21,9 @@ import {
   ChevronDown,
   Clock,
   BarChart3,
+  History,
+  Key,
+  Webhook as WebhookIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -73,6 +76,11 @@ const navItems: NavItem[] = [
     icon: <BarChart3 className="size-5" />,
   },
   {
+    id: 'deployment-history',
+    label: 'سجل النشر',
+    icon: <History className="size-5" />,
+  },
+  {
     id: 'files',
     label: 'مدير الملفات',
     icon: <FolderOpen className="size-5" />,
@@ -81,6 +89,17 @@ const navItems: NavItem[] = [
     id: 'logs',
     label: 'السجلات',
     icon: <ScrollText className="size-5" />,
+  },
+  {
+    id: 'api-keys',
+    label: 'مفاتيح API',
+    icon: <Key className="size-5" />,
+    separator: true,
+  },
+  {
+    id: 'webhooks',
+    label: 'وخدمات الويب',
+    icon: <WebhookIcon className="size-5" />,
   },
   {
     id: 'activity',

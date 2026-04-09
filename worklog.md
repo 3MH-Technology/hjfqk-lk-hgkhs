@@ -599,3 +599,99 @@ The White Wolf Hosting platform is highly stable with zero errors across all che
 8. Add webhook configuration for bot events
 9. Implement team collaboration features (multi-user bot access)
 10. Add API key management for external integrations
+
+---
+Task ID: 14
+Agent: Deployment History Page Agent
+Task: Create a new Deployment History page that tracks all bot deployment events across the platform.
+
+Work Log:
+- Created deployment-history.tsx (~480 lines) with comprehensive deployment tracking dashboard
+- Page Header: History icon, title "سجل النشر", subtitle with filtered deployment count, live tracking badge
+- Filter Bar: 3-column filter with Bot selector (All bots + 6 individual bots), Status filter (All/Success/Failed/In Progress/Rolled Back), Date range selector (7/30/90 days)
+- Deployment Stats Cards (4 cards in a row):
+  - Total Deployments (count + 14.2% up trend arrow)
+  - Success Rate (percentage + colored quality badge: ممتاز/جيد/يحتاج تحسين)
+  - Average Deploy Time (seconds + 8.5% down trend)
+  - Failed Deployments (count + 5.3% down trend)
+- Mini Deploy Chart: recharts BarChart with stacked bars (success/failed) over last 7 days with Arabic day labels
+- Deployment Timeline (main content):
+  - Vertical timeline with color-coded status dots and connecting lines
+  - Each entry shows: relative timestamp, bot name, event type badge (نشر/إعادة نشر/تراجع/إيقاف), version info (git commit/version), duration, trigger type (يدوي/تلقائي)
+  - Expandable log section per deployment with color-coded log lines (INFO/WARN/ERROR/SUCCESS)
+  - 4 status colors: green (success), red (failed), amber (in_progress), blue (rolled_back)
+  - Staggered entrance animation for timeline items using framer-motion
+  - "تحميل المزيد" button to load additional events (10 at a time)
+  - Empty state when no deployments match filters
+- Mock data: 30 deployment events across 6 bots with realistic timestamps, durations, versions, and log entries
+- Added 'deployment-history' to Page type union in app-store.ts
+- Added lazy import and switch case in app-layout.tsx
+- Added page title 'سجل النشر' in header.tsx
+- Added sidebar navigation item with History icon placed after "تحليلات البوتات" in sidebar.tsx
+- All text in Arabic (RTL), framer-motion animations with `as const` on ease/type strings
+- Zero lint errors, clean dev server compilation
+
+Stage Summary:
+- New Deployment History page with 5 major sections
+- recharts BarChart (stacked) for deployment visualization
+- Interactive filter bar with 3 filter dimensions
+- Vertical timeline with expandable deployment logs
+- 30 mock deployment events with realistic data
+- Zero lint errors
+
+---
+Task ID: 13
+Agent: Inner Pages Styling Enhancement Agent
+Task: Enhance the styling of 3 core inner pages with animations, visual polish, and detail.
+
+Work Log:
+- Enhanced bot-detail.tsx (~570 lines) with comprehensive visual upgrades:
+  - Added framer-motion containerVariants/itemVariants for staggered section entrance animations
+  - Redesigned header with gradient background (from-primary/20 to transparent) and decorative blur elements
+  - Added status badge with pulsing dot animation for running/building states
+  - Added glassmorphism action bar (backdrop-blur-sm, bg-card/40) with animated buttons (whileHover/whileTap)
+  - Added tab transition animations using AnimatePresence with slide-in/out effects (tabContentVariants)
+  - Styled tabs with icons (Activity, Zap, FileCode) in TabsTrigger
+  - Redesigned General tab with mini-card layout: each info item in its own card with icon, bg color, and hover border
+  - Added Bot Timeline section: vertical timeline with 5 mock events (created, started, restarted, error, restarted), color-coded event cards with icons, animated staggered entrance
+  - Added resource usage mini-bars (CPU/RAM) with framer-motion animated width in the resources stats card
+  - Added Quick Actions floating bar at the bottom (sticky, glassmorphism) with links to console, files, logs, monitoring
+  - Replaced `any` error handling with `unknown` + instanceof Error
+  - All motion variants use `as const` on ease/type strings
+
+- Enhanced account-settings.tsx (~580 lines) with comprehensive visual upgrades:
+  - Added framer-motion containerVariants/itemVariants for staggered entrance animations
+  - Added gradient profile card at top with avatar, name, email, role badge (admin/maintainer), join date, green online dot
+  - Added profile completion progress bar (animated 75% gradient from primary to amber) with checklist indicators
+  - Added section dividers between settings sections with centered icons and labels (الإشعارات, الحسابات المرتبطة, الأمان, الحدود, منطقة الخطر)
+  - Added Notification Preferences section with 4 mock toggle switches (email notifications, error alerts, system updates, marketing)
+  - Added Connected Accounts section with 2 mock accounts (Telegram connected, GitHub not connected) with connect/disconnect buttons
+  - Enhanced Danger Zone section with red-themed section divider, AlertTriangle icon, and shadow effects on delete button
+  - Enhanced delete dialog with red focus ring on input
+  - All motion variants use `as const` on ease/type strings
+  - Replaced `any` error handling with `unknown` + instanceof Error
+
+- Enhanced log-viewer.tsx (~420 lines) with comprehensive visual upgrades:
+  - Added framer-motion containerVariants/itemVariants for staggered entrance animations
+  - Added stats bar at top showing log counts by level (info/warn/error/debug) with colored clickable badges and icons
+  - Enhanced log level filter tabs with active state styling (bg-primary shadow-md shadow-primary/20)
+  - Added animated button interactions (whileHover/whileTap) on all action buttons
+  - Added alternating row backgrounds (even rows: bg-card/20) with hover effects (hover:bg-accent/40)
+  - Added search-within-logs input field with clear button and search term badge display
+  - Enhanced auto-scroll toggle button with bounce animation on active state and "Scroll to bottom" button when disabled
+  - Added log entry slide-in animations (AnimatePresence with popLayout mode, x: 30 → 0)
+  - Added level-specific icons (Info, AlertTriangle, AlertCircle, Bug) next to each log entry
+  - Added filter active badges showing current filter/search with dismiss buttons
+  - Enhanced empty states with different messages for cleared vs filtered vs no-data states
+  - Fixed unused eslint-disable directive warning
+
+- All text in Arabic (RTL) across all 3 files
+- Zero lint errors, zero warnings, clean dev server compilation
+
+Stage Summary:
+- 3 core inner pages enhanced with 25+ total visual improvements
+- Bot detail: gradient header, glassmorphism action bar, animated tabs, mini-card info layout, timeline section, resource bars, quick actions bar
+- Account settings: gradient profile card, completion progress bar, section dividers with icons, notification toggles, connected accounts, enhanced danger zone
+- Log viewer: stats bar with level counts, animated filter tabs, alternating row backgrounds, log slide-in animations, level icons, enhanced search/filter UX
+- All motion variants use `as const` on ease/type strings
+- Zero lint errors

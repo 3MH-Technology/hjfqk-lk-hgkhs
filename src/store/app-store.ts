@@ -21,6 +21,9 @@ export type Page =
   | "admin-bots"
   | "bot-comparison"
   | "bot-analytics"
+  | "api-keys"
+  | "webhooks"
+  | "deployment-history"
   | "404";
 
 export type Theme = 'dark' | 'light';
