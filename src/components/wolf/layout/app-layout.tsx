@@ -50,12 +50,6 @@ const BotDetail = dynamic(
   { loading: () => loadingFallback }
 );
 
-const BotTemplates = dynamic(
-  () =>
-    import('@/components/wolf/bots/templates/bot-templates'),
-  { loading: () => loadingFallback }
-);
-
 const BotConsole = dynamic(
   () =>
     import('@/components/wolf/bots/bot-console').then((m) => m.BotConsole),
@@ -139,6 +133,21 @@ const HelpCenter = dynamic(
   { loading: () => loadingFallback }
 );
 
+const DevAdmin = dynamic(
+  () => import('@/components/wolf/admin/dev-admin'),
+  { loading: () => loadingFallback }
+);
+
+const PrivacyPolicy = dynamic(
+  () => import('@/components/wolf/legal/privacy').then((m) => ({ default: m.PrivacyPolicy })),
+  { loading: () => loadingFallback }
+);
+
+const TermsOfService = dynamic(
+  () => import('@/components/wolf/legal/terms').then((m) => ({ default: m.TermsOfService })),
+  { loading: () => loadingFallback }
+);
+
 // Page renderer based on currentPage state
 function PageContent() {
   const { currentPage } = useAppStore();
@@ -152,8 +161,6 @@ function PageContent() {
       return <BotDetail />;
     case 'bot-console':
       return <BotConsole />;
-    case 'bot-templates':
-      return <BotTemplates />;
     case 'bot-monitoring':
       return <BotMonitoring />;
     case 'files':
@@ -184,6 +191,12 @@ function PageContent() {
       return <WebhooksPage />;
     case 'team':
       return <TeamManagementPage />;
+    case 'dev-admin':
+      return <DevAdmin />;
+    case 'privacy':
+      return <PrivacyPolicy />;
+    case 'terms':
+      return <TermsOfService />;
     default:
       return <Dashboard />;
   }

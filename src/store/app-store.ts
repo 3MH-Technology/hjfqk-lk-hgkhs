@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import type { User, Bot, BotFile, BotLog, BotEnv } from "@prisma/client";
 
 export type Page =
   | "landing"
@@ -9,7 +8,6 @@ export type Page =
   | "bots"
   | "bot-detail"
   | "bot-console"
-  | "bot-templates"
   | "bot-monitoring"
   | "files"
   | "logs"
@@ -25,19 +23,26 @@ export type Page =
   | "webhooks"
   | "deployment-history"
   | "team"
+  | "dev-admin"
+  | "privacy"
+  | "terms"
   | "404";
 
 export type Theme = 'dark' | 'light';
 
+export interface UserInfo {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: string;
+  plan?: string;
+  avatarUrl?: string | null;
+}
+
 interface AppState {
   currentPage: Page;
   selectedBotId: string | null;
-  user: {
-    id: string;
-    email: string;
-    name?: string | null;
-    role: string;
-  } | null;
+  user: UserInfo | null;
   isLoading: boolean;
   sidebarOpen: boolean;
   unreadNotifications: number;
@@ -46,7 +51,7 @@ interface AppState {
   theme: Theme;
   setCurrentPage: (page: Page) => void;
   setSelectedBotId: (id: string | null) => void;
-  setUser: (user: any | null) => void;
+  setUser: (user: UserInfo | null) => void;
   setLoading: (loading: boolean) => void;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;

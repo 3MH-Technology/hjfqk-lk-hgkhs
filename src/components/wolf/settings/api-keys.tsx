@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   Key,
   Plus,
@@ -11,17 +11,13 @@ import {
   AlertTriangle,
   Clock,
   Shield,
-  Eye,
-  EyeOff,
-  X,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -48,37 +44,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAppStore } from '@/store/app-store';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 type Expiration = '30' | '90' | '365' | 'never';
 
-interface Permission {
-  id: string;
-  label: string;
-}
-
-const PERMISSIONS: Permission[] = [
-  { id: 'read', label: 'قراءة' },
-  { id: 'write', label: 'كتابة' },
-  { id: 'delete', label: 'حذف' },
-  { id: 'admin', label: 'إدارة' },
-];
-
-interface ApiKey {
+interface ApiKeyItem {
   id: string;
   name: string;
-  prefix: string;
+  keyPrefix: string;
+  permissions: string;
+  lastUsedAt: string | null;
+  expiresAt: string | null;
   createdAt: string;
-  expiresAt: string;
-  status: 'active' | 'expired';
-  lastUsed: string;
-  permissions: string[];
+  status: string;
 }
 
-// API keys loaded from API - initialized empty
-
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -87,29 +69,31 @@ const containerVariants = {
       delayChildren: 0.1,
     },
   },
-} as const;
+};
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: 'spring' as const, stiffness: 260, damping: 24 },
+    transition: { type: 'spring', stiffness: 260, damping: 24 },
   },
-} as const;
+};
 
-const fadeInVariants = {
+const fadeInVariants: Variants = {
   hidden: { opacity: 0, y: -8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: 'easeIn' as const } },
-} as const;
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: 'easeIn' } },
+};
 
-function getRelativeTime(dateStr: string): string {
-  return dateStr;
-}
+const PERMISSION_MAP: Record<string, { label: string; color: string }> = {
+  read: { label: 'قراءة', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+  write: { label: 'كتابة', color: 'bg-blue-500/15 text-blue-400 border-blue-500/30' },
+  admin: { label: 'إدارة', color: 'bg-primary/15 text-primary border-primary/30' },
+};
 
-function formatDate(dateStr: string): string {
-  if (dateStr === 'لا ينتهي') return dateStr;
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return 'لا ينتهي';
   try {
     return new Intl.DateTimeFormat('ar-SA', {
       year: 'numeric',
@@ -122,77 +106,104 @@ function formatDate(dateStr: string): string {
 }
 
 export default function ApiKeysPage() {
-  const { user } = useAppStore();
-  const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [keys, setKeys] = useState<ApiKeyItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeId, setRevokeId] = useState<string | null>(null);
 
-  // Create key form state
+  // Create form
   const [keyName, setKeyName] = useState('');
   const [expiration, setExpiration] = useState<Expiration>('90');
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(['read']);
+  const [permissions, setPermissions] = useState('read');
+  const [creating, setCreating] = useState(false);
   const [showNewKey, setShowNewKey] = useState(false);
   const [newKeyValue, setNewKeyValue] = useState('');
   const [copiedNew, setCopiedNew] = useState(false);
-
-  // Copy key prefix state
   const [copiedPrefixId, setCopiedPrefixId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const togglePermission = (permId: string) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permId)
-        ? prev.filter((p) => p !== permId)
-        : [...prev, permId]
-    );
-  };
+  const fetchKeys = useCallback(async () => {
+    try {
+      const res = await fetch('/api/api-keys', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setKeys(data);
+      }
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleCreateKey = () => {
+  useEffect(() => {
+    fetchKeys();
+  }, [fetchKeys]);
+
+  const handleCreateKey = async () => {
     if (!keyName.trim()) {
       toast.error('يرجى إدخال اسم المفتاح');
       return;
     }
-    if (selectedPermissions.length === 0) {
-      toast.error('يرجى اختيار صلاحية واحدة على الأقل');
-      return;
+
+    setCreating(true);
+    try {
+      const body: Record<string, unknown> = {
+        name: keyName.trim(),
+        permissions,
+      };
+
+      if (expiration !== 'never') {
+        body.expiresAt = expiration;
+      }
+
+      const res = await fetch('/api/api-keys', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setNewKeyValue(data.key);
+        setShowNewKey(true);
+        toast.success('تم إنشاء مفتاح API بنجاح');
+        fetchKeys();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'فشل في إنشاء المفتاح');
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) toast.error(err.message);
+      else toast.error('حدث خطأ أثناء إنشاء المفتاح');
+    } finally {
+      setCreating(false);
     }
-
-    const randomStr = Array.from({ length: 32 }, () =>
-      '0123456789abcdef'[Math.floor(Math.random() * 16)]
-    ).join('');
-    const prefix = `sk-wolf-${randomStr.slice(0, 8)}...${randomStr.slice(-4)}`;
-
-    const now = new Date();
-    const expiresAt = expiration === 'never'
-      ? 'لا ينتهي'
-      : new Date(now.getTime() + parseInt(expiration) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    const newKey: ApiKey = {
-      id: String(Date.now()),
-      name: keyName.trim(),
-      prefix,
-      createdAt: now.toISOString().split('T')[0],
-      expiresAt,
-      status: 'active',
-      lastUsed: 'لم يُستخدم بعد',
-      permissions: [...selectedPermissions],
-    };
-
-    setKeys((prev) => [newKey, ...prev]);
-    setNewKeyValue(`sk-wolf-${randomStr}`);
-    setShowNewKey(true);
-
-    // Reset form
-    setKeyName('');
-    setExpiration('90');
-    setSelectedPermissions(['read']);
-
-    toast.success('تم إنشاء مفتاح API بنجاح');
   };
 
-  const handleRevokeKey = (id: string) => {
-    setKeys((prev) => prev.filter((k) => k.id !== id));
-    setRevokeId(null);
-    toast.success('تم إلغاء مفتاح API بنجاح');
+  const handleDeleteKey = async (id: string) => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/api-keys/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        setKeys((prev) => prev.filter((k) => k.id !== id));
+        setRevokeId(null);
+        toast.success('تم إلغاء مفتاح API بنجاح');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'فشل في إلغاء المفتاح');
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) toast.error(err.message);
+      else toast.error('حدث خطأ');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleCopyPrefix = async (id: string, text: string) => {
@@ -225,30 +236,8 @@ export default function ApiKeysPage() {
       setCopiedNew(false);
       setKeyName('');
       setExpiration('90');
-      setSelectedPermissions(['read']);
+      setPermissions('read');
     }
-  };
-
-  const getPermissionBadge = (permId: string) => {
-    const perm = PERMISSIONS.find((p) => p.id === permId);
-    if (!perm) return null;
-
-    const colorMap: Record<string, string> = {
-      read: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-      write: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-      delete: 'bg-red-500/15 text-red-400 border-red-500/30',
-      admin: 'bg-primary/15 text-primary border-primary/30',
-    };
-
-    return (
-      <Badge
-        key={permId}
-        variant="outline"
-        className={`text-[10px] px-1.5 py-0 ${colorMap[permId] || ''}`}
-      >
-        {perm.label}
-      </Badge>
-    );
   };
 
   return (
@@ -357,6 +346,21 @@ export default function ApiKeysPage() {
                     />
                   </div>
 
+                  {/* Permissions */}
+                  <div className="space-y-2">
+                    <Label>الصلاحية</Label>
+                    <Select value={permissions} onValueChange={setPermissions}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="read">قراءة</SelectItem>
+                        <SelectItem value="write">كتابة</SelectItem>
+                        <SelectItem value="admin">إدارة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {/* Expiration */}
                   <div className="space-y-2">
                     <Label>مدة الصلاحية</Label>
@@ -373,25 +377,6 @@ export default function ApiKeysPage() {
                     </Select>
                   </div>
 
-                  {/* Permissions */}
-                  <div className="space-y-3">
-                    <Label>الصلاحيات</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {PERMISSIONS.map((perm) => (
-                        <label
-                          key={perm.id}
-                          className="flex items-center gap-2.5 rounded-lg border border-border/50 px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/50 has-[:checked]:border-primary/40 has-[:checked]:bg-primary/5"
-                        >
-                          <Checkbox
-                            checked={selectedPermissions.includes(perm.id)}
-                            onCheckedChange={() => togglePermission(perm.id)}
-                          />
-                          <span className="text-sm">{perm.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
                   <DialogFooter className="gap-2">
                     <Button
                       variant="outline"
@@ -401,10 +386,14 @@ export default function ApiKeysPage() {
                     </Button>
                     <Button
                       onClick={handleCreateKey}
-                      disabled={!keyName.trim() || selectedPermissions.length === 0}
+                      disabled={!keyName.trim() || creating}
                       className="gap-2"
                     >
-                      <Key className="size-4" />
+                      {creating ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Key className="size-4" />
+                      )}
                       إنشاء المفتاح
                     </Button>
                   </DialogFooter>
@@ -419,7 +408,7 @@ export default function ApiKeysPage() {
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' as const }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className="flex items-start gap-3 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4"
       >
         <Shield className="size-5 text-blue-400 shrink-0 mt-0.5" />
@@ -441,115 +430,142 @@ export default function ApiKeysPage() {
           </h2>
         </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-3"
-        >
-          <AnimatePresence>
-            {keys.map((key) => (
-              <motion.div
-                key={key.id}
-                variants={itemVariants}
-                layout
-                exit={{ opacity: 0, x: 50, transition: { duration: 0.2 } }}
-              >
-                <Card className="border-border/50 hover:border-border/80 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                      {/* Key info */}
-                      <div className="flex-1 min-w-0 space-y-3">
-                        {/* Name + Status */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-medium text-sm">{key.name}</h3>
-                          <Badge
-                            variant="outline"
-                            className={
-                              key.status === 'active'
-                                ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 text-[10px]'
-                                : 'text-red-400 border-red-500/30 bg-red-500/10 text-[10px]'
-                            }
-                          >
-                            <span className="relative flex size-1.5 ml-1.5">
-                              {key.status === 'active' && (
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <Card key={i} className="border-border/50">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                  <Skeleton className="h-4 w-64" />
+                  <div className="flex gap-4">
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-3"
+          >
+            <AnimatePresence>
+              {keys.map((key) => (
+                <motion.div
+                  key={key.id}
+                  variants={itemVariants}
+                  layout
+                  exit={{ opacity: 0, x: 50, transition: { duration: 0.2 } }}
+                >
+                  <Card className="border-border/50 hover:border-border/80 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        {/* Key info */}
+                        <div className="flex-1 min-w-0 space-y-3">
+                          {/* Name + Status */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-medium text-sm">{key.name}</h3>
+                            <Badge
+                              variant="outline"
+                              className={
+                                key.status === 'active'
+                                  ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 text-[10px]'
+                                  : 'text-red-400 border-red-500/30 bg-red-500/10 text-[10px]'
+                              }
+                            >
+                              <span className="relative flex size-1.5 ml-1.5">
+                                {key.status === 'active' && (
+                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                                )}
+                                <span
+                                  className={`relative inline-flex size-1.5 rounded-full ${
+                                    key.status === 'active' ? 'bg-emerald-500' : 'bg-red-500'
+                                  }`}
+                                />
+                              </span>
+                              {key.status === 'active' ? 'نشط' : 'منتهي الصلاحية'}
+                            </Badge>
+                          </div>
+
+                          {/* Prefix + Copy */}
+                          <div className="flex items-center gap-2">
+                            <code
+                              className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded font-mono truncate max-w-[280px]"
+                              dir="ltr"
+                            >
+                              {key.keyPrefix}
+                            </code>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-7 shrink-0 text-muted-foreground hover:text-foreground"
+                              onClick={() => handleCopyPrefix(key.id, key.keyPrefix)}
+                            >
+                              {copiedPrefixId === key.id ? (
+                                <Check className="size-3 text-emerald-400" />
+                              ) : (
+                                <Copy className="size-3" />
                               )}
-                              <span
-                                className={`relative inline-flex size-1.5 rounded-full ${
-                                  key.status === 'active' ? 'bg-emerald-500' : 'bg-red-500'
-                                }`}
-                              />
+                            </Button>
+                          </div>
+
+                          {/* Meta info */}
+                          <div className="flex items-center gap-4 text-[11px] text-muted-foreground flex-wrap">
+                            <span className="flex items-center gap-1">
+                              <Clock className="size-3" />
+                              أنشئ: {formatDate(key.createdAt)}
                             </span>
-                            {key.status === 'active' ? 'نشط' : 'منتهي الصلاحية'}
-                          </Badge>
+                            <span className="flex items-center gap-1">
+                              <Clock className="size-3" />
+                              ينتهي: {formatDate(key.expiresAt)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              {key.lastUsedAt ? formatDate(key.lastUsedAt) : 'لم يُستخدم بعد'}
+                            </span>
+                          </div>
+
+                          {/* Permission badge */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {PERMISSION_MAP[key.permissions] && (
+                              <Badge
+                                key={key.permissions}
+                                variant="outline"
+                                className={`text-[10px] px-1.5 py-0 ${PERMISSION_MAP[key.permissions].color}`}
+                              >
+                                {PERMISSION_MAP[key.permissions].label}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
 
-                        {/* Prefix + Copy */}
-                        <div className="flex items-center gap-2">
-                          <code
-                            className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded font-mono truncate max-w-[280px]"
-                            dir="ltr"
-                          >
-                            {key.prefix}
-                          </code>
+                        {/* Actions */}
+                        <div className="flex items-center gap-1 shrink-0">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="size-7 shrink-0 text-muted-foreground hover:text-foreground"
-                            onClick={() => handleCopyPrefix(key.id, key.prefix)}
+                            className="size-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => setRevokeId(key.id)}
                           >
-                            {copiedPrefixId === key.id ? (
-                              <Check className="size-3 text-emerald-400" />
-                            ) : (
-                              <Copy className="size-3" />
-                            )}
+                            <Trash2 className="size-4" />
                           </Button>
                         </div>
-
-                        {/* Meta info */}
-                        <div className="flex items-center gap-4 text-[11px] text-muted-foreground flex-wrap">
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3" />
-                            أنشئ: {formatDate(key.createdAt)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3" />
-                            ينتهي: {key.expiresAt === 'لا ينتهي' ? 'لا ينتهي' : formatDate(key.expiresAt)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Eye className="size-3" />
-                            آخر استخدام: {key.lastUsed}
-                          </span>
-                        </div>
-
-                        {/* Permissions */}
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {key.permissions.map((p) => getPermissionBadge(p))}
-                        </div>
                       </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => setRevokeId(key.id)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
         {/* Empty state */}
-        {keys.length === 0 && (
+        {!loading && keys.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -583,10 +599,15 @@ export default function ApiKeysPage() {
           <AlertDialogFooter className="gap-2">
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => revokeId && handleRevokeKey(revokeId)}
+              onClick={() => revokeId && handleDeleteKey(revokeId)}
               className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={deleting}
             >
-              <Trash2 className="size-4 ml-2" />
+              {deleting ? (
+                <Loader2 className="size-4 ml-2 animate-spin" />
+              ) : (
+                <Trash2 className="size-4 ml-2" />
+              )}
               إلغاء المفتاح
             </AlertDialogAction>
           </AlertDialogFooter>

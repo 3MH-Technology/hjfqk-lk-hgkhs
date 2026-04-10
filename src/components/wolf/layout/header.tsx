@@ -14,13 +14,13 @@ const pageTitles: Record<Page, string> = {
   bots: 'إدارة البوتات',
   'bot-detail': 'تفاصيل البوت',
   'bot-console': 'وحدة التحكم',
-  'bot-templates': 'قوالب البوتات',
+
   'bot-monitoring': 'مراقبة الأداء',
   files: 'مدير الملفات',
   logs: 'السجلات',
   activity: 'مركز النشاط',
   settings: 'الإعدادات',
-  help: 'مركز المساعدة',
+  help: 'إصلاح مشاكل',
   admin: 'لوحة المدير',
   'admin-users': 'إدارة المستخدمين',
   'admin-bots': 'إدارة البوتات العامة',
@@ -30,6 +30,9 @@ const pageTitles: Record<Page, string> = {
   webhooks: 'وخدمات الويب',
   'deployment-history': 'سجل النشر',
   team: 'إدارة الفريق',
+  'dev-admin': 'لوحة المطور',
+  privacy: 'سياسة الخصوصية',
+  terms: 'شروط الاستخدام',
   '404': 'الصفحة غير موجودة',
 };
 

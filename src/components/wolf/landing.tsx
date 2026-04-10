@@ -181,20 +181,20 @@ const pricingPlans = [
   {
     name: 'مجاني',
     icon: Sparkles,
-    price: '0',
-    currency: 'ر.س',
-    period: '/شهرياً',
+    price: '$0',
+    currency: '',
+    period: '/شهر',
     description: 'مثالي للمبتدئين والمشاريع الصغيرة',
     badge: null,
     highlighted: false,
     features: [
-      { text: '3 بوتات', included: true },
-      { text: '512MB ذاكرة RAM', included: true },
-      { text: 'دعم أساسي', included: true },
-      { text: '1GB مساحة تخزين', included: true },
-      { text: 'مراقبة متقدمة', included: false },
-      { text: 'نطاقات مخصصة', included: false },
-      { text: 'ضمان SLA', included: false },
+      { text: '2 بوتات', included: true },
+      { text: '256MB ذاكرة RAM', included: true },
+      { text: 'ملفات (قراءة فقط)', included: true },
+      { text: 'API keys', included: false, proOnly: false },
+      { text: 'Webhooks', included: false, proOnly: false },
+      { text: 'مراقبة متقدمة', included: false, proOnly: true },
+      { text: 'دعم أولوي', included: false, proOnly: true },
     ],
     ctaLabel: 'ابدأ مجاناً',
     ctaVariant: 'outline' as const,
@@ -202,43 +202,43 @@ const pricingPlans = [
   {
     name: 'احترافي',
     icon: Crown,
-    price: '29',
-    currency: 'ر.س',
-    period: '/شهرياً',
+    price: '$9.99',
+    currency: '',
+    period: '/شهر',
     description: 'الأفضل للمطورين المحترفين',
     badge: 'الأكثر شعبية',
     highlighted: true,
     features: [
-      { text: '15 بوت', included: true },
-      { text: '2GB ذاكرة RAM', included: true },
-      { text: 'دعم ذو أولوية', included: true },
-      { text: '10GB مساحة تخزين', included: true },
+      { text: '10 بوتات', included: true },
+      { text: '1GB ذاكرة RAM', included: true },
+      { text: 'ملفات كاملة', included: true },
+      { text: 'API keys', included: true, proOnly: true },
+      { text: 'Webhooks', included: true, proOnly: true },
       { text: 'مراقبة متقدمة', included: true },
-      { text: 'نطاقات مخصصة', included: false },
-      { text: 'ضمان SLA', included: false },
+      { text: 'دعم أولوي', included: true },
     ],
-    ctaLabel: 'اشترك الآن',
+    ctaLabel: 'تواصل مع المطور',
     ctaVariant: 'default' as const,
   },
   {
     name: 'مؤسسات',
     icon: Building2,
-    price: '99',
-    currency: 'ر.س',
-    period: '/شهرياً',
+    price: '$29.99',
+    currency: '',
+    period: '/شهر',
     description: 'للشركات والمشاريع الكبيرة',
     badge: null,
     highlighted: false,
     features: [
-      { text: 'بوتات غير محدودة', included: true },
-      { text: '8GB ذاكرة RAM', included: true },
-      { text: 'دعم مخصص 24/7', included: true },
-      { text: '100GB مساحة تخزين', included: true },
-      { text: 'مراقبة متقدمة', included: true },
-      { text: 'نطاقات مخصصة', included: true },
-      { text: 'ضمان SLA', included: true },
+      { text: '50 بوت', included: true },
+      { text: '4GB ذاكرة RAM', included: true },
+      { text: 'ملفات كاملة', included: true },
+      { text: 'API متقدم', included: true },
+      { text: 'Webhooks', included: true },
+      { text: 'كل الميزات', included: true },
+      { text: 'دعم مخصص', included: true },
     ],
-    ctaLabel: 'تواصل معنا',
+    ctaLabel: 'تواصل مع المطور',
     ctaVariant: 'outline' as const,
   },
 ];
@@ -1238,6 +1238,21 @@ export default function Landing() {
                       >
                         {feature.text}
                       </span>
+                      {'proOnly' in feature && feature.proOnly && !feature.included && (
+                        <Badge
+                          variant="outline"
+                          className="text-[9px] px-1.5 py-0 border-primary/30 text-primary/60 bg-primary/5 mr-auto"
+                        >
+                          برو
+                        </Badge>
+                      )}
+                      {'proOnly' in feature && feature.proOnly && feature.included && (
+                        <Badge
+                          className="text-[9px] px-1.5 py-0 bg-primary/15 text-primary border-0 mr-auto"
+                        >
+                          برو
+                        </Badge>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -1251,7 +1266,7 @@ export default function Landing() {
                         : 'border-primary/30 hover:bg-primary/10 hover:border-primary/50'
                     }`}
                     onClick={() =>
-                      plan.name === 'مؤسسات'
+                      (plan.name === 'احترافي' || plan.name === 'مؤسسات')
                         ? scrollToSection('contact')
                         : setCurrentPage('register')
                     }
@@ -1262,6 +1277,22 @@ export default function Landing() {
                 </motion.div>
               </motion.div>
             ))}
+          </motion.div>
+
+          {/* Pricing Note */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="max-w-2xl mx-auto mt-8 text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/5 border border-primary/15">
+              <MessageSquare className="h-4 w-4 text-primary/60" />
+              <span className="text-sm text-muted-foreground">
+                لتطوير الخطة يجب التواصل مع المطور عبر تيليجرام
+              </span>
+            </div>
           </motion.div>
         </section>
 
@@ -1515,6 +1546,8 @@ export default function Landing() {
                   { label: 'كيف تبدأ', action: () => {} },
                   { label: 'تسجيل الدخول', action: () => setCurrentPage('login') },
                   { label: 'إنشاء حساب', action: () => setCurrentPage('register') },
+                  { label: 'سياسة الخصوصية', action: () => setCurrentPage('privacy') },
+                  { label: 'شروط الاستخدام', action: () => setCurrentPage('terms') },
                 ].map((link) => (
                   <li key={link.label}>
                     <motion.button
@@ -1557,9 +1590,25 @@ export default function Landing() {
           <Separator className="my-8" />
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground/60">
-              جميع الحقوق محفوظة © {new Date().getFullYear()} استضافة الذئب
-            </p>
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <p className="text-xs text-muted-foreground/60">
+                جميع الحقوق محفوظة © {new Date().getFullYear()} استضافة الذئب
+              </p>
+              <span className="text-xs text-muted-foreground/30">|</span>
+              <button
+                onClick={() => setCurrentPage('privacy')}
+                className="text-xs text-muted-foreground/50 hover:text-primary/70 transition-colors"
+              >
+                سياسة الخصوصية
+              </button>
+              <span className="text-xs text-muted-foreground/30">|</span>
+              <button
+                onClick={() => setCurrentPage('terms')}
+                className="text-xs text-muted-foreground/50 hover:text-primary/70 transition-colors"
+              >
+                شروط الاستخدام
+              </button>
+            </div>
             <div className="flex items-center gap-2">
               <Badge
                 variant="outline"

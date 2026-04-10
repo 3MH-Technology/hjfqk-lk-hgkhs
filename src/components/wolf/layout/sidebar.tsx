@@ -13,9 +13,8 @@ import {
   LogOut,
   X,
   Activity,
-  Package,
   MonitorDot,
-  LifeBuoy,
+  Wrench,
   Cpu,
   MemoryStick,
   ChevronDown,
@@ -24,6 +23,7 @@ import {
   History,
   Key,
   Webhook as WebhookIcon,
+  Code2,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -61,11 +61,7 @@ const navItems: NavItem[] = [
     label: 'إدارة البوتات',
     icon: <Bot className="size-5" />,
   },
-  {
-    id: 'bot-templates',
-    label: 'قوالب البوتات',
-    icon: <Package className="size-5" />,
-  },
+
   {
     id: 'bot-monitoring',
     label: 'مراقبة الأداء',
@@ -120,14 +116,20 @@ const navItems: NavItem[] = [
   },
   {
     id: 'help',
-    label: 'مركز المساعدة',
-    icon: <LifeBuoy className="size-5" />,
+    label: 'إصلاح مشاكل',
+    icon: <Wrench className="size-5" />,
     separator: true,
   },
   {
     id: 'admin',
     label: 'لوحة المدير',
     icon: <Shield className="size-5" />,
+    adminOnly: true,
+  },
+  {
+    id: 'dev-admin',
+    label: 'لوحة المطور',
+    icon: <Code2 className="size-5" />,
     adminOnly: true,
   },
 ];
@@ -260,7 +262,7 @@ function SidebarContent({
     ...item,
     badge: item.id === 'activity' ? unreadNotifications : undefined,
   })).filter(
-    (item) => !item.adminOnly || user?.role === 'admin'
+    (item) => !item.adminOnly || user?.role === 'admin' || user?.role === 'developer'
   );
 
   return (

@@ -62,6 +62,26 @@ export async function PATCH(
       return NextResponse.json(user);
     }
 
+    if (body.action === "changePlan") {
+      const validPlans = ["free", "pro", "enterprise"];
+      if (!validPlans.includes(body.plan)) {
+        return NextResponse.json({ error: "خطة غير صالحة" }, { status: 400 });
+      }
+      const user = await db.user.update({
+        where: { id: userId },
+        data: { plan: body.plan },
+      });
+      return NextResponse.json(user);
+    }
+
+    if (body.isBanned !== undefined) {
+      const user = await db.user.update({
+        where: { id: userId },
+        data: { isBanned: body.isBanned },
+      });
+      return NextResponse.json(user);
+    }
+
     return NextResponse.json({ error: "إجراء غير معروف" }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "حدث خطأ" }, { status: 500 });

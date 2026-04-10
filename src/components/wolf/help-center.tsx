@@ -1,38 +1,27 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import {
   Search,
-  BookOpen,
-  Bot,
-  Upload,
-  Rocket,
-  FolderCog,
-  MonitorDot,
-  Shield,
-  Settings,
   Wrench,
-  Clock,
-  ArrowLeft,
-  MessageCircle,
-  Mail,
-  FileText,
-  HelpCircle,
-  Key,
-  Zap,
-  Terminal,
-  Layers,
+  Bot,
+  Code2,
+  Wifi,
+  HardDrive,
+  FolderOpen,
+  LogIn,
+  Send,
+  ChevronDown,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 
 /* ─── Animation Variants ─── */
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -40,193 +29,206 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: 'easeOut' as const },
+    transition: { duration: 0.4, ease: 'easeOut' },
   },
 };
 
-/* ─── Quick Start Steps ─── */
+/* ─── FAQ Data ─── */
 
-const quickStartSteps = [
-  {
-    icon: HelpCircle,
-    title: 'سجّل حسابك',
-    description: 'أنشئ حساباً مجانياً في أقل من دقيقة واحدة',
-    color: 'text-primary',
-    bg: 'bg-primary/15',
-    step: 1,
-  },
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface TroubleshootCategory {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  color: string;
+  bg: string;
+  border: string;
+  faqs: FAQItem[];
+}
+
+const categories: TroubleshootCategory[] = [
   {
     icon: Bot,
-    title: 'أنشئ بوتك',
-    description: 'اختر قالباً جاهزاً أو أنشئ بوتك من الصفر',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/15',
-    step: 2,
-  },
-  {
-    icon: Upload,
-    title: 'ارفع ملفاتك',
-    description: 'ارفع كود البوت وملفاته عبر مدير الملفات',
-    color: 'text-sky-400',
-    bg: 'bg-sky-500/15',
-    step: 3,
-  },
-  {
-    icon: Rocket,
-    title: 'أطلق البوت',
-    description: 'شغّل بوتك وراقبه من لوحة التحكم',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/15',
-    step: 4,
-  },
-];
-
-/* ─── Knowledge Base Categories ─── */
-
-const categories = [
-  {
-    icon: Bot,
-    title: 'إنشاء وإدارة البوتات',
-    description: 'تعلم كيفية إنشاء البوتات وإدارتها وإعداداتها المتقدمة',
-    articleCount: 12,
+    title: 'البوت لا يعمل',
+    description: 'مشاكل تتعلق بتشغيل وتوقف البوتات',
     color: 'text-primary',
     bg: 'bg-primary/15',
     border: 'border-primary/20',
+    faqs: [
+      {
+        question: 'البوت يتوقف بعد فترة قصيرة من التشغيل',
+        answer: 'تأكد من أن كود البوت لا يحتوي على أخطاء تسبب انهياره. تحقق من السجلات في صفحة السجلات لمشاهدة رسالة الخطأ. تأكد أيضاً من أن توكن البوت صالح وأن المتغيرات البيئية مضبوطة بشكل صحيح.',
+      },
+      {
+        question: 'لا أستطيع تشغيل البوت ويظهر خطأ',
+        answer: 'تحقق من صحة ملف البوت الرئيسي (main.py أو index.php). تأكد من أن جميع المكتبات المطلوبة موجودة في ملف requirements.txt أو composer.json. جرب إعادة تشغيل البوت بعد التحقق.',
+      },
+      {
+        question: 'البوت يعمل لكن لا يستجيب للرسائل',
+        answer: 'تأكد من أن توكن البوت صالح ومفاده من BotFather. تحقق من أن الكود يتعامل مع الرسائل بشكل صحيح. راجع السجلات للتأكد من عدم وجود أخطاء في استقبال الرسائل.',
+      },
+    ],
   },
   {
-    icon: FolderCog,
-    title: 'إدارة الملفات',
-    description: 'رفع الملفات وتعديلها وحذفها عبر مدير الملفات المتكامل',
-    articleCount: 8,
-    color: 'text-sky-400',
-    bg: 'bg-sky-500/15',
-    border: 'border-sky-500/20',
-  },
-  {
-    icon: MonitorDot,
-    title: 'مراقبة الأداء',
-    description: 'متابعة استخدام الموارد والأداء والتنبيهات',
-    articleCount: 6,
+    icon: Code2,
+    title: 'أخطاء في الكود',
+    description: 'مشاكل برمجية وأخطاء في تنفيذ الكود',
     color: 'text-emerald-400',
     bg: 'bg-emerald-500/15',
     border: 'border-emerald-500/20',
+    faqs: [
+      {
+        question: 'خطأ ModuleNotFoundError في Python',
+        answer: 'هذا يعني أن مكتبة غير مثبتة. أضف اسم المكتبة في ملف requirements.txt وارفعه مجدداً. يمكنك أيضاً استخدام pip install داخل البوت إذا كانت المكتبة غير متوفرة في النظام.',
+      },
+      {
+        question: 'خطأ Syntax Error عند تشغيل البوت',
+        answer: 'تحقق من الكود الخاص بك بحثاً عن أخطاء إملائية أو قوس مفقود. استخدم محرر الكود المدمج لمراجعة الملفات. خطأ Syntax يعني أن هناك مشكلة في بنية الكود.',
+      },
+    ],
   },
   {
-    icon: Shield,
-    title: 'الأمان والحماية',
-    description: 'أفضل ممارسات الأمان وحماية بياناتك وبوتاتك',
-    articleCount: 9,
-    color: 'text-red-400',
-    bg: 'bg-red-500/15',
-    border: 'border-red-500/20',
+    icon: Wifi,
+    title: 'مشاكل الشبكة',
+    description: 'مشاكل في الاتصال بالإنترنت والطلبات الخارجية',
+    color: 'text-sky-400',
+    bg: 'bg-sky-500/15',
+    border: 'border-sky-500/20',
+    faqs: [
+      {
+        question: 'البوت لا يستطيع الاتصال بـ Telegram API',
+        answer: 'تأكد من أن توكن البوت صالح. تحقق من عدم وجود حظر على عنوان IP الخاص بالخادم. يمكنك اختبار الاتصال باستخدام أمر curl في وحدة التحكم.',
+      },
+      {
+        question: 'طلبات API الخارجية تفشل',
+        answer: 'تأكد من أن الخدمة الخارجية تعمل. تحقق من صحة مفاتيح API المستخدمة. بعض الخدمات قد تحظر الطلبات من خوادم مشتركة، تأكد من ذلك.',
+      },
+    ],
   },
   {
-    icon: Settings,
-    title: 'إعدادات الحساب',
-    description: 'إدارة ملفك الشخصي وتغيير كلمة المرور والإعدادات العامة',
-    articleCount: 5,
+    icon: HardDrive,
+    title: 'مشاكل الذاكرة',
+    description: 'مشاكل استهلاك الموارد والذاكرة',
     color: 'text-violet-400',
     bg: 'bg-violet-500/15',
     border: 'border-violet-500/20',
+    faqs: [
+      {
+        question: 'البوت يستهلك ذاكرة عالية',
+        answer: 'تحقق من وجود تسرب للذاكرة في الكود (memory leak). تأكد من إغلاق الاتصالات والملفات بعد الاستخدام. راجع صفحة مراقبة الأداء لمتابعة استهلاك الموارد.',
+      },
+      {
+        question: 'البوت يستخدم CPU مرتفع بشكل مستمر',
+        answer: 'قد يكون هناك حلقة تكرار لا نهائية (infinite loop). تحقق من وجود while True بدون sleep. راجع الكود بحثاً عن عمليات مكثفة لا حاجة لها.',
+      },
+    ],
   },
   {
-    icon: Wrench,
-    title: 'استكشاف الأخطاء',
-    description: 'حل المشاكل الشائعة والأخطاء المتكررة وأسئلة وأجوبة',
-    articleCount: 14,
+    icon: FolderOpen,
+    title: 'مشاكل الملفات',
+    description: 'مشاكل في رفع وإدارة ملفات البوت',
     color: 'text-blue-400',
     bg: 'bg-blue-500/15',
     border: 'border-blue-500/20',
-  },
-];
-
-/* ─── Popular Articles ─── */
-
-const articles = [
-  {
-    icon: Zap,
-    title: 'كيفية تشغيل أول بوت تيليجرام',
-    category: 'إنشاء البوتات',
-    readTime: '3 دقائق',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/15',
+    faqs: [
+      {
+        question: 'لا أستطيع رفع ملفات كبيرة',
+        answer: 'هناك حد أقصى لحجم الملفات. حاول ضغط الملفات قبل رفعها أو تقسيمها. تأكد من أن الملفات ليست أكبر من الحد المسموح في خطتك.',
+      },
+      {
+        question: 'الملفات تختفي بعد إعادة تشغيل البوت',
+        answer: 'تأكد من حفظ الملفات في الدليل الصحيح. ملفات البوت مؤقتة وقد يتم حذفها عند إعادة النشر. استخدم مدير الملفات لحفظ الملفات بشكل دائم.',
+      },
+    ],
   },
   {
-    icon: Key,
-    title: 'الحصول على توكن بوت تيليجرام من BotFather',
-    category: 'إنشاء البوتات',
-    readTime: '2 دقيقة',
-    color: 'text-primary',
-    bg: 'bg-primary/15',
-  },
-  {
-    icon: Layers,
-    title: 'إدارة متغيرات البيئة بشكل آمن',
-    category: 'الأمان',
-    readTime: '4 دقائق',
+    icon: LogIn,
+    title: 'مشاكل تسجيل الدخول',
+    description: 'مشاكل في الدخول والحساب والمصادقة',
     color: 'text-red-400',
     bg: 'bg-red-500/15',
-  },
-  {
-    icon: Upload,
-    title: 'رفع ملفات متعددة وبناء مشروع كامل',
-    category: 'إدارة الملفات',
-    readTime: '5 دقائق',
-    color: 'text-sky-400',
-    bg: 'bg-sky-500/15',
-  },
-  {
-    icon: Terminal,
-    title: 'قراءة وفهم سجلات البوت',
-    category: 'استكشاف الأخطاء',
-    readTime: '3 دقائق',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/15',
-  },
-  {
-    icon: MonitorDot,
-    title: 'تفسير مؤشرات الأداء وتحسينها',
-    category: 'مراقبة الأداء',
-    readTime: '6 دقائق',
-    color: 'text-violet-400',
-    bg: 'bg-violet-500/15',
-  },
-  {
-    icon: FileText,
-    title: 'استخدام محرر الكود المتكامل في مدير الملفات',
-    category: 'إدارة الملفات',
-    readTime: '4 دقائق',
-    color: 'text-sky-400',
-    bg: 'bg-sky-500/15',
-  },
-  {
-    icon: Wrench,
-    title: 'حل مشكلة توقف البوت بشكل مفاجئ',
-    category: 'استكشاف الأخطاء',
-    readTime: '3 دقائق',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/15',
+    border: 'border-red-500/20',
+    faqs: [
+      {
+        question: 'لا أستطيع تسجيل الدخول',
+        answer: 'تأكد من صحة البريد الإلكتروني وكلمة المرور. إذا نسيت كلمة المرور، استخدم خيار "نسيت كلمة المرور". تأكد من أن حسابك مفعل وليس محظوراً.',
+      },
+      {
+        question: 'تظهر رسالة "الجلسة منتهية" عند تسجيل الدخول',
+        answer: 'حاول تسجيل الخروج ثم تسجيل الدخول مجدداً. امسح ملفات تعريف الارتباط (cookies) في المتصفح. إذا استمرت المشكلة، تواصل مع المطور.',
+      },
+    ],
   },
 ];
+
+/* ─── FAQ Accordion Component ─── */
+
+function FAQAccordion({ faqs }: { faqs: FAQItem[] }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div className="space-y-2">
+      {faqs.map((faq, idx) => {
+        const isOpen = openIndex === idx;
+        return (
+          <div
+            key={idx}
+            className="rounded-lg border border-border/50 bg-muted/30 overflow-hidden"
+          >
+            <button
+              onClick={() => setOpenIndex(isOpen ? null : idx)}
+              className="flex w-full items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors text-right"
+            >
+              <span className="flex-1">{faq.question}</span>
+              <motion.div
+                animate={{ rotate: isOpen ? 180 : 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              >
+                <ChevronDown className="size-4 text-muted-foreground shrink-0" />
+              </motion.div>
+            </button>
+            <motion.div
+              initial={false}
+              animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-3 text-sm text-muted-foreground leading-relaxed border-t border-border/30 pt-3">
+                {faq.answer}
+              </div>
+            </motion.div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 /* ─── Main Component ─── */
 
 export default function HelpCenter() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredArticles = useMemo(() => {
-    if (!searchQuery.trim()) return articles;
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery.trim()) return categories;
     const q = searchQuery.trim().toLowerCase();
-    return articles.filter(
-      (article) =>
-        article.title.includes(q) ||
-        article.category.includes(q)
-    );
+    return categories
+      .map((cat) => ({
+        ...cat,
+        faqs: cat.faqs.filter(
+          (faq) => faq.question.includes(q) || faq.answer.includes(q)
+        ),
+      }))
+      .filter((cat) => cat.faqs.length > 0);
   }, [searchQuery]);
 
   return (
@@ -243,14 +245,13 @@ export default function HelpCenter() {
           <CardContent className="relative p-6 md:p-8">
             <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
               <div className="size-16 rounded-2xl bg-primary/15 flex items-center justify-center mb-4 glow-effect">
-                <BookOpen className="size-8 text-primary" />
+                <Wrench className="size-8 text-primary" />
               </div>
               <h1 className="text-2xl md:text-3xl font-bold mb-3 gradient-text">
-                مركز المساعدة
+                إصلاح مشاكل
               </h1>
               <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-6">
-                اكتشف مقالات ودليل شامل لمساعدتك في البدء واستخدام جميع ميزات
-                استضافة الذئب. ابحث عن أي سؤال أو تصفح الأقسام أدناه.
+                حلول سريعة للمشاكل الشائعة
               </p>
 
               {/* Search Bar */}
@@ -258,7 +259,7 @@ export default function HelpCenter() {
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="ابحث في المقالات والأدلة..."
+                  placeholder="ابحث عن مشكلة..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 pl-4 h-11 bg-muted/50 border-border rounded-xl text-sm focus:ring-primary/30 focus:border-primary/50"
@@ -277,131 +278,14 @@ export default function HelpCenter() {
         </Card>
       </motion.div>
 
-      {/* ─── Quick Start Guide ─── */}
-      <motion.div variants={itemVariants}>
-        <div className="mb-4">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <Rocket className="size-5 text-primary" />
-            دليل البدء السريع
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            أربع خطوات بسيطة لبدء استضافة بوتك
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickStartSteps.map((step, i) => {
-            const Icon = step.icon;
-            return (
-              <motion.div
-                key={step.step}
-                variants={itemVariants}
-                className="relative"
-              >
-                <Card className="bg-card border-border rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full">
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <div
-                          className={`size-12 rounded-xl ${step.bg} flex items-center justify-center`}
-                        >
-                          <Icon className={`size-6 ${step.color}`} />
-                        </div>
-                        <div className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                          {step.step}
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold mb-1">{step.title}</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                {/* Connector line between steps on larger screens */}
-                {i < quickStartSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -left-3 w-6 border-t border-dashed border-primary/30" />
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* ─── Knowledge Base Categories ─── */}
-      <motion.div variants={itemVariants}>
-        <div className="mb-4">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <BookOpen className="size-5 text-primary" />
-            قاعدة المعرفة
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            تصفح المقالات حسب التصنيف
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <motion.div key={cat.title} variants={itemVariants}>
-                <Card
-                  className={`bg-card border ${cat.border} rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full group cursor-pointer`}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`size-12 rounded-xl ${cat.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300`}
-                      >
-                        <Icon className={`size-6 ${cat.color}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <h3 className="text-sm font-bold">{cat.title}</h3>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                          {cat.description}
-                        </p>
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] bg-muted/50"
-                        >
-                          <FileText className="size-3 ml-1" />
-                          {cat.articleCount} مقال
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* ─── Popular Articles ─── */}
-      <motion.div variants={itemVariants}>
-        <div className="mb-4">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <FileText className="size-5 text-primary" />
-            المقالات الأكثر قراءة
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            مقالات مفيدة يحتاجها معظم المستخدمين
-            {searchQuery && (
-              <span className="text-primary mr-2">
-                — نتائج البحث: &quot;{searchQuery}&quot;
-              </span>
-            )}
-          </p>
-        </div>
-
-        {filteredArticles.length === 0 ? (
+      {/* ─── Troubleshooting Categories ─── */}
+      {filteredCategories.length === 0 ? (
+        <motion.div variants={itemVariants}>
           <Card className="bg-card border-border rounded-xl">
             <CardContent className="p-8 text-center">
               <Search className="size-10 text-muted-foreground/40 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">
-                لم يتم العثور على مقالات تطابق بحثك
+                لم يتم العثور على نتائج تطابق بحثك
               </p>
               <Button
                 variant="outline"
@@ -412,92 +296,69 @@ export default function HelpCenter() {
               </Button>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filteredArticles.map((article, i) => {
-              const Icon = article.icon;
-              return (
-                <motion.div
-                  key={i}
-                  variants={itemVariants}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
+        </motion.div>
+      ) : (
+        <div className="space-y-6">
+          {filteredCategories.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <motion.div key={cat.title} variants={itemVariants}>
+                <Card
+                  className={`bg-card border ${cat.border} rounded-xl overflow-hidden`}
                 >
-                  <Card className="bg-card border-border rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`size-10 rounded-lg ${article.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300`}
-                        >
-                          <Icon className={`size-5 ${article.color}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold mb-1 group-hover:text-primary transition-colors line-clamp-1">
-                            {article.title}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] bg-muted/50"
-                            >
-                              {article.category}
-                            </Badge>
-                            <span className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
-                              <Clock className="size-3" />
-                              {article.readTime}
-                            </span>
-                          </div>
-                        </div>
-                        <ArrowLeft className="size-4 text-muted-foreground/40 group-hover:text-primary group-hover:-translate-x-1 transition-all duration-300 shrink-0" />
+                  <CardContent className="p-5 space-y-4">
+                    {/* Category Header */}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`size-11 rounded-xl ${cat.bg} flex items-center justify-center shrink-0`}
+                      >
+                        <Icon className={`size-5 ${cat.color}`} />
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
-      </motion.div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold">{cat.title}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {cat.description}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] bg-muted/50 shrink-0"
+                      >
+                        {cat.faqs.length} حل
+                      </Badge>
+                    </div>
 
-      {/* ─── Contact Support Section ─── */}
+                    {/* FAQ Items */}
+                    <FAQAccordion faqs={cat.faqs} />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ─── Contact Developer Section ─── */}
       <motion.div variants={itemVariants}>
         <Card className="relative overflow-hidden rounded-xl border border-primary/20">
           <div className="absolute inset-0 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent pointer-events-none" />
           <CardContent className="relative p-6 md:p-8">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              {/* Message Icon */}
-              <div className="shrink-0">
-                <div className="size-16 rounded-2xl bg-primary/15 flex items-center justify-center glow-effect">
-                  <MessageCircle className="size-8 text-primary" />
-                </div>
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="size-14 rounded-2xl bg-primary/15 flex items-center justify-center glow-effect">
+                <Send className="size-7 text-primary" />
               </div>
-
-              {/* Content */}
-              <div className="flex-1 text-center md:text-right">
+              <div>
                 <h2 className="text-lg font-bold mb-2">
-                  تحتاج مساعدة إضافية؟
+                  تواصل مع المطور
                 </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  لم تجد ما تبحث عنه؟ تواصل مع فريق الدعم الفني وسنساعدك في حل
-                  أي مشكلة أو الإجابة على أي سؤال.
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                  للتواصل مع المطور يجب مراسلته عبر تيليجرام
                 </p>
               </div>
-
-              {/* Contact Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-                <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-                  <MessageCircle className="size-4" />
-                  تيليجرام
-                </Button>
-                <Button
-                  variant="outline"
-                  className="gap-2 border-primary/30 text-primary hover:bg-primary/10"
-                >
-                  <Mail className="size-4" />
-                  البريد الإلكتروني
-                </Button>
-              </div>
+              <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Send className="size-4" />
+                مراسلة عبر تيليجرام
+              </Button>
             </div>
           </CardContent>
         </Card>

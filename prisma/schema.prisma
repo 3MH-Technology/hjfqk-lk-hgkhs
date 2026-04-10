@@ -12,13 +12,18 @@ model User {
   email          String         @unique
   password       String
   name           String?
-  role           String         @default("user")
+  avatarUrl      String?
+  role           String         @default("user") // user, admin, developer
+  plan           String         @default("free") // free, pro, enterprise
   isBanned       Boolean        @default(false)
-  maxBots        Int            @default(5)
+  ipAddress      String?
+  maxBots        Int            @default(2)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   bots           Bot[]
   notifications  Notification[]
+  apiKeys        ApiKey[]
+  webhooks       Webhook[]
 }
 
 model Bot {
@@ -87,6 +92,45 @@ model Notification {
   @@index([userId, createdAt])
 }
 
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  key         String   @unique
+  keyPrefix   String
+  permissions String   @default("read") // read, write, admin
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Webhook {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  url         String
+  events      String   @default("bot.started,bot.stopped,bot.error")
+  secret      String?
+  isActive    Boolean  @default(true)
+  lastTriggerAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PlatformConfig {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  value         String
+  updatedAt     DateTime @updatedAt
+}
+
 model Team {
   id        String       @id @default(cuid())
   name      String       @default("فريقي")
@@ -110,4 +154,14 @@ model TeamMember {
   teamId    String
 
   @@index([teamId])
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String
+  isPublished Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

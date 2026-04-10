@@ -7,6 +7,8 @@ import Login from '@/components/wolf/auth/login-form';
 import Register from '@/components/wolf/auth/register-form';
 import { AppLayout } from '@/components/wolf/layout/app-layout';
 import Landing from '@/components/wolf/landing';
+import { PrivacyPolicy } from '@/components/wolf/legal/privacy';
+import { TermsOfService } from '@/components/wolf/legal/terms';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function LoadingScreen() {
@@ -67,6 +69,8 @@ function AppContent() {
         email: session.user.email || '',
         name: session.user.name,
         role: (session.user as any).role || 'user',
+        plan: (session.user as any).plan || 'free',
+        avatarUrl: (session.user as any).avatarUrl || null,
       });
 
       // Redirect to dashboard if on auth/landing pages
@@ -76,7 +80,7 @@ function AppContent() {
     } else {
       setUser(null);
       // Redirect to landing if trying to access protected pages
-      if (!['landing', 'login', 'register', '404'].includes(currentPage)) {
+      if (!['landing', 'login', 'register', '404', 'privacy', 'terms'].includes(currentPage)) {
         setCurrentPage('landing');
       }
     }
@@ -98,6 +102,15 @@ function AppContent() {
   // Landing page
   if (currentPage === 'landing') {
     return <Landing />;
+  }
+
+  // Legal pages (accessible without auth)
+  if (currentPage === 'privacy') {
+    return <PrivacyPolicy />;
+  }
+
+  if (currentPage === 'terms') {
+    return <TermsOfService />;
   }
 
   // 404 page

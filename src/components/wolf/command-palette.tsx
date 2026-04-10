@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   Bot,
-  Package,
   MonitorDot,
   FolderOpen,
   ScrollText,
@@ -63,14 +62,7 @@ export function CommandPalette() {
         action: () => setCurrentPage('bots'),
         keywords: ['بوت', 'bot', 'bots', 'إدارة'],
       },
-      {
-        id: 'bot-templates',
-        label: 'قوالب البوتات',
-        description: 'تصفح واستخدم قوالب البوتات الجاهزة',
-        icon: <Package className="size-4 text-primary" />,
-        action: () => setCurrentPage('bot-templates'),
-        keywords: ['قالب', 'templates', 'قوالب'],
-      },
+
       {
         id: 'bot-monitoring',
         label: 'مراقبة الأداء',

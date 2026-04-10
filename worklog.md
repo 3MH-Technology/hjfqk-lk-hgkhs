@@ -1453,3 +1453,340 @@ The White Wolf Hosting platform is highly stable with zero lint errors and zero 
 8. Add API documentation page (Swagger/OpenAPI)
 9. Add bot auto-scaling rules configuration
 10. Add rate limiting and usage quotas per plan
+---
+Task ID: 20-D
+Agent: Legal Pages + Landing Update Agent
+Task: Create Privacy Policy, Terms of Service, Update Pricing to USD, Add Platform Config API
+
+Work Log:
+- Created `/src/components/wolf/legal/privacy.tsx` (~170 lines) — professional Arabic privacy policy page
+  - 8 sections: جمع البيانات, استخدام البيانات, مشاركة البيانات, تخزين البيانات, ملفات تعريف الارتباط, الأمان, حقوق المستخدم, التواصل
+  - Each section with icon (Database, Shield, Share2, HardDrive, Cookie, Lock, UserCheck, MessageSquare)
+  - "العودة" back button, framer-motion staggered entrance animations, max-w-4xl container
+  - Last updated date (يوليو 2025) at top and bottom
+- Created `/src/components/wolf/legal/terms.tsx` (~190 lines) — professional Arabic terms of service page
+  - 9 sections: القبول, الخدمات, الحسابات, الخطط والأسعار, المحتوى الممنوع, حدود المسؤولية, التعليق, التطوير, التحديثات
+  - Same design language as privacy page with shield/lock icons
+  - "لتطوير الخطة يجب التواصل مع المطور عبر تيليجرام" in plans section
+  - Last updated date at top and bottom
+- Updated landing.tsx pricing section:
+  - Changed prices from SAR (ر.س) to USD ($0, $9.99, $29.99 per month)
+  - Updated Free plan: 2 bots, 256MB RAM, read-only files, no API keys, no webhooks
+  - Updated Pro plan: 10 bots, 1GB RAM, full files, API keys, webhooks, advanced monitoring, priority support
+  - Updated Enterprise plan: 50 bots, 4GB RAM, all features, custom support, advanced API
+  - Added "برو" badge indicators on Pro-only features (both included and excluded states)
+  - Changed Pro CTA from "اشترك الآن" to "تواصل مع المطور" (navigates to contact section)
+  - Changed Enterprise CTA to "تواصل مع المطور" (navigates to contact section)
+  - Added pricing note below cards: "لتطوير الخطة يجب التواصل مع المطور عبر تيليجرام"
+- Added Privacy/Terms links to landing page footer:
+  - Two links in "روابط سريعة" column: سياسة الخصوصية, شروط الاستخدام
+  - Two links in copyright bar with pipe separators
+- Created `/src/app/api/platform-config/route.ts` — GET endpoint returning all PlatformConfig entries as key-value map
+- Updated `src/app/page.tsx`:
+  - Added lazy imports for PrivacyPolicy and TermsOfService components
+  - Added routing cases for 'privacy' and 'terms' pages (before auth check)
+  - Added 'privacy' and 'terms' to unauthenticated allowed pages list
+- ESLint check: zero errors
+
+Stage Summary:
+- 2 new legal pages (Privacy Policy + Terms of Service) in Arabic RTL
+- Pricing section updated to USD with Pro-only badges
+- Pro and Enterprise CTAs now point to contact section instead of registration
+- Platform Config API route created for dynamic configuration
+- Privacy/Terms links added to footer (quick links + copyright bar)
+- Legal pages accessible without authentication
+- Zero lint errors
+
+---
+Task ID: 20-A
+Agent: Structural Changes Agent
+Task: Remove Bot Templates, Change Help Center, Remove Social Login, Add Dev Admin + Legal Pages
+
+Work Log:
+- Removed bot-templates nav item from sidebar.tsx navItems array
+- Removed bot-templates command item from command-palette.tsx (and removed unused Package import)
+- Removed BotTemplates lazy import and case from app-layout.tsx
+- Removed bot-templates page title from header.tsx
+- Verified bot-list.tsx had no template buttons/links (none found)
+- Changed help nav item in sidebar: label 'مركز المساعدة' → 'إصلاح مشاكل', icon LifeBuoy → Wrench
+- Changed help page title in header.tsx: 'مركز المساعدة' → 'إصلاح مشاكل'
+- Completely rewrote help-center.tsx as troubleshooting page with 6 FAQ categories:
+  - البوت لا يعمل (Bot not working) - 3 FAQs
+  - أخطاء في الكود (Code errors) - 2 FAQs
+  - مشاكل الشبكة (Network issues) - 2 FAQs
+  - مشاكل الذاكرة (Memory issues) - 2 FAQs
+  - مشاكل الملفات (File issues) - 2 FAQs
+  - مشاكل تسجيل الدخول (Login issues) - 2 FAQs
+- Added expandable FAQ accordion with animated chevron
+- Added "تواصل مع المطور" contact section with Telegram button
+- Removed GitHub + Telegram social login buttons from login-form.tsx
+- Removed "أو تابع باستخدام" divider from login-form.tsx
+- Removed unused handleSocialClick function and Separator import from login-form.tsx
+- Removed GitHub + Telegram social login buttons from register-form.tsx
+- Removed "أو تابع باستخدام" divider from register-form.tsx
+- Removed unused handleSocialClick function, Send import, and Separator import from register-form.tsx
+- Added dev-admin nav item to sidebar.tsx (after admin, adminOnly: true, Code2 icon)
+- Added Code2 import to sidebar.tsx
+- Added lazy imports and switch cases in app-layout.tsx for: dev-admin, privacy, terms
+- Added page titles in header.tsx: dev-admin → 'لوحة المطور', privacy → 'سياسة الخصوصية', terms → 'شروط الاستخدام'
+- Created dev-admin.tsx with system info grid (4 cards: Server, Database, Logs, Performance)
+- Created legal/privacy.tsx with 6-section privacy policy
+- Created legal/terms.tsx with 7-section terms of service
+
+Stage Summary:
+- Bot templates completely removed from navigation, command palette, and routing
+- Help Center transformed to "إصلاح مشاكل" troubleshooting page with 6 categories and 13 FAQs
+- Social login buttons removed from both login and register forms
+- Dev Admin page added (visible for admin role only in sidebar)
+- Privacy Policy and Terms of Service pages created
+- All page titles registered in header
+- Zero lint errors
+
+Files Modified:
+1. src/components/wolf/layout/sidebar.tsx - Removed bot-templates, changed help, added dev-admin
+2. src/components/wolf/layout/app-layout.tsx - Removed BotTemplates, added DevAdmin/Privacy/Terms
+3. src/components/wolf/layout/header.tsx - Updated page titles
+4. src/components/wolf/command-palette.tsx - Removed templates command
+5. src/components/wolf/help-center.tsx - Complete rewrite as troubleshooting page
+6. src/components/wolf/auth/login-form.tsx - Removed social login
+7. src/components/wolf/auth/register-form.tsx - Removed social login
+
+Files Created:
+1. src/components/wolf/admin/dev-admin.tsx - Developer admin panel
+2. src/components/wolf/legal/privacy.tsx - Privacy policy page
+3. src/components/wolf/legal/terms.tsx - Terms of service page
+
+---
+Task ID: 20-B
+Agent: Dev Admin Panel Agent
+Task: Create Developer Super Admin Panel
+
+Work Log:
+- Read full project structure: prisma schema, app-store, existing admin-panel, API routes, sidebar, header, app-layout
+- Confirmed PlatformConfig and Notification models already exist in prisma schema
+- Confirmed 'dev-admin' Page type already exists in app-store.ts
+- Confirmed dev-admin page title ('لوحة المطور') already in header.tsx
+- Confirmed dev-admin sidebar nav item already exists in sidebar.tsx
+- Confirmed dev-admin dynamic import and switch case already in app-layout.tsx
+- Fixed duplicate DevAdmin import in app-layout.tsx
+
+- Updated /api/users/[userId]/route.ts:
+  - Added `changePlan` action: validates plan (free/pro/enterprise) and updates user plan
+  - Added `isBanned` direct toggle: sets isBanned boolean without using BotManager
+
+- Created /api/platform-config/route.ts:
+  - GET: Returns all PlatformConfig entries as key-value object (requires admin/developer role)
+  - POST: Upserts a PlatformConfig entry by key (requires admin/developer role)
+
+- Created /api/notifications/broadcast/route.ts:
+  - POST: Creates a Notification record for every user in the database
+  - Accepts { title, message, type } body
+  - Requires admin/developer role
+  - Returns { success: true, count } with number of notifications created
+
+- Rewrote src/components/wolf/admin/dev-admin.tsx (~730 lines) with comprehensive dev admin panel:
+  - Platform Statistics Overview tab:
+    - 4 stat cards: Total Users, Total Bots, Active Bots, Pro Users
+    - Quick summary with active/banned/plan/role breakdowns
+    - Data fetched from /api/stats and /api/users
+  - User Management tab:
+    - Full user table with: name, email, plan badge, role badge, bot count, status, date, actions
+    - Search/filter by email or name with clear button
+    - Actions per user: Change Plan (free↔pro↔enterprise), Ban/Unban, Delete
+    - Plan change via AlertDialog with Select dropdown
+    - Ban/Unban and Delete via AlertDialog with confirmation
+  - Bot Management tab:
+    - Full bot table with: name, owner email, language, status, date, actions
+    - Fetches all bots across all users via user detail endpoints
+    - Actions: Force Stop (running bots only), Delete
+    - Refresh button to reload bot list
+  - Platform Configuration tab:
+    - 3 URL fields: support channel, announcement channel, developer contact
+    - 3 plan cards (Free/Pro/Enterprise) each with bot count and price inputs
+    - Glassmorphism card styling with color-coded plan borders
+    - Save button with loading state
+    - Uses POST /api/platform-config for each field
+  - File Browser tab:
+    - Tree view grouped by User → Bot → Files
+    - Expandable/collapsible users and bots with chevron icons
+    - File rows show: path, size (formatted), last updated date
+    - Read-only view with refresh button
+  - Announcements tab:
+    - Title and message input fields
+    - Warning banner about broadcasting to all users
+    - Send button with loading state
+    - Uses POST /api/notifications/broadcast
+  - All dialogs: Change Plan, Ban/Unban, Delete User, Force Stop Bot, Delete Bot
+  - Framer Motion animations: containerVariants, itemVariants, cardHoverVariants, fadeIn
+  - All Variants typed correctly with `ease: 'easeOut'`
+  - Professional dark theme with glassmorphism cards (bg-card/60 backdrop-blur-sm)
+  - Status badges: active=green, banned=red, pro=blue, free=slate, enterprise=cyan
+  - Error handling: unknown + instanceof Error pattern (no `any` types)
+  - Access guard: checks user.role === 'developer' || user.role === 'admin'
+
+- Updated sidebar.tsx:
+  - Changed admin nav filter to include developer role: `user?.role === 'admin' || user?.role === 'developer'`
+
+Stage Summary:
+- 3 API routes created (platform-config GET/POST, notifications/broadcast POST)
+- 1 API route updated (users/[userId] PATCH with changePlan + isBanned support)
+- 1 major component created (dev-admin.tsx ~730 lines with 6 tab sections)
+- 5 AlertDialog confirmations for all destructive/admin actions
+- All text in Arabic (RTL), framer-motion animations, dark glassmorphism theme
+- Zero ESLint errors
+- All pre-existing TypeScript errors unrelated to changes
+
+---
+Task ID: 20-C
+Agent: Real Features Agent
+Task: Real API Keys, Webhooks, and Account Settings with full CRUD
+
+Work Log:
+- Updated Prisma schema: Added `keyPrefix` field to ApiKey model, pushed to DB
+- Created 6 new API routes:
+  - /api/api-keys (GET: list all keys with masked prefix + status, POST: create key with SHA-256 hash)
+  - /api/api-keys/[id] (DELETE: delete key with ownership verification)
+  - /api/webhooks (GET: list all webhooks, POST: create webhook with event validation)
+  - /api/webhooks/[id] (PATCH: update webhook name/url/events/active toggle, DELETE: delete webhook)
+  - /api/user/profile (GET: return user profile, PATCH: update name/avatarUrl)
+  - /api/user/password (PATCH: change password with bcrypt verify + hash)
+- Rewrote api-keys.tsx (~370 lines) with real CRUD:
+  - Fetches keys from API on mount, shows loading skeletons
+  - Create dialog: name input, permissions select (قراءة/كتابة/إدارة), expiry select (30/90/365/never)
+  - Shows generated key ONCE in dialog with copy button and warning banner
+  - Delete with confirmation dialog + loading state
+  - Permission badges with color coding, masked key prefix display
+  - Empty state with key icon
+- Rewrote webhooks.tsx (~380 lines) with real CRUD:
+  - Fetches webhooks from API on mount, shows loading skeletons
+  - Create/Edit dialog: name, URL, events checkboxes (bot.started/stopped/error/deployed), optional secret
+  - Active/Inactive toggle switch per webhook (direct API call)
+  - Edit/Delete actions per webhook with loading states
+  - Events badges with color coding, truncated URL with copy button
+  - Empty state with webhook icon
+- Rewrote account-settings.tsx (~470 lines) with real functionality:
+  - Fetches user profile from /api/user/profile API
+  - Profile picture: shows current avatar (img with base64 support), Camera icon on hover, file picker with 500KB limit
+  - Avatar converted to base64 and saved via PATCH /api/user/profile
+  - Name editable input with save button hitting PATCH /api/user/profile
+  - Email displayed only (not changeable)
+  - Plan badge (مجاني/احترافي/مؤسسات) with "للتطوير تواصل مع المطور" message
+  - Password change via PATCH /api/user/password with current password verification
+  - Password strength indicator (5-level: ضعيف جداً → قوي جداً) with animated bar
+  - Password requirements checklist (8+ chars, upper/lower, digits, symbols)
+  - Removed all mock data (notification toggles, connected accounts sections)
+  - Removed "Connected Accounts" section entirely
+  - Kept delete account functionality
+- All framer-motion variants use proper `type Variants` instead of `as const`
+- All text Arabic (RTL), dark theme, blue accents, no indigo/amber
+- Zero lint errors
+
+Stage Summary:
+- 6 new API routes with proper authentication and ownership verification
+- API keys: full CRUD with SHA-256 hashing, masked prefix display, one-time key reveal
+- Webhooks: full CRUD with toggle, event validation, name/URL/secret editing
+- Account settings: real profile fetching, avatar upload (base64), name editing, password change with strength indicator
+- Removed all mock data and unused sections from account settings
+- Zero lint errors
+
+---
+Task ID: 20
+Agent: Main Orchestrator Agent
+Task: Major Platform Overhaul — Real Features, Pro Plans, Developer Admin, Legal Pages
+
+Work Log:
+- Read full worklog.md and all core files to understand project state
+- Updated Prisma schema with major changes:
+  - Added `avatarUrl`, `plan`, `ipAddress` fields to User model
+  - Added `maxBots` default changed from 5 to 2 (free plan limit)
+  - Added ApiKey model (real key storage with hash)
+  - Added Webhook model (real webhook storage)
+  - Added PlatformConfig model (dynamic platform settings)
+  - Added Page model (for privacy/terms content)
+- Updated auth.ts: Added plan, avatarUrl to JWT token and session callbacks
+- Updated register route: Added IP restriction (one account per IP), plan field
+- Updated app-store.ts: Added UserInfo interface with plan/avatarUrl, new Page types (dev-admin, privacy, terms)
+- Updated page.tsx: Include plan/avatarUrl from session, allow privacy/terms without auth
+- Fixed TS errors in login-form.tsx and register-form.tsx (id field optional)
+- Launched 4 parallel subagents:
+  - Agent 20-A: Structural Changes (templates removal, help→fix problems, social login removal, sidebar updates)
+  - Agent 20-B: Developer Super Admin Panel (6-tab panel with user/bot management, platform config, files, announcements)
+  - Agent 20-C: Real API Keys + Webhooks + Account Settings (CRUD API routes, avatar upload, password change)
+  - Agent 20-D: Legal Pages + Landing Update (privacy policy, terms of service, USD pricing, footer links)
+- Fixed TS errors: privacy/terms named exports, dynamic import compatibility
+- Post-agent verification: zero lint errors, zero TS errors (in src/)
+- Browser QA: Landing page, login (no social buttons), dashboard, sidebar (no templates, fix problems visible)
+
+Stage Summary:
+- 1 account per IP restriction implemented
+- Bot Templates page completely removed
+- Help Center converted to "إصلاح مشاكل" (Fix Problems) with 6 troubleshooting categories
+- GitHub/Telegram social login buttons removed from login and register
+- Pricing changed to USD: Free $0, Pro $9.99, Enterprise $29.99
+- Developer Super Admin Panel created (6 tabs: overview, users, bots, config, files, announcements)
+- API Keys with real CRUD (generate wolf_ keys, SHA-256 hash storage, masked display)
+- Webhooks with real CRUD (create/edit/delete/toggle, event selection)
+- Account Settings with real functionality (avatar upload base64, name edit, password change)
+- Privacy Policy page created (8 sections, professional Arabic content)
+- Terms of Service page created (9 sections, professional Arabic content)
+- Platform config API for dynamic settings
+- Notification broadcast API for admin announcements
+- Footer links added (privacy, terms)
+- Pro-only feature badges on pricing
+- Zero lint errors, zero TS errors (in src/)
+
+## Current Project Status (Updated)
+
+### Assessment
+The platform has undergone a major overhaul from a demo/showcase to a production-ready hosting platform. All features are now real with database persistence. User management includes IP restriction, plan-based access control, and real authentication. The developer has absolute control via the super admin panel.
+
+### Database Models (10 models)
+User, Bot, BotFile, BotLog, BotEnv, Notification, ApiKey, Webhook, PlatformConfig, Team, TeamMember, Page
+
+### API Routes (28+ routes)
+- Auth: login, register, session
+- Bots: CRUD, start/stop/restart, env, files, logs, export
+- Users: list, update, delete
+- Notifications: list, mark read, mark all read, broadcast
+- API Keys: list, create, delete
+- Webhooks: list, create, update, delete
+- Platform Config: get all, set
+- Stats: platform statistics
+- Team: list, invite, update role, remove
+
+### Pages (20+)
+- Landing (hero + features + pricing USD + FAQ + privacy/terms links)
+- Login / Register (email/password only, no social)
+- Dashboard (real API data)
+- Bot list / Bot detail
+- Bot monitoring / analytics / console / comparison
+- File manager / Log viewer
+- Deployment history
+- API Keys (real CRUD)
+- Webhooks (real CRUD)
+- Activity center (real notifications)
+- Team management
+- Settings (real: avatar upload, name edit, password change)
+- Fix Problems (replaced Help Center)
+- Privacy Policy / Terms of Service
+- Dev Admin Panel (super admin, 6 tabs)
+- Command palette, Notification dropdown, Theme toggle
+
+### Key Changes Made
+1. One account per IP restriction
+2. Bot templates removed entirely
+3. Social login buttons removed
+4. Help Center → Fix Problems
+5. Pricing in USD ($0 / $9.99 / $29.99)
+6. Developer super admin panel
+7. Real API keys with secure storage
+8. Real webhooks with event management
+9. Real account settings (avatar, name, password)
+10. Privacy Policy and Terms of Service pages
+11. Platform config API for dynamic settings
+12. Plan-based feature access (free/pro/enterprise)
+
+### Unresolved Issues
+- Turbopack HMR state desync after major file changes (requires browser restart)
+- Pro plan upgrade requires manual developer intervention (by design)
+- Docker container management not available in sandbox environment
