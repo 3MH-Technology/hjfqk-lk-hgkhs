@@ -613,7 +613,7 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
     >
       <div className="empty-wolf-float inline-block mb-6">
         <img
-          src="https://f.top4top.io/p_37210bgwm1.jpg"
+          src="https:
           alt="استضافة الذئب"
           className="w-24 h-24 mx-auto rounded-full opacity-40"
         />
@@ -643,7 +643,7 @@ export function DeploymentHistory() {
   const [dateRange, setDateRange] = useState<DateRange>('7days');
   const [visibleCount, setVisibleCount] = useState(10);
 
-  // Filter deployments based on selected filters
+  
   const filteredDeployments = useMemo(() => {
     let filtered = [...allDeployments];
 
@@ -673,7 +673,7 @@ export function DeploymentHistory() {
     return filtered;
   }, [selectedBot, selectedStatus, dateRange]);
 
-  // Stats calculations
+  
   const stats = useMemo(() => {
     const total = filteredDeployments.length;
     const successCount = filteredDeployments.filter((d) => d.status === 'success').length;
@@ -692,7 +692,7 @@ export function DeploymentHistory() {
     };
   }, [filteredDeployments]);
 
-  // Visible deployments
+  
   const visibleDeployments = filteredDeployments.slice(0, visibleCount);
   const hasMore = visibleCount < filteredDeployments.length;
   const hasActiveFilters = selectedBot !== 'all' || selectedStatus !== 'all';

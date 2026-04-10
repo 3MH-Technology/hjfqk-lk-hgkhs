@@ -68,7 +68,7 @@ interface BotItem {
   _count: { files: number; logs: number };
 }
 
-// ─── Motion Variants ─────────────────────────────────────────────────────────
+
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -145,7 +145,7 @@ const wolfEyeGlowVariants: Variants = {
   },
 } as const;
 
-// ─── Status Config ──────────────────────────────────────────────────────────
+
 
 const statusConfig: Record<
   string,
@@ -194,7 +194,7 @@ const statusConfig: Record<
   },
 };
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
+
 
 function StatusBadge({ status }: { status: string }) {
   const cfg = statusConfig[status] || statusConfig.stopped;
@@ -239,7 +239,7 @@ function WolfSilhouette() {
         height="120"
         viewBox="0 0 120 120"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+        xmlns="http:
         className="drop-shadow-[0_0_20px_rgba(245,158,11,0.3)]"
       >
         {/* Wolf head silhouette */}
@@ -391,7 +391,7 @@ function ListCardSkeleton() {
   );
 }
 
-// ─── Animated Action Button ─────────────────────────────────────────────────
+
 
 interface ActionButtonProps {
   icon: React.ReactNode;
@@ -433,7 +433,7 @@ function ActionButton({
   );
 }
 
-// ─── Main Component ─────────────────────────────────────────────────────────
+
 
 export function BotList() {
   const { setCurrentPage, setSelectedBotId } = useAppStore();
@@ -445,7 +445,7 @@ export function BotList() {
   const [importLoading, setImportLoading] = useState(false);
   const importInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter state
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [languageFilter, setLanguageFilter] = useState('all');
@@ -469,7 +469,7 @@ export function BotList() {
     fetchBots();
   }, [fetchBots]);
 
-  // Filtered bots
+  
   const filteredBots = useMemo(() => {
     return bots.filter((bot) => {
       const matchesSearch = bot.name

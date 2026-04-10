@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get all users
+    
     const users = await db.user.findMany({
       select: { id: true },
     });
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, count: 0 });
     }
 
-    // Create a notification for every user
+    
     const notifications = await db.notification.createMany({
       data: users.map((user) => ({
         userId: user.id,

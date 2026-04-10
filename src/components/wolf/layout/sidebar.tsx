@@ -171,10 +171,10 @@ const navSections: NavSection[] = [
   },
 ];
 
-// All nav items flattened for search
+
 const allNavItems = navSections.flatMap((s) => s.items);
 
-// Sidebar overlay backdrop for mobile
+
 function MobileBackdrop({ onClick }: { onClick: () => void }) {
   return (
     <motion.div
@@ -202,7 +202,7 @@ interface ActiveBot {
   status: string;
 }
 
-// System metrics - loaded from API
+
 function useSystemMetrics() {
   const [mounted, setMounted] = useState(false);
   const [metrics, setMetrics] = useState<SystemMetrics>({
@@ -235,7 +235,7 @@ function useSystemMetrics() {
   return { metrics, mounted };
 }
 
-// Active bots - loaded from API
+
 function useActiveBots() {
   const [bots, setBots] = useState<ActiveBot[]>([]);
 
@@ -416,7 +416,7 @@ function SidebarContent({
     }
   };
 
-  // Filter nav sections based on admin role
+  
   const filteredSections = navSections.map((section) => ({
     ...section,
     items: section.items
@@ -429,7 +429,7 @@ function SidebarContent({
       ),
   })).filter((section) => section.items.length > 0);
 
-  // Search results
+  
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.trim().toLowerCase();
@@ -445,7 +445,7 @@ function SidebarContent({
       {/* Brand Header */}
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-7 h-7 rounded-full object-cover" />
+          <img src="https:
           <span className="text-lg font-bold gradient-text">
             استضافة الذئب
           </span>

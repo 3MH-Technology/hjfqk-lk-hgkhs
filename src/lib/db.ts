@@ -10,7 +10,7 @@ function createPrismaClient() {
   })
 }
 
-// In development, always create a fresh client to avoid stale schema issues
+
 export const db = process.env.NODE_ENV === 'production'
   ? (globalForPrisma.prisma ??= createPrismaClient())
   : createPrismaClient()

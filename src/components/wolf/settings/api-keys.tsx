@@ -111,7 +111,7 @@ export default function ApiKeysPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeId, setRevokeId] = useState<string | null>(null);
 
-  // Create form
+  
   const [keyName, setKeyName] = useState('');
   const [expiration, setExpiration] = useState<Expiration>('90');
   const [permissions, setPermissions] = useState('read');
@@ -130,7 +130,7 @@ export default function ApiKeysPage() {
         setKeys(data);
       }
     } catch {
-      // silent
+      
     } finally {
       setLoading(false);
     }

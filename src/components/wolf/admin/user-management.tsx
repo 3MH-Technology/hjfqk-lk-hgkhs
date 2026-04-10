@@ -85,15 +85,15 @@ export default function UserManagement() {
   const [page, setPage] = useState(1);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
-  // Ban dialog
+  
   const [banTarget, setBanTarget] = useState<AdminUser | null>(null);
   const [togglingBan, setTogglingBan] = useState(false);
 
-  // Delete dialog
+  
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Max bots editing
+  
   const [editingMaxBots, setEditingMaxBots] = useState<string | null>(null);
   const [maxBotsValue, setMaxBotsValue] = useState(0);
   const [savingMaxBots, setSavingMaxBots] = useState(false);
@@ -121,18 +121,18 @@ export default function UserManagement() {
     }
   }, [user?.role, fetchUsers]);
 
-  // Filter and search
+  
   const filteredUsers = useMemo(() => {
     let result = [...users];
 
-    // Status filter
+    
     if (statusFilter === 'active') {
       result = result.filter((u) => !u.isBanned);
     } else if (statusFilter === 'banned') {
       result = result.filter((u) => u.isBanned);
     }
 
-    // Search
+    
     if (search.trim()) {
       const q = search.toLowerCase().trim();
       result = result.filter(
@@ -145,14 +145,14 @@ export default function UserManagement() {
     return result;
   }, [users, statusFilter, search]);
 
-  // Pagination
+  
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
   const paginatedUsers = filteredUsers.slice(
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE
   );
 
-  // Reset page on filter change
+  
   useEffect(() => {
     setPage(1);
   }, [search, statusFilter]);
@@ -252,7 +252,7 @@ export default function UserManagement() {
     }
   };
 
-  // Not admin
+  
   if (!user || user.role !== 'admin') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-6">

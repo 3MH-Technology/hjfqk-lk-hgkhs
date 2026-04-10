@@ -13,7 +13,7 @@ import {
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
-// ─── Syntax Highlighting ──────────────────────────────────────────────────────
+
 
 interface HighlightedToken {
   text: string;
@@ -47,7 +47,7 @@ function tokenize(code: string, language: string): HighlightedToken[][] {
     let i = 0;
 
     while (i < line.length) {
-      // Whitespace
+      
       if (line[i] === ' ' || line[i] === '\t') {
         let start = i;
         while (i < line.length && (line[i] === ' ' || line[i] === '\t')) i++;
@@ -55,27 +55,27 @@ function tokenize(code: string, language: string): HighlightedToken[][] {
         continue;
       }
 
-      // Single-line comment
-      if (line[i] === '#' || (line.slice(i, i + 2) === '//')) {
+      
+      if (line[i] === '#' || (line.slice(i, i + 2) === '
         tokens.push({ text: line.slice(i), className: 'text-muted-foreground/60' });
         break;
       }
 
-      // Strings (double and single quoted)
+      
       if (line[i] === '"' || line[i] === "'" || line[i] === '`') {
         const quote = line[i];
         let start = i;
         i++;
         while (i < line.length && line[i] !== quote) {
-          if (line[i] === '\\') i++; // skip escaped char
+          if (line[i] === '\\') i++; 
           i++;
         }
-        if (i < line.length) i++; // closing quote
+        if (i < line.length) i++; 
         tokens.push({ text: line.slice(start, i), className: 'text-emerald-400' });
         continue;
       }
 
-      // Numbers
+      
       if (/[0-9]/.test(line[i])) {
         let start = i;
         while (i < line.length && /[0-9.xXa-fA-F_]/.test(line[i])) i++;
@@ -83,7 +83,7 @@ function tokenize(code: string, language: string): HighlightedToken[][] {
         continue;
       }
 
-      // Identifiers and keywords
+      
       if (/[a-zA-Z_$\u0600-\u06FF]/.test(line[i])) {
         let start = i;
         while (i < line.length && /[a-zA-Z0-9_$\u0600-\u06FF]/.test(line[i])) i++;
@@ -98,7 +98,7 @@ function tokenize(code: string, language: string): HighlightedToken[][] {
         continue;
       }
 
-      // Operators and punctuation
+      
       const char = line[i];
       if ('()[]{}:;,.<>=!+-*/%&|^~?'.includes(char)) {
         tokens.push({ text: char, className: 'text-foreground/70' });
@@ -106,7 +106,7 @@ function tokenize(code: string, language: string): HighlightedToken[][] {
         continue;
       }
 
-      // Anything else
+      
       tokens.push({ text: char, className: '' });
       i++;
     }
@@ -136,7 +136,7 @@ function getLanguageLabel(lang: string): string {
   }
 }
 
-// ─── Props ─────────────────────────────────────────────────────────────────────
+
 
 interface FileViewerProps {
   open: boolean;
@@ -145,7 +145,7 @@ interface FileViewerProps {
   content: string;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 
 export function FileViewer({ open, onOpenChange, filePath, content }: FileViewerProps) {
   const language = getLanguageFromPath(filePath);

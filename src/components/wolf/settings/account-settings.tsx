@@ -91,7 +91,7 @@ function getPasswordStrength(password: string): {
   };
 }
 
-// Animation variants
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -132,17 +132,17 @@ export default function AccountSettings() {
   const { user, setUser } = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Profile from API
+  
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
-  // Personal info
+  
   const [name, setName] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [savingAvatar, setSavingAvatar] = useState(false);
 
-  // Password change
+  
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -150,11 +150,11 @@ export default function AccountSettings() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
-  // Stats
+  
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  // Delete account
+  
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
 
@@ -169,7 +169,7 @@ export default function AccountSettings() {
         setAvatarUrl(data.avatarUrl);
       }
     } catch {
-      // silent
+      
     } finally {
       setLoadingProfile(false);
     }
@@ -184,7 +184,7 @@ export default function AccountSettings() {
         setStats(data);
       }
     } catch {
-      // Silent fail for stats
+      
     } finally {
       setLoadingStats(false);
     }
@@ -266,7 +266,7 @@ export default function AccountSettings() {
       }
     };
     reader.readAsDataURL(file);
-    // Reset input so same file can be selected again
+    
     e.target.value = '';
   };
 

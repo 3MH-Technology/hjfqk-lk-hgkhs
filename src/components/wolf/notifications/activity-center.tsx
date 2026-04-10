@@ -582,7 +582,7 @@ export default function ActivityCenter() {
         setUnreadNotifications(unread);
       }
     } catch {
-      // Use mock data as fallback
+      
       const mockData = generateMockActivities();
       setActivities(mockData);
       const unread = mockData.filter((a) => !a.read).length;

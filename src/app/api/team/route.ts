@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-// GET /api/team — fetch team members
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -13,7 +13,7 @@ export async function GET() {
 
     const userId = (session.user as any).id;
 
-    // Find team owned by this user, or create one if not exists
+    
     let team = await db.team.findFirst({ where: { ownerId: userId } });
 
     if (!team) {
@@ -34,7 +34,7 @@ export async function GET() {
   }
 }
 
-// POST /api/team — invite a new member
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Check if member already exists
+    
     const existing = await db.teamMember.findFirst({
       where: { teamId: team.id, email: email.toLowerCase() },
     });

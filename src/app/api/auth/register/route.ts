@@ -15,13 +15,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" }, { status: 400 });
     }
 
-    // Check existing email
+    
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json({ error: "هذا البريد الإلكتروني مسجل مسبقاً" }, { status: 409 });
     }
 
-    // One account per IP restriction
+    
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
                req.headers.get("x-real-ip") || 
                "unknown";

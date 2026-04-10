@@ -9,7 +9,7 @@ import { QuickActionsWidget } from '../quick-actions-widget';
 import { WelcomeBanner } from '../welcome-banner';
 import { useAppStore } from '@/store/app-store';
 
-// Loading skeleton for lazy-loaded pages
+
 function PageSkeleton() {
   return (
     <div className="space-y-6">
@@ -31,10 +31,10 @@ function PageSkeleton() {
   );
 }
 
-// Loading skeleton for lazy-loaded pages
+
 const loadingFallback = <PageSkeleton />;
 
-// Lazy-loaded page components with loading fallback
+
 const Dashboard = dynamic(
   () => import('@/components/wolf/dashboard/dashboard').then((m) => m.Dashboard),
   { loading: () => loadingFallback }
@@ -165,7 +165,7 @@ const TermsOfService = dynamic(
   { loading: () => loadingFallback }
 );
 
-// Page renderer based on currentPage state
+
 function PageContent() {
   const { currentPage } = useAppStore();
 

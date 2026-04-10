@@ -174,7 +174,7 @@ function useAnimatedCounter(target: number, duration: number = 1200): number {
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3); 
       setCount(Math.round(eased * target));
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
@@ -615,7 +615,7 @@ export function BotAnalytics() {
   const [dateRange, setDateRange] = useState('7');
   const [selectedBot, setSelectedBot] = useState('all');
 
-  // Generate mock data based on date range
+  
   const days = parseInt(dateRange, 10);
 
   const performanceData = useMemo(() => generatePerformanceData(days), [days]);
@@ -625,7 +625,7 @@ export function BotAnalytics() {
   const topErrors = useMemo(() => generateTopErrors(), []);
   const heatmapData = useMemo(() => generateHeatmapData(), []);
 
-  // Top performing bots (sorted by score)
+  
   const topBots = useMemo(() =>
     [...botHealthData]
       .map(b => ({ ...b, requests: Math.round(b.reqPerMin * 1440) }))
@@ -635,7 +635,7 @@ export function BotAnalytics() {
 
   const hourLabels = ['12ص', '1ص', '2ص', '3ص', '4ص', '5ص', '6م', '7م', '8م', '9م', '10م', '11م', '12م', '1م', '2م', '3م', '4م', '5م', '6م', '7م', '8م', '9م', '10م', '11م'];
 
-  // Computed metrics
+  
   const totalRequests = useMemo(
     () => performanceData.reduce((sum, d) => sum + d.requests, 0),
     [performanceData]
@@ -653,19 +653,19 @@ export function BotAnalytics() {
     [totalRequests, totalErrors]
   );
 
-  // Spark data
+  
   const requestSparkData = useMemo(() => generateSparkData(12, 800, 400), []);
   const responseSparkData = useMemo(() => generateSparkData(12, 120, 80), []);
   const errorSparkData = useMemo(() => generateSparkData(12, 15, 20), []);
   const uptimeSparkData = useMemo(() => generateSparkData(12, 97, 4), []);
 
-  // Filter bot health data
+  
   const filteredBotHealth = useMemo(() => {
     if (selectedBot === 'all') return botHealthData;
     return botHealthData.filter(b => b.id === selectedBot);
   }, [botHealthData, selectedBot]);
 
-  // Export CSV mock
+  
   const handleExport = useCallback(() => {
     const headers = ['اليوم', 'الطلبات', 'وقت الاستجابة (ms)', 'الأخطاء'];
     const rows = performanceData.map(d => [d.day, d.requests, d.responseTime, d.errors]);

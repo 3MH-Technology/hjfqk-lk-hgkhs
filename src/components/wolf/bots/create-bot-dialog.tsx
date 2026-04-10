@@ -38,6 +38,7 @@ export function CreateBotDialog({ open, onOpenChange, onCreated }: CreateBotDial
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [language, setLanguage] = useState<string>('python');
+  const [templateId, setTemplateId] = useState<string>('none');
   const [githubUrl, setGithubUrl] = useState('');
   const [envVars, setEnvVars] = useState<EnvVar[]>([{ key: '', value: '' }]);
   const [submitting, setSubmitting] = useState(false);
@@ -46,6 +47,7 @@ export function CreateBotDialog({ open, onOpenChange, onCreated }: CreateBotDial
     setName('');
     setDescription('');
     setLanguage('python');
+    setTemplateId('none');
     setGithubUrl('');
     setEnvVars([{ key: '', value: '' }]);
   };
@@ -105,6 +107,7 @@ export function CreateBotDialog({ open, onOpenChange, onCreated }: CreateBotDial
           description: description.trim() || undefined,
           language,
           githubUrl: githubUrl.trim() || undefined,
+          templateId: templateId !== 'none' ? templateId : undefined,
           envVars: validEnvVars.length > 0 ? validEnvVars : undefined,
         }),
       });
@@ -166,10 +169,25 @@ export function CreateBotDialog({ open, onOpenChange, onCreated }: CreateBotDial
             />
           </div>
 
+          {/* Template */}
+          <div className="space-y-2">
+            <Label>استخدام قالب جاهز</Label>
+            <Select value={templateId} onValueChange={setTemplateId} disabled={submitting}>
+              <SelectTrigger className="w-full bg-input/50 border-border focus:border-primary">
+                <SelectValue placeholder="اختر قالباً (اختياري)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">بدون قالب (بوت جديد)</SelectItem>
+                <SelectItem value="python-simple">بوت بايثون بسيط 🐍</SelectItem>
+                <SelectItem value="php-simple">سكربت PHP بسيط 🐘</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Language */}
           <div className="space-y-2">
             <Label>لغة البرمجة</Label>
-            <Select value={language} onValueChange={setLanguage} disabled={submitting}>
+            <Select value={language} onValueChange={setLanguage} disabled={submitting || (templateId !== 'none' && !!templateId)}>
               <SelectTrigger className="w-full bg-input/50 border-border focus:border-primary">
                 <SelectValue placeholder="اختر لغة البرمجة" />
               </SelectTrigger>

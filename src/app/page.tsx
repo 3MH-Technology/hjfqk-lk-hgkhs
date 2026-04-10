@@ -17,7 +17,7 @@ function LoadingScreen() {
       <div className="text-center space-y-4">
         <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden pulse-dot">
           <img
-            src="https://f.top4top.io/p_37210bgwm1.jpg"
+            src="https:
             alt="استضافة الذئب"
             className="w-10 h-10 rounded-lg object-cover"
           />
@@ -73,13 +73,13 @@ function AppContent() {
         avatarUrl: (session.user as any).avatarUrl || null,
       });
 
-      // Redirect to dashboard if on auth/landing pages
+      
       if (['landing', 'login', 'register'].includes(currentPage)) {
         setCurrentPage('dashboard');
       }
     } else {
       setUser(null);
-      // Redirect to landing if trying to access protected pages
+      
       if (!['landing', 'login', 'register', '404', 'privacy', 'terms'].includes(currentPage)) {
         setCurrentPage('landing');
       }
@@ -90,7 +90,7 @@ function AppContent() {
     return <LoadingScreen />;
   }
 
-  // Auth pages
+  
   if (currentPage === 'login') {
     return <Login />;
   }
@@ -99,12 +99,12 @@ function AppContent() {
     return <Register />;
   }
 
-  // Landing page
+  
   if (currentPage === 'landing') {
     return <Landing />;
   }
 
-  // Legal pages (accessible without auth)
+  
   if (currentPage === 'privacy') {
     return <PrivacyPolicy />;
   }
@@ -113,12 +113,12 @@ function AppContent() {
     return <TermsOfService />;
   }
 
-  // 404 page
+  
   if (currentPage === '404') {
     return <NotFound />;
   }
 
-  // Protected pages - require auth
+  
   if (!session?.user) {
     setCurrentPage('landing');
     return null;

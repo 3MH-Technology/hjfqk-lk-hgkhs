@@ -71,15 +71,15 @@ export default function AdminPanel() {
   const [loadingStats, setLoadingStats] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
-  // Delete dialog
+  
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Ban dialog
+  
   const [banTarget, setBanTarget] = useState<AdminUser | null>(null);
   const [togglingBan, setTogglingBan] = useState(false);
 
-  // Max bots editing
+  
   const [editingMaxBots, setEditingMaxBots] = useState<string | null>(null);
   const [maxBotsValue, setMaxBotsValue] = useState(0);
   const [savingMaxBots, setSavingMaxBots] = useState(false);
@@ -93,7 +93,7 @@ export default function AdminPanel() {
         setStats(data);
       }
     } catch {
-      // Silent
+      
     } finally {
       setLoadingStats(false);
     }
@@ -108,7 +108,7 @@ export default function AdminPanel() {
         setUsers(data);
       }
     } catch {
-      // Silent
+      
     } finally {
       setLoadingUsers(false);
     }
@@ -208,7 +208,7 @@ export default function AdminPanel() {
     }
   };
 
-  // Not admin check
+  
   if (!user || user.role !== 'admin') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-6">

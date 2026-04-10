@@ -51,9 +51,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "عنوان URL مطلوب" }, { status: 400 });
     }
 
-    if (!body.url.startsWith("https://")) {
+    if (!body.url.startsWith("https:
       return NextResponse.json(
-        { error: "يجب أن يبدأ عنوان URL بـ https://" },
+        { error: "يجب أن يبدأ عنوان URL بـ https:
         { status: 400 }
       );
     }

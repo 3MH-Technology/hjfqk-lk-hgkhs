@@ -179,7 +179,7 @@ const planVariant = (plan: string) => {
 export default function DevAdmin() {
   const { user, setCurrentPage } = useAppStore();
 
-  // ── State: Stats ──
+  
   const [stats, setStats] = useState<{
     totalUsers: number;
     totalBots: number;
@@ -188,7 +188,7 @@ export default function DevAdmin() {
   } | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  // ── State: Users ──
+  
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [userSearch, setUserSearch] = useState('');
@@ -200,7 +200,7 @@ export default function DevAdmin() {
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // ── State: Bots ──
+  
   const [bots, setBots] = useState<AdminBot[]>([]);
   const [loadingBots, setLoadingBots] = useState(false);
   const [stopTarget, setStopTarget] = useState<AdminBot | null>(null);
@@ -208,14 +208,14 @@ export default function DevAdmin() {
   const [deleteBotTarget, setDeleteBotTarget] = useState<AdminBot | null>(null);
   const [deletingBot, setDeletingBot] = useState(false);
 
-  // ── State: Platform Config ──
+  
   const [config, setConfig] = useState<Record<string, string>>({});
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
 
   const configFields = [
-    { key: 'supportChannelUrl', label: 'رابط قناة الدعم', type: 'text', placeholder: 'https://t.me/...' },
-    { key: 'announcementChannelUrl', label: 'رابط قناة الإعلانات', type: 'text', placeholder: 'https://t.me/...' },
+    { key: 'supportChannelUrl', label: 'رابط قناة الدعم', type: 'text', placeholder: 'https:
+    { key: 'announcementChannelUrl', label: 'رابط قناة الإعلانات', type: 'text', placeholder: 'https:
     { key: 'developerContact', label: 'طريقة التواصل مع المطور', type: 'text', placeholder: ' Telegram أو البريد الإلكتروني' },
     { key: 'freePlanBots', label: 'عدد البوتات المجانية', type: 'number', placeholder: '2' },
     { key: 'proPlanBots', label: 'عدد بوتات البرو', type: 'number', placeholder: '10' },
@@ -225,13 +225,13 @@ export default function DevAdmin() {
     { key: 'enterprisePlanPrice', label: 'سعر خطة المؤسسات ($)', type: 'number', placeholder: '29.99' },
   ];
 
-  // ── State: Files ──
+  
   const [fileTree, setFileTree] = useState<FileTreeUser[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const [expandedBots, setExpandedBots] = useState<Set<string>>(new Set());
 
-  // ── State: Announcements ──
+  
   const [announcementTitle, setAnnouncementTitle] = useState('');
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
@@ -256,7 +256,7 @@ export default function DevAdmin() {
         });
       }
     } catch {
-      // Silent
+      
     } finally {
       setLoadingStats(false);
     }
@@ -271,7 +271,7 @@ export default function DevAdmin() {
         setUsers(data);
       }
     } catch {
-      // Silent
+      
     } finally {
       setLoadingUsers(false);
     }
@@ -280,7 +280,7 @@ export default function DevAdmin() {
   const fetchBots = useCallback(async () => {
     setLoadingBots(true);
     try {
-      // Admin can fetch all bots — use a dedicated approach
+      
       const usersRes = await fetch('/api/users', { credentials: 'include' });
       if (!usersRes.ok) return;
       const usersData: AdminUser[] = await usersRes.json();
@@ -305,12 +305,12 @@ export default function DevAdmin() {
             }
           }
         } catch {
-          // Skip this user's bots
+          
         }
       }
       setBots(allBots);
     } catch {
-      // Silent
+      
     } finally {
       setLoadingBots(false);
     }
@@ -325,7 +325,7 @@ export default function DevAdmin() {
         setConfig(data);
       }
     } catch {
-      // Silent
+      
     } finally {
       setLoadingConfig(false);
     }
@@ -362,7 +362,7 @@ export default function DevAdmin() {
                 }
               }
             } catch {
-              // Skip this bot's files
+              
             }
           }
           if (userBots.length > 0) {
@@ -374,12 +374,12 @@ export default function DevAdmin() {
             });
           }
         } catch {
-          // Skip this user
+          
         }
       }
       setFileTree(tree);
     } catch {
-      // Silent
+      
     } finally {
       setLoadingFiles(false);
     }
@@ -619,7 +619,7 @@ export default function DevAdmin() {
       <motion.div variants={itemVariants} className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
           <img
-            src="https://f.top4top.io/p_37210bgwm1.jpg"
+            src="https:
             alt="استضافة الذئب"
             className="w-6 h-6 rounded-lg object-cover"
           />

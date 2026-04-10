@@ -87,7 +87,7 @@ export function WelcomeBanner() {
 
   useEffect(() => {
     if (!dismissed) {
-      // Small delay so the page renders first, then banner slides in
+      
       const timer = setTimeout(() => setVisible(true), 300);
       return () => clearTimeout(timer);
     }
@@ -95,7 +95,7 @@ export function WelcomeBanner() {
 
   const handleDismiss = () => {
     setVisible(false);
-    // Wait for exit animation to finish before marking as dismissed
+    
     setTimeout(() => {
       setDismissed(true);
       localStorage.setItem(DISMISS_KEY, 'true');
@@ -143,7 +143,7 @@ export function WelcomeBanner() {
                   size="sm"
                   className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-xs rounded-lg shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-primary/30"
                 >
-                  <a href="https://t.me/j49_c" target="_blank" rel="noopener noreferrer">
+                  <a href="https:
                     <Send className="size-3.5" />
                     <span className="hidden xs:inline">تواصل عبر تيليجرام</span>
                     <span className="xs:hidden">تيليجرام</span>

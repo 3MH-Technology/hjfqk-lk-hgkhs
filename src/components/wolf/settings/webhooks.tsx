@@ -131,7 +131,7 @@ export default function WebhooksPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Form state
+  
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formName, setFormName] = useState('');
   const [formUrl, setFormUrl] = useState('');
@@ -147,7 +147,7 @@ export default function WebhooksPage() {
         setWebhooks(data);
       }
     } catch {
-      // silent
+      
     } finally {
       setLoading(false);
     }
@@ -192,8 +192,8 @@ export default function WebhooksPage() {
       toast.error('يرجى إدخال اسم الويب هوك');
       return;
     }
-    if (!formUrl.trim() || !formUrl.startsWith('https://')) {
-      toast.error('يجب أن يبدأ عنوان URL بـ https://');
+    if (!formUrl.trim() || !formUrl.startsWith('https:
+      toast.error('يجب أن يبدأ عنوان URL بـ https:
       return;
     }
     if (formEvents.length === 0) {
@@ -365,7 +365,7 @@ export default function WebhooksPage() {
                   id="webhook-url"
                   value={formUrl}
                   onChange={(e) => setFormUrl(e.target.value)}
-                  placeholder="https://example.com/webhooks/bot"
+                  placeholder="https:
                   dir="ltr"
                 />
               </div>

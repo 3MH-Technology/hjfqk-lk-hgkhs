@@ -102,7 +102,7 @@ const errorShakeVariants: Variants = {
 function WolfLogo({ size = 48 }: { size?: number }) {
   return (
     <img
-      src="https://f.top4top.io/p_37210bgwm1.jpg"
+      src="https:
       alt="استضافة الذئب"
       style={{ width: size, height: size }}
       className="rounded-full object-cover wolf-svg-glow"
@@ -114,7 +114,7 @@ function WolfLogo({ size = 48 }: { size?: number }) {
 function WolfSilhouetteParticle({ size = 16, className = '', style }: { size?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="https://f.top4top.io/p_37210bgwm1.jpg"
+      src="https:
       alt=""
       style={{ width: size, height: size, ...style }}
       className={`rounded-full object-cover ${className}`}

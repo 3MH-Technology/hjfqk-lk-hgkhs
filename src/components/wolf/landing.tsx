@@ -425,13 +425,13 @@ export default function Landing() {
   const [isLoading, setIsLoading] = useState(true);
 
 
-  // Simulate initial load
+  
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
-  // Back to top scroll listener
+  
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 600);
@@ -440,7 +440,7 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Auto-scroll testimonials
+  
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -481,7 +481,7 @@ export default function Landing() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-8 h-8 rounded-full object-cover" />
+            <img src="https:
             <span className="font-bold gradient-text text-base md:text-lg">
               استضافة الذئب
             </span>
@@ -663,7 +663,7 @@ export default function Landing() {
 
                   {/* Wolf Head SVG Silhouette */}
                   <div className="wolf-svg-glow absolute inset-0 flex items-center justify-center">
-                    <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover" />
+                    <img src="https:
                   </div>
 
                   {/* Corner accent dots */}
@@ -1541,7 +1541,7 @@ export default function Landing() {
               {/* Telegram Contact Button */}
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <a
-                  href="https://t.me/j49_c"
+                  href="https:
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-3 h-12 px-8 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white font-medium shadow-lg shadow-[#0088cc]/20 transition-all duration-300 text-base"
@@ -1629,7 +1629,7 @@ export default function Landing() {
             {/* Column 1 — Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-2.5">
-                <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-8 h-8 rounded-full object-cover" />
+                <img src="https:
                 <span className="font-bold gradient-text text-base">
                   استضافة الذئب
                 </span>
@@ -1677,7 +1677,7 @@ export default function Landing() {
               <ul className="space-y-2.5">
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MessageSquare className="h-4 w-4 text-[#0088cc]" />
-                  <a href="https://t.me/j49_c" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                  <a href="https:
                     @j49_c — المطور
                   </a>
                 </li>

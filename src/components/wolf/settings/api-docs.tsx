@@ -27,7 +27,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
-// ─── Types ───────────────────────────────────────────────
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 type Category = 'all' | 'auth' | 'bots' | 'files' | 'logs' | 'users' | 'stats';
 
@@ -40,7 +40,7 @@ interface Endpoint {
   responseExample: string;
 }
 
-// ─── Method Colors ───────────────────────────────────────
+
 const METHOD_CONFIG: Record<HttpMethod, { color: string; bg: string; border: string }> = {
   GET: {
     color: 'text-emerald-400',
@@ -74,7 +74,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ReactNode }> 
   stats: { label: 'الإحصائيات', icon: <BarChart3 className="size-4" /> },
 };
 
-// ─── Endpoints Data ──────────────────────────────────────
+
 const endpoints: Endpoint[] = [
   {
     method: 'POST',
@@ -122,7 +122,7 @@ const endpoints: Endpoint[] = [
     path: '/api/bots',
     category: 'bots',
     description: 'قائمة جميع البوتات الخاصة بالمستخدم مع حالة كل بوت',
-    requestExample: `// لا يتطلب معاملات
+    requestExample: `
 GET /api/bots`,
     responseExample: `[
   {
@@ -151,7 +151,7 @@ GET /api/bots`,
   "language": "python",
   "envVars": {
     "BOT_TOKEN": "123456:ABC-DEF...",
-    "API_URL": "https://api.example.com"
+    "API_URL": "https:
   }
 }`,
     responseExample: `{
@@ -168,7 +168,7 @@ GET /api/bots`,
     path: '/api/bots/[id]',
     category: 'bots',
     description: 'الحصول على تفاصيل بوت محدد بالمعرف',
-    requestExample: `// استبدل [id] بمعرف البوت
+    requestExample: `
 GET /api/bots/bot_001`,
     responseExample: `{
   "id": "bot_001",
@@ -178,7 +178,7 @@ GET /api/bots/bot_001`,
   "containerId": "container_abc123",
   "envVars": [
     { "key": "BOT_TOKEN", "value": "***" },
-    { "key": "API_URL", "value": "https://api.example.com" }
+    { "key": "API_URL", "value": "https:
   ],
   "createdAt": "2025-01-10T08:00:00Z",
   "updatedAt": "2025-01-15T09:00:00Z"
@@ -210,7 +210,7 @@ GET /api/bots/bot_001`,
     path: '/api/bots/[id]',
     category: 'bots',
     description: 'حذف بوت نهائياً مع جميع ملفاته وسجلاته',
-    requestExample: `// استبدل [id] بمعرف البوت
+    requestExample: `
 DELETE /api/bots/bot_001`,
     responseExample: `{
   "message": "تم حذف البوت بنجاح",
@@ -222,7 +222,7 @@ DELETE /api/bots/bot_001`,
     path: '/api/bots/[id]/start',
     category: 'bots',
     description: 'تشغيل بوت متوقف',
-    requestExample: `// استبدل [id] بمعرف البوت
+    requestExample: `
 POST /api/bots/bot_001/start`,
     responseExample: `{
   "message": "تم تشغيل البوت بنجاح",
@@ -234,7 +234,7 @@ POST /api/bots/bot_001/start`,
     path: '/api/bots/[id]/stop',
     category: 'bots',
     description: 'إيقاف بوت يعمل حالياً',
-    requestExample: `// استبدل [id] بمعرف البوت
+    requestExample: `
 POST /api/bots/bot_001/stop`,
     responseExample: `{
   "message": "تم إيقاف البوت بنجاح",
@@ -246,7 +246,7 @@ POST /api/bots/bot_001/stop`,
     path: '/api/bots/[id]/restart',
     category: 'bots',
     description: 'إعادة تشغيل البوت',
-    requestExample: `// استبدل [id] بمعرف البوت
+    requestExample: `
 POST /api/bots/bot_001/restart`,
     responseExample: `{
   "message": "تم إعادة تشغيل البوت بنجاح",
@@ -258,8 +258,8 @@ POST /api/bots/bot_001/restart`,
     path: '/api/bots/[id]/logs',
     category: 'logs',
     description: 'سجل أحداث البوت مع تصفية حسب المستوى',
-    requestExample: `// استبدل [id] بمعرف البوت
-// معاملات اختيارية: ?level=error&limit=50
+    requestExample: `
+
 GET /api/bots/bot_001/logs?level=error&limit=50`,
     responseExample: `[
   {
@@ -281,7 +281,7 @@ GET /api/bots/bot_001/logs?level=error&limit=50`,
     path: '/api/bots/[id]/files',
     category: 'files',
     description: 'قائمة ملفات البوت مع بنية المجلدات',
-    requestExample: `// استبدل [id] بمعرف البوت
+    requestExample: `
 GET /api/bots/bot_001/files`,
     responseExample: `[
   {
@@ -328,7 +328,7 @@ GET /api/bots/bot_001/files`,
     path: '/api/stats',
     category: 'stats',
     description: 'إحصائيات المنصة العامة (ال CPU, RAM, البوتات النشطة)',
-    requestExample: `// لا يتطلب معاملات
+    requestExample: `
 GET /api/stats`,
     responseExample: `{
   "totalBots": 156,
@@ -344,7 +344,7 @@ GET /api/stats`,
     path: '/api/user/profile',
     category: 'users',
     description: 'الحصول على بيانات الملف الشخصي للمستخدم الحالي',
-    requestExample: `// لا يتطلب معاملات
+    requestExample: `
 GET /api/user/profile`,
     responseExample: `{
   "id": "usr_abc123",
@@ -375,7 +375,7 @@ GET /api/user/profile`,
   },
 ];
 
-// ─── Animation Variants ──────────────────────────────────
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -405,7 +405,7 @@ const heroVariants: Variants = {
   },
 };
 
-// ─── Copy Button Component ───────────────────────────────
+
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -436,7 +436,7 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-// ─── Code Block Component ────────────────────────────────
+
 function CodeBlock({ code, label }: { code: string; label?: string }) {
   return (
     <div className="group/code relative">
@@ -459,7 +459,7 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
   );
 }
 
-// ─── Endpoint Card Component ─────────────────────────────
+
 function EndpointCard({ endpoint, index }: { endpoint: Endpoint; index: number }) {
   const [expanded, setExpanded] = useState(false);
   const methodCfg = METHOD_CONFIG[endpoint.method];
@@ -559,7 +559,7 @@ function EndpointCard({ endpoint, index }: { endpoint: Endpoint; index: number }
   );
 }
 
-// ─── Main Component ──────────────────────────────────────
+
 export function ApiDocsPage() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category>('all');
@@ -585,7 +585,7 @@ export function ApiDocsPage() {
   }, []);
 
   const handleExpandAll = useCallback(() => {
-    // Toggle expand all by triggering state change
+    
     setSearch('');
     setActiveCategory('all');
   }, []);

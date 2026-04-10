@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Log entry type
+
 interface LogEntry {
   level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
   message: string;
@@ -118,21 +118,21 @@ export function RealtimeLogs() {
   const logsEndRef = useRef<HTMLDivElement>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);
 
-  // Filter logs
+  
   const filteredLogs = logs.filter((log) => {
     if (levelFilter !== 'ALL' && log.level !== levelFilter) return false;
     if (botFilter !== 'all' && log.botId !== botFilter) return false;
     return true;
   });
 
-  // Auto-scroll
+  
   useEffect(() => {
     if (!paused) {
       logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [filteredLogs, paused]);
 
-  // Connect to socket.io
+  
   useEffect(() => {
     const socket = io('/?XTransformPort=3004', {
       transports: ['polling', 'websocket'],
@@ -157,13 +157,13 @@ export function RealtimeLogs() {
 
     socket.on('log', (entry: LogEntry) => {
       if (!paused) {
-        setLogs((prev) => [...prev.slice(-499), entry]); // Keep max 500 logs
+        setLogs((prev) => [...prev.slice(-499), entry]); 
         setTotalReceived((prev) => prev + 1);
       }
     });
 
     socket.on('subscribed', () => {
-      // Subscription confirmed
+      
     });
 
     return () => {
@@ -172,7 +172,7 @@ export function RealtimeLogs() {
     };
   }, [paused]);
 
-  // Handle bot filter change
+  
   const handleBotFilterChange = useCallback((value: string) => {
     setBotFilter(value);
     if (socketRef.current) {
@@ -184,7 +184,7 @@ export function RealtimeLogs() {
     }
   }, []);
 
-  // Handle pause/resume
+  
   const handleTogglePause = useCallback(() => {
     const newPaused = !paused;
     setPaused(newPaused);
@@ -197,7 +197,7 @@ export function RealtimeLogs() {
     }
   }, [paused]);
 
-  // Handle clear
+  
   const handleClear = useCallback(() => {
     setLogs([]);
     setTotalReceived(0);

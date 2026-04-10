@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const userId = (session.user as { id: string }).id;
 
-    // Parse request body - support both JSON body and file upload
+    
     let importData: ImportData;
 
     const contentType = req.headers.get("content-type") || "";
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       importData = (await req.json()) as ImportData;
     }
 
-    // Validate import data structure
+    
     if (!importData.bot || !importData.bot.name) {
       return NextResponse.json(
         { error: "بيانات الاستيراد غير صالحة: يجب أن يحتوي على اسم البوت" },
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate language
+    
     if (!["python", "php"].includes(botLanguage)) {
       return NextResponse.json(
         { error: "اللغة غير مدعومة. يجب أن تكون python أو php" },
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate files
+    
     const files = importData.files || [];
     for (const file of files) {
       if (!file.path || !file.content) {
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check user bot limit
+    
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) {
       return NextResponse.json({ error: "المستخدم غير موجود" }, { status: 404 });
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the bot
+    
     const newBot = await db.bot.create({
       data: {
         userId,

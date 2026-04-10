@@ -70,7 +70,7 @@ const levelIcons: Record<string, typeof Info> = {
   debug: Bug,
 };
 
-// Animation variants
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -149,7 +149,7 @@ export default function LogViewer() {
     }
   }, [selectedBotId, isPaused, logs.length]);
 
-  // Initial load
+  
   useEffect(() => {
     if (selectedBotId) {
       setLoading(true);
@@ -157,14 +157,14 @@ export default function LogViewer() {
     }
     }, [selectedBotId]);
 
-  // Auto-refresh every 3 seconds
+  
   useEffect(() => {
     if (!selectedBotId || isPaused) return;
     const interval = setInterval(fetchLogs, 3000);
     return () => clearInterval(interval);
   }, [selectedBotId, isPaused, fetchLogs]);
 
-  // Auto-scroll to bottom
+  
   useEffect(() => {
     if (autoScroll && logsEndRef.current) {
       logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -178,7 +178,7 @@ export default function LogViewer() {
     return matchesLevel && matchesSearch;
   });
 
-  // Compute log counts by level
+  
   const logCounts = logs.reduce<Record<string, number>>((acc, log) => {
     acc[log.level] = (acc[log.level] || 0) + 1;
     return acc;

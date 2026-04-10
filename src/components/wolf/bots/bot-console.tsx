@@ -7,7 +7,7 @@ import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface LogLine {
   id: number;
   text: string;
@@ -15,7 +15,7 @@ interface LogLine {
   timestamp: string;
 }
 
-// ─── Terminal Boot Sequence & Commands ────────────────────────────────────
+
 const BOOT_SEQUENCE: LogLine[] = [
   { id: 1, text: '[INFO] جاري تحضير البيئة...', type: 'info', timestamp: '' },
   { id: 2, text: '[INFO] تم تحميل التبعيات بنجاح (42 حزمة)', type: 'ok', timestamp: '' },
@@ -87,7 +87,7 @@ function formatUptime(seconds: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-// ─── Component ──────────────────────────────────────────────────────────────
+
 export function BotConsole() {
   const { selectedBotId, setCurrentPage } = useAppStore();
   const [botName, setBotName] = useState<string>('البوت');
@@ -106,38 +106,50 @@ export function BotConsole() {
   const inputRef = useRef<HTMLInputElement>(null);
   const uptimeRef = useRef(0);
 
-  // Boot sequence on mount
+
   useEffect(() => {
-    // Fetch bot name
     if (selectedBotId) {
       fetch(`/api/bots/${selectedBotId}`, { credentials: 'include' })
         .then((res) => res.json())
         .then((data) => {
           if (data?.name) setBotName(data.name);
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
-    // Animate boot sequence line by line
-    let lineIndex = 0;
-    const bootInterval = setInterval(() => {
-      if (lineIndex >= BOOT_SEQUENCE.length) {
-        clearInterval(bootInterval);
-        setBooting(false);
-        return;
+    let isMounted = true;
+    const fetchLogs = async () => {
+      if (!selectedBotId || !isMounted) return;
+      try {
+        const res = await fetch(`/api/bots/${selectedBotId}/logs?limit=50`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            const mappedLogs: LogLine[] = data.reverse().map((l: any, i: number) => ({
+              id: l.id,
+              text: l.message,
+              type: l.level === 'error' ? 'error' : 'info',
+              timestamp: new Date(l.createdAt).toLocaleTimeString('ar-EG', { hour12: false }),
+            }));
+            setLogs(mappedLogs);
+            setBooting(false);
+          }
+        }
+      } catch (err) {
+        console.error("Log fetch error:", err);
       }
-      const line = BOOT_SEQUENCE[lineIndex];
-      setLogs((prev) => [
-        ...prev,
-        { ...line, id: ++logIdRef.current, timestamp: getTimestamp() },
-      ]);
-      lineIndex++;
-    }, 400);
+    };
 
-    return () => clearInterval(bootInterval);
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 3000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [selectedBotId]);
 
-  // Blinking cursor
+
   useEffect(() => {
     const blink = setInterval(() => {
       setCursorVisible((v) => !v);
@@ -145,7 +157,7 @@ export function BotConsole() {
     return () => clearInterval(blink);
   }, []);
 
-  // Uptime counter
+
   useEffect(() => {
     const timer = setInterval(() => {
       uptimeRef.current += 1;
@@ -154,7 +166,7 @@ export function BotConsole() {
     return () => clearInterval(timer);
   }, []);
 
-  // Memory fluctuation
+
   useEffect(() => {
     const timer = setInterval(() => {
       setMemory((prev) => {
@@ -166,7 +178,7 @@ export function BotConsole() {
     return () => clearInterval(timer);
   }, []);
 
-  // Random log messages every 5-8 seconds
+
   useEffect(() => {
     if (booting) return;
 
@@ -191,36 +203,36 @@ export function BotConsole() {
     return () => clearTimeout(timerRef.current);
   }, [booting]);
 
-  // Auto-scroll to bottom
+
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
   }, [logs]);
 
-  // Focus input on terminal click
+
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Handle command submit
+
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
       const cmd = input.trim();
       if (!cmd) return;
 
-      // Add command to logs
+
       setLogs((prev) => [
         ...prev,
         { id: ++logIdRef.current, text: `$ ${cmd}`, type: 'cmd', timestamp: getTimestamp() },
       ]);
 
-      // Save to history
+
       setCommandHistory((prev) => [...prev, cmd]);
       setHistoryIndex(-1);
 
-      // Process command
+
       const handler = COMMAND_RESPONSES[cmd];
       if (handler) {
         const responses = handler(botName, formatUptime(uptime), memory);
@@ -258,7 +270,7 @@ export function BotConsole() {
     [input, botName, uptime, memory]
   );
 
-  // Handle history navigation (up/down arrows)
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowUp') {
@@ -283,7 +295,7 @@ export function BotConsole() {
     [commandHistory, historyIndex]
   );
 
-  // ─── Log line color by type ───────────────────────────────────────────
+
   function getLogColor(type: LogLine['type']): string {
     switch (type) {
       case 'info':
@@ -394,9 +406,8 @@ export function BotConsole() {
                 <span className="text-blue-400">$</span>{' '}
                 {input || (
                   <span
-                    className={`inline-block w-2 h-4 bg-blue-400 align-middle transition-opacity ${
-                      cursorVisible ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    className={`inline-block w-2 h-4 bg-blue-400 align-middle transition-opacity ${cursorVisible ? 'opacity-100' : 'opacity-0'
+                      }`}
                   />
                 )}
               </span>
@@ -423,9 +434,8 @@ export function BotConsole() {
             />
             {input && (
               <span
-                className={`inline-block w-2 h-4 bg-blue-400 transition-opacity ${
-                  cursorVisible ? 'opacity-100' : 'opacity-0'
-                }`}
+                className={`inline-block w-2 h-4 bg-blue-400 transition-opacity ${cursorVisible ? 'opacity-100' : 'opacity-0'
+                  }`}
               />
             )}
           </form>
@@ -437,9 +447,8 @@ export function BotConsole() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <span
-                className={`w-2 h-2 rounded-full ${
-                  connected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'
-                }`}
+                className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'
+                  }`}
               />
               <span className="text-zinc-400">{connected ? 'متصل' : 'غير متصل'}</span>
             </div>

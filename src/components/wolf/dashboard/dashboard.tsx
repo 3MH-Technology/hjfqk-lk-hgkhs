@@ -73,7 +73,7 @@ interface BotItem {
 
 /* ─── Constants ─── */
 
-const WOLF_LOGO = 'https://f.top4top.io/p_37210bgwm1.jpg';
+const WOLF_LOGO = 'https:
 
 const statCards: {
   key: keyof Stats;

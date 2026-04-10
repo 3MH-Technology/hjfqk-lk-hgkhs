@@ -70,7 +70,7 @@ interface BotDetail {
   envVars: { id: string; key: string; value: string; createdAt: string }[];
 }
 
-// Animation variants
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -114,7 +114,7 @@ const tabContentVariants: Variants = {
   },
 };
 
-// Timeline events loaded from API
+
 const timelineEvents: { id: string; type: string; label: string; icon: typeof Rocket; color: string; bgColor: string; borderColor: string; time: string }[] = [];
 
 export function BotDetail() {
@@ -293,7 +293,7 @@ export function BotDetail() {
   };
   const statusCfg = statusConfig[bot.status] || statusConfig.stopped;
 
-  // Resource usage - loaded from API (defaults to 0 when no data)
+  
   const cpuUsage = 0;
   const ramUsage = 0;
   const cpuPercent = 0;

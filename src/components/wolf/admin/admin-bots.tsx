@@ -91,15 +91,15 @@ export default function AdminBots() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<BotStatusFilter>('all');
 
-  // Delete dialog
+  
   const [deleteTarget, setDeleteTarget] = useState<AdminBot | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Stop dialog
+  
   const [stopTarget, setStopTarget] = useState<AdminBot | null>(null);
   const [stopping, setStopping] = useState(false);
 
-  // Extract all bots from all users
+  
   const allBots: AdminBot[] = useMemo(() => {
     return allUsers.flatMap((u) =>
       (u.bots || []).map((b) => ({
@@ -109,7 +109,7 @@ export default function AdminBots() {
     );
   }, [allUsers]);
 
-  // Filtered bots
+  
   const filteredBots = useMemo(() => {
     let result = [...allBots];
 
@@ -267,11 +267,11 @@ export default function AdminBots() {
     }
   };
 
-  // Stats
+  
   const runningCount = allBots.filter((b) => b.status === 'running').length;
   const stoppedCount = allBots.filter((b) => b.status === 'stopped').length;
 
-  // Not admin
+  
   if (!user || user.role !== 'admin') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-6">

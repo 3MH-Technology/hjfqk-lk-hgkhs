@@ -149,20 +149,20 @@ export function NotificationDropdown() {
         setUnreadNotifications(unread);
       }
     } catch {
-      // Silently fail
+      
     } finally {
       setLoading(false);
     }
   }, [setUnreadNotifications]);
 
-  // Fetch on mount and every 30 seconds
+  
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  // Refetch when popover opens
+  
   useEffect(() => {
     if (open) {
       fetchNotifications();
@@ -190,7 +190,7 @@ export function NotificationDropdown() {
         setUnreadNotifications(0);
       }
     } catch {
-      // Silently fail
+      
     }
   };
 
@@ -211,7 +211,7 @@ export function NotificationDropdown() {
         });
       }
     } catch {
-      // Silently fail
+      
     }
   };
 

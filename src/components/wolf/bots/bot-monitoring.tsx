@@ -917,7 +917,7 @@ export default function BotMonitoring() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Global dashboard data
+  
   const [allBots, setAllBots] = useState<BotData[]>([]);
   const [botHealthCards, setBotHealthCards] = useState<BotHealthCard[]>([]);
   const [globalLoading, setGlobalLoading] = useState(true);
@@ -934,7 +934,7 @@ export default function BotMonitoring() {
         setBotHealthCards(data.map(getBotHealthCard));
       }
     } catch {
-      // silent fail
+      
     } finally {
       setGlobalLoading(false);
     }
@@ -954,7 +954,7 @@ export default function BotMonitoring() {
         setEnvironment(getDefaultEnvironment());
       }
     } catch {
-      // silent fail
+      
     } finally {
       setLoading(false);
     }
@@ -1140,7 +1140,7 @@ export default function BotMonitoring() {
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' as const }}
                 />
                 <img
-                  src="https://f.top4top.io/p_37210bgwm1.jpg"
+                  src="https:
                   alt="شعار الذئب"
                   className="w-24 h-24 rounded-2xl object-cover glow-effect relative"
                 />

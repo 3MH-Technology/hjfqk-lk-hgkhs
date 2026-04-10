@@ -96,7 +96,7 @@ export function QuickActionsWidget() {
   const closePanel = useCallback(() => setIsOpen(false), []);
   const togglePanel = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  // Close on Escape
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -107,7 +107,7 @@ export function QuickActionsWidget() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, closePanel]);
 
-  // Close on outside click
+  
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -170,7 +170,7 @@ export function QuickActionsWidget() {
       icon: <Send className="size-5" />,
       onClick: () => {
         closePanel();
-        window.open('https://t.me/j49_c', '_blank', 'noopener,noreferrer');
+        window.open('https:
       },
     },
   ];

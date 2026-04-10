@@ -43,7 +43,7 @@ export function CommandPalette() {
   const { commandPaletteOpen, setCommandPaletteOpen, setCurrentPage, user, setUser, setSidebarOpen } =
     useAppStore();
 
-  // Navigation pages
+  
   const navItems = useMemo<CommandItemData[]>(
     () => [
       {
@@ -107,7 +107,7 @@ export function CommandPalette() {
     [setCurrentPage],
   );
 
-  // Action items
+  
   const actionItems = useMemo<CommandItemData[]>(
     () => [
       {
@@ -137,7 +137,7 @@ export function CommandPalette() {
     [setCurrentPage, setUser, setSidebarOpen],
   );
 
-  // Keyboard shortcut handler
+  
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {

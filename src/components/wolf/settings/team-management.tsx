@@ -178,25 +178,25 @@ function formatDate(dateStr: string): string {
 export default function TeamManagement() {
   const { user } = useAppStore();
 
-  // Team data
+  
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Search
+  
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Invite dialog
+  
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState('viewer');
   const [inviting, setInviting] = useState(false);
 
-  // Remove dialog
+  
   const [removeId, setRemoveId] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
 
-  // Role change
+  
   const [changingRole, setChangingRole] = useState<string | null>(null);
 
   /* ─── Fetch team members ─── */
@@ -209,7 +209,7 @@ export default function TeamManagement() {
         setMembers(data.members || []);
       }
     } catch {
-      // silent fail
+      
     } finally {
       setLoading(false);
     }
@@ -705,7 +705,7 @@ export default function TeamManagement() {
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               />
               <img
-                src="https://f.top4top.io/p_37210bgwm1.jpg"
+                src="https:
                 alt="استضافة الذئب"
                 className="w-20 h-20 rounded-full object-cover border-2 border-primary/30 relative"
               />

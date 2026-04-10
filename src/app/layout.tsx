@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   keywords: ["استضافة", "تيليجرام", "بوتات", "Python", "PHP", "استضافة الذئب"],
   authors: [{ name: "@j49_c" }],
   icons: {
-    icon: "https://f.top4top.io/p_37210bgwm1.jpg",
+    icon: "https:
   },
 };
 
