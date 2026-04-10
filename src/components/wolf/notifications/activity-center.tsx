@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   Bell,
   BellOff,
@@ -10,23 +10,11 @@ import {
   AlertTriangle,
   XCircle,
   Info,
-  Play,
-  Square,
-  RotateCcw,
-  Upload,
   Trash2,
-  Shield,
-  Settings,
-  FileText,
   Clock,
   Filter,
   CheckCheck,
-  UserPlus,
-  Cpu,
-  MemoryStick,
-  Wifi,
-  WifiOff,
-  Zap,
+  RefreshCw,
   Eye,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +25,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/store/app-store';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 /* ─── Types ─── */
 
@@ -47,22 +37,12 @@ type FilterTab = 'all' | ActivityType;
 interface ActivityItem {
   id: string;
   type: ActivityType;
-  icon: typeof Bell;
   title: string;
-  description: string;
-  timestamp: Date;
+  message: string;
+  timestamp: string;
   read: boolean;
-  botName?: string;
+  link?: string | null;
 }
-
-/* ─── Icon Map ─── */
-
-const typeIconMap: Record<ActivityType, typeof Bell> = {
-  info: Info,
-  success: CheckCircle2,
-  warning: AlertTriangle,
-  error: XCircle,
-};
 
 /* ─── Type Config ─── */
 
@@ -70,6 +50,7 @@ const typeConfig: Record<
   ActivityType,
   {
     label: string;
+    icon: typeof Bell;
     iconBg: string;
     iconColor: string;
     barColor: string;
@@ -79,6 +60,7 @@ const typeConfig: Record<
 > = {
   info: {
     label: 'معلومات',
+    icon: Info,
     iconBg: 'bg-sky-500/15',
     iconColor: 'text-sky-400',
     barColor: 'bg-sky-400',
@@ -87,6 +69,7 @@ const typeConfig: Record<
   },
   success: {
     label: 'نجاح',
+    icon: CheckCircle2,
     iconBg: 'bg-emerald-500/15',
     iconColor: 'text-emerald-400',
     barColor: 'bg-emerald-400',
@@ -95,6 +78,7 @@ const typeConfig: Record<
   },
   warning: {
     label: 'تحذير',
+    icon: AlertTriangle,
     iconBg: 'bg-blue-500/15',
     iconColor: 'text-blue-400',
     barColor: 'bg-blue-400',
@@ -103,6 +87,7 @@ const typeConfig: Record<
   },
   error: {
     label: 'خطأ',
+    icon: XCircle,
     iconBg: 'bg-red-500/15',
     iconColor: 'text-red-400',
     barColor: 'bg-red-400',
@@ -121,13 +106,9 @@ const filterTabs: { value: FilterTab; label: string; icon: typeof Bell }[] = [
   { value: 'error', label: 'خطأ', icon: XCircle },
 ];
 
-// Activity items loaded from API
-
-const initialActivities: ActivityItem[] = [];
-
 /* ─── Animation Variants ─── */
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -135,12 +116,12 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, x: 20 },
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.35, ease: 'easeOut' as const },
+    transition: { duration: 0.35, ease: 'easeOut' },
   },
   exit: {
     opacity: 0,
@@ -149,19 +130,19 @@ const itemVariants = {
   },
 };
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: { opacity: 0, y: -12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: 'easeOut' as const },
+    transition: { duration: 0.4, ease: 'easeOut' },
   },
 };
 
 /* ─── Relative Time Formatter ─── */
 
-function formatRelativeTime(date: Date): string {
-  if (!date) return "";
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
   const diffMs = Date.now() - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
@@ -175,31 +156,53 @@ function formatRelativeTime(date: Date): string {
     return diffHours === 1 ? 'منذ ساعة' : `منذ ${diffHours} ساعة`;
   if (diffDays < 7)
     return diffDays === 1 ? 'منذ يوم' : `منذ ${diffDays} يوم`;
-  return date.toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  return format(date, 'dd MMM yyyy', { locale: ar });
 }
 
-function formatFullDate(date: Date): string {
-  return date.toLocaleDateString('ar-SA', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+function formatFullDate(dateStr: string): string {
+  return format(new Date(dateStr), 'EEEE d MMMM yyyy HH:mm', { locale: ar });
 }
 
 /* ─── Main Component ─── */
 
 export default function ActivityCenter() {
-  const { user } = useAppStore();
-  const [activities, setActivities] = useState<ActivityItem[]>(initialActivities);
+  const { setUnreadNotifications } = useAppStore();
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  /* ─── Fetch Notifications ─── */
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/notifications', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const items: ActivityItem[] = data.map((n: { id: string; type: string; title: string; message: string; read: boolean; link?: string | null; createdAt: string }) => ({
+          id: n.id,
+          type: (n.type as ActivityType) || 'info',
+          title: n.title,
+          message: n.message,
+          timestamp: n.createdAt,
+          read: n.read,
+          link: n.link,
+        }));
+        setActivities(items);
+        const unread = items.filter((a) => !a.read).length;
+        setUnreadNotifications(unread);
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, [setUnreadNotifications]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   /* ─── Derived State ─── */
 
@@ -232,25 +235,54 @@ export default function ActivityCenter() {
 
   /* ─── Handlers ─── */
 
-  const handleMarkAllRead = () => {
-    setActivities((prev) => prev.map((a) => ({ ...a, read: true })));
-    toast.success('تم تعليم جميع الإشعارات كمقروءة');
+  const handleRefresh = () => {
+    fetchNotifications();
   };
 
-  const handleMarkAsRead = (id: string) => {
-    setActivities((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, read: true } : a))
-    );
+  const handleMarkAllRead = async () => {
+    try {
+      const res = await fetch('/api/notifications/read-all', {
+        method: 'PUT',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setActivities((prev) => prev.map((a) => ({ ...a, read: true })));
+        setUnreadNotifications(0);
+        toast.success('تم تعليم جميع الإشعارات كمقروءة');
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء التحديث');
+    }
+  };
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const res = await fetch(`/api/notifications/${id}/read`, {
+        method: 'PUT',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setActivities((prev) => {
+          const updated = prev.map((a) => (a.id === id ? { ...a, read: true } : a));
+          const newUnread = updated.filter((a) => !a.read).length;
+          setUnreadNotifications(newUnread);
+          return updated;
+        });
+      }
+    } catch {
+      // Silently fail
+    }
   };
 
   const handleClearAll = () => {
     setActivities([]);
+    setUnreadNotifications(0);
     toast.success('تم مسح جميع الإشعارات');
   };
 
   /* ─── Empty State ─── */
 
-  if (activities.length === 0) {
+  if (!loading && activities.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -271,6 +303,15 @@ export default function ActivityCenter() {
             <p className="text-sm text-muted-foreground max-w-xs">
               جميع الإشعارات السابقة تم مسحها. ستظهر الإشعارات الجديدة هنا تلقائياً.
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 gap-2"
+              onClick={handleRefresh}
+            >
+              <RefreshCw className="size-3.5" />
+              تحديث
+            </Button>
           </CardContent>
         </Card>
       </motion.div>
@@ -321,7 +362,19 @@ export default function ActivityCenter() {
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                {/* Refresh */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                  className="gap-2 text-xs border-border hover:border-primary/30 hover:text-primary"
+                >
+                  <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+                  تحديث
+                </Button>
+
                 {/* Show unread toggle */}
                 <Button
                   variant={showUnreadOnly ? 'default' : 'outline'}
@@ -438,7 +491,16 @@ export default function ActivityCenter() {
           <CardContent className="p-0">
             <ScrollArea className="h-[600px]">
               <div className="p-2 sm:p-3">
-                {filteredActivities.length === 0 ? (
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="flex size-12 items-center justify-center rounded-xl bg-muted/50 mb-4 animate-pulse">
+                      <Bell className="size-7 text-muted-foreground/40" />
+                    </div>
+                    <p className="text-muted-foreground text-sm font-medium mb-1">
+                      جاري تحميل الإشعارات...
+                    </p>
+                  </div>
+                ) : filteredActivities.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="flex items-center justify-center size-14 rounded-2xl bg-muted/50 mb-4">
                       <Bell className="size-7 text-muted-foreground/40" />
@@ -447,7 +509,7 @@ export default function ActivityCenter() {
                       لا توجد إشعارات مطابقة
                     </p>
                     <p className="text-muted-foreground/60 text-xs">
-                      جرب تغيير الفلتر أو إزالة خيار "غير المقروء فقط"
+                      جرب تغيير الفلتر أو إزالة خيار &quot;غير المقروء فقط&quot;
                     </p>
                   </div>
                 ) : (
@@ -463,7 +525,7 @@ export default function ActivityCenter() {
 
                       {filteredActivities.map((activity, index) => {
                         const config = typeConfig[activity.type];
-                        const ActivityIcon = activity.icon || typeIconMap[activity.type];
+                        const ActivityIcon = config.icon;
                         const isLast = index === filteredActivities.length - 1;
 
                         return (
@@ -559,18 +621,11 @@ export default function ActivityCenter() {
                                           : 'text-muted-foreground/70'
                                       }`}
                                     >
-                                      {activity.description}
+                                      {activity.message}
                                     </p>
 
                                     {/* Meta info row */}
                                     <div className="flex items-center gap-3 mt-2 flex-wrap">
-                                      {/* Bot name tag */}
-                                      {activity.botName && (
-                                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary/80 bg-primary/8 px-2 py-0.5 rounded-md">
-                                          <Bot className="size-3" />
-                                          {activity.botName}
-                                        </span>
-                                      )}
                                       {/* Timestamp */}
                                       <span
                                         className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/60"

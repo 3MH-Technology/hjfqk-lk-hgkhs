@@ -17,9 +17,6 @@ import {
   Calendar,
   Crown,
   Link2,
-  ToggleLeft,
-  ToggleRight,
-  MessageSquare,
   Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,6 +48,56 @@ interface UserStats {
   maxBots: number;
 }
 
+/* ─── Notification Preferences Mock Data ─── */
+const notificationPreferences = [
+  {
+    id: 'email-notifications',
+    label: 'إشعارات البريد الإلكتروني',
+    description: 'استلام إشعارات عبر البريد عند الأحداث المهمة',
+    enabled: true,
+  },
+  {
+    id: 'error-alerts',
+    label: 'تنبيهات الأخطاء',
+    description: 'إشعار فوري عند حدوث خطأ في أي بوت',
+    enabled: true,
+  },
+  {
+    id: 'system-updates',
+    label: 'تحديثات النظام',
+    description: 'أخبار الصيانة والتحديثات الجديدة',
+    enabled: false,
+  },
+  {
+    id: 'bot-status',
+    label: 'تغيير حالة البوت',
+    description: 'إشعار عند توقف أو إعادة تشغيل البوتات',
+    enabled: true,
+  },
+];
+
+/* ─── Connected Accounts Mock Data ─── */
+const connectedAccountsData = [
+  {
+    id: 'telegram',
+    name: 'تيليجرام',
+    description: 'ربط حساب تيليجرام للإشعارات الفورية',
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    borderColor: 'border-sky-500/20',
+    connected: true,
+  },
+  {
+    id: 'github',
+    name: 'جيت هب',
+    description: 'ربط حساب جيت هب لاستيراد المشاريع',
+    color: 'text-zinc-300',
+    bgColor: 'bg-zinc-500/10',
+    borderColor: 'border-zinc-500/20',
+    connected: false,
+  },
+];
+
 function getPasswordStrength(password: string): {
   score: number;
   label: string;
@@ -67,7 +114,7 @@ function getPasswordStrength(password: string): {
 
   const strengths = [
     { label: 'ضعيف جداً', color: 'bg-red-500' },
-    { label: 'ضعيف', color: 'bg-orange-500' },
+    { label: 'ضعيف', color: 'bg-red-400' },
     { label: 'متوسط', color: 'bg-blue-500' },
     { label: 'قوي', color: 'bg-emerald-500' },
     { label: 'قوي جداً', color: 'bg-emerald-400' },
@@ -106,11 +153,17 @@ const itemVariants: Variants = {
   },
 };
 
-// Notification preferences - loaded from API
-const defaultNotificationPrefs = [];
-
-// Connected accounts - loaded from API
-const connectedAccounts: { id: string; name: string; description: string; icon: typeof Send; color: string; bgColor: string; borderColor: string; connected: boolean }[] = [];
+const sectionHeaderVariants: Variants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.4,
+      ease: 'easeOut',
+    },
+  },
+};
 
 export default function AccountSettings() {
   const { user, setUser } = useAppStore();
@@ -137,7 +190,7 @@ export default function AccountSettings() {
 
   // Notification toggles
   const [notifications, setNotifications] = useState(
-    () => defaultNotificationPrefs
+    () => notificationPreferences
   );
 
   const fetchStats = useCallback(async () => {
@@ -264,6 +317,20 @@ export default function AccountSettings() {
 
   const passwordStrength = getPasswordStrength(newPassword);
 
+  /* ─── Gradient Section Divider ─── */
+  function SectionDivider({ icon: Icon, label, danger }: { icon: typeof Bell; label: string; danger?: boolean }) {
+    return (
+      <motion.div variants={sectionHeaderVariants} className="flex items-center gap-3">
+        <div className={`flex-1 h-px ${danger ? 'bg-gradient-to-l from-red-500/20 via-red-500/10 to-transparent' : 'bg-gradient-to-l from-primary/20 via-primary/10 to-transparent'}`} />
+        <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${danger ? 'text-red-400/60 bg-red-500/5 border border-red-500/10' : 'text-primary/60 bg-primary/5 border border-primary/10'}`}>
+          <Icon className="size-3" />
+          <span className="text-[10px] font-medium">{label}</span>
+        </div>
+        <div className={`flex-1 h-px ${danger ? 'bg-gradient-to-r from-red-500/20 via-red-500/10 to-transparent' : 'bg-gradient-to-r from-primary/20 via-primary/10 to-transparent'}`} />
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       className="flex flex-col gap-6 p-4 max-w-2xl mx-auto"
@@ -275,26 +342,39 @@ export default function AccountSettings() {
         <h1 className="text-2xl font-bold gradient-text">الإعدادات</h1>
       </motion.div>
 
-      {/* Gradient Profile Card */}
+      {/* ─── Gradient Profile Card ─── */}
       <motion.div variants={itemVariants}>
-        <Card className="border-border/50 overflow-hidden">
+        <Card className="border-border/50 overflow-hidden relative">
+          {/* Animated gradient border effect */}
+          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary/20 via-transparent to-blue-500/20 opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
           <div className="relative bg-gradient-to-l from-primary/15 via-primary/5 to-transparent p-6">
             <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2" />
             <div className="absolute bottom-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl translate-x-1/4 translate-y-1/4" />
             <div className="relative flex items-center gap-4">
-              <div className="relative">
-                <Avatar className="h-16 w-16 border-2 border-primary/30">
+              {/* Avatar with animated gradient border */}
+              <div className="relative group">
+                <motion.div
+                  className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary via-blue-500 to-primary opacity-60 blur-sm"
+                  animate={{ opacity: [0.4, 0.7, 0.4] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-primary/80 via-blue-400 to-primary/80" />
+                <Avatar className="relative h-16 w-16 border-2 border-background">
                   <AvatarFallback className="bg-primary/15 text-primary text-xl font-bold">
                     {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'م'}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-background" />
+                <motion.div
+                  className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-background"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-bold">{user?.name || 'مستخدم'}</h2>
                   {user?.role === 'admin' && (
-                    <Badge className="bg-blue-500/15 text-blue-400 border-blue-500/30 gap-1">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 gap-1">
                       <Crown className="h-3 w-3" />
                       مدير
                     </Badge>
@@ -324,7 +404,7 @@ export default function AccountSettings() {
                 className="h-full rounded-full bg-gradient-to-l from-primary to-blue-500"
                 initial={{ width: 0 }}
                 animate={{ width: user?.name && user?.email ? '50%' : '25%' }}
-                transition={{ delay: 0.5, duration: 1, type: 'tween' as const, ease: 'easeOut' as const }}
+                transition={{ delay: 0.5, duration: 1, ease: 'easeOut' }}
               />
             </div>
             <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
@@ -337,9 +417,9 @@ export default function AccountSettings() {
         </Card>
       </motion.div>
 
-      {/* Personal Info */}
+      {/* ─── Personal Info ─── */}
       <motion.div variants={itemVariants}>
-        <Card className="border-border/50">
+        <Card className="border-border/50 border-r-2 border-r-primary/40">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -395,19 +475,12 @@ export default function AccountSettings() {
         </Card>
       </motion.div>
 
-      {/* Section Divider */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Bell className="h-3 w-3" />
-          الإشعارات
-        </div>
-        <Separator className="flex-1" />
-      </motion.div>
+      {/* ─── Section Divider: Notifications ─── */}
+      <SectionDivider icon={Bell} label="الإشعارات" />
 
-      {/* Notification Preferences */}
+      {/* ─── Notification Preferences ─── */}
       <motion.div variants={itemVariants}>
-        <Card className="border-border/50">
+        <Card className="border-border/50 border-r-2 border-r-blue-400/30">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
@@ -423,14 +496,17 @@ export default function AccountSettings() {
             {notifications.map((notif, i) => (
               <motion.div
                 key={notif.id}
-                className="flex items-center justify-between py-3 border-b border-border/30 last:border-0"
+                className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 group"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.05, type: 'tween' as const, ease: 'easeOut' as const, duration: 0.2 }}
+                transition={{ delay: 0.3 + i * 0.06, duration: 0.3, ease: 'easeOut' }}
               >
-                <div>
-                  <p className="text-sm font-medium">{notif.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{notif.description}</p>
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${notif.enabled ? 'bg-emerald-400 shadow-sm shadow-emerald-400/40' : 'bg-muted-foreground/30'}`} />
+                  <div>
+                    <p className="text-sm font-medium">{notif.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{notif.description}</p>
+                  </div>
                 </div>
                 <Switch
                   checked={notif.enabled}
@@ -447,19 +523,12 @@ export default function AccountSettings() {
         </Card>
       </motion.div>
 
-      {/* Section Divider */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Link2 className="h-3 w-3" />
-          الحسابات المرتبطة
-        </div>
-        <Separator className="flex-1" />
-      </motion.div>
+      {/* ─── Section Divider: Connected Accounts ─── */}
+      <SectionDivider icon={Link2} label="الحسابات المرتبطة" />
 
-      {/* Connected Accounts */}
+      {/* ─── Connected Accounts ─── */}
       <motion.div variants={itemVariants}>
-        <Card className="border-border/50">
+        <Card className="border-border/50 border-r-2 border-r-sky-400/30">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
@@ -472,17 +541,26 @@ export default function AccountSettings() {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {connectedAccounts.map((account, i) => (
+            {connectedAccountsData.map((account, i) => (
               <motion.div
                 key={account.id}
-                className={`flex items-center justify-between p-3 rounded-xl border ${account.borderColor} ${account.bgColor} hover:scale-[1.01] transition-transform`}
+                className={`flex items-center justify-between p-3 rounded-xl border ${account.borderColor} ${account.bgColor} hover:scale-[1.01] transition-all duration-200`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.08, type: 'spring' as const, stiffness: 260, damping: 24 }}
+                transition={{ delay: 0.3 + i * 0.08, type: 'spring', stiffness: 260, damping: 24 }}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${account.bgColor} flex items-center justify-center`}>
-                    <account.icon className={`h-5 w-5 ${account.color}`} />
+                  <div className={`w-10 h-10 rounded-xl ${account.bgColor} flex items-center justify-center relative`}>
+                    {account.id === 'telegram' ? (
+                      <Send className={`h-5 w-5 ${account.color}`} />
+                    ) : (
+                      <svg className={`h-5 w-5 ${account.color}`} viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                      </svg>
+                    )}
+                    {account.connected && (
+                      <div className="absolute -top-0.5 -left-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background" />
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-medium flex items-center gap-2">
@@ -492,6 +570,11 @@ export default function AccountSettings() {
                           متصل
                         </Badge>
                       )}
+                      {!account.connected && (
+                        <Badge variant="outline" className="text-[10px] bg-muted/50 text-muted-foreground border-border/50">
+                          غير متصل
+                        </Badge>
+                      )}
                     </p>
                     <p className="text-xs text-muted-foreground">{account.description}</p>
                   </div>
@@ -499,7 +582,7 @@ export default function AccountSettings() {
                 <Button
                   size="sm"
                   variant={account.connected ? 'outline' : 'default'}
-                  className={`text-xs ${account.connected ? 'text-red-400 border-red-500/30 hover:bg-red-500/10' : ''}`}
+                  className={`text-xs transition-all duration-200 ${account.connected ? 'text-red-400 border-red-500/30 hover:bg-red-500/10 hover:text-red-300' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
                   onClick={() => {
                     toast.success(account.connected ? `تم فصل ${account.name}` : `تم ربط ${account.name}`);
                   }}
@@ -512,19 +595,12 @@ export default function AccountSettings() {
         </Card>
       </motion.div>
 
-      {/* Section Divider */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Shield className="h-3 w-3" />
-          الأمان
-        </div>
-        <Separator className="flex-1" />
-      </motion.div>
+      {/* ─── Section Divider: Security ─── */}
+      <SectionDivider icon={Shield} label="الأمان" />
 
-      {/* Security */}
+      {/* ─── Security ─── */}
       <motion.div variants={itemVariants}>
-        <Card className="border-border/50">
+        <Card className="border-border/50 border-r-2 border-r-red-400/30">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
@@ -550,7 +626,7 @@ export default function AccountSettings() {
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showCurrentPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -576,7 +652,7 @@ export default function AccountSettings() {
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showNewPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -591,31 +667,39 @@ export default function AccountSettings() {
                     <span className="text-xs text-muted-foreground">
                       قوة كلمة المرور
                     </span>
-                    <span
+                    <motion.span
+                      key={passwordStrength.label}
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
                       className={`text-xs font-medium ${
                         passwordStrength.score <= 1
                           ? 'text-red-400'
                           : passwordStrength.score <= 2
-                          ? 'text-orange-400'
+                          ? 'text-red-300'
                           : passwordStrength.score <= 3
                           ? 'text-blue-400'
                           : 'text-emerald-400'
                       }`}
                     >
                       {passwordStrength.label}
-                    </span>
+                    </motion.span>
                   </div>
+                  {/* Animated password strength bar */}
                   <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                      style={{
+                    <motion.div
+                      key={passwordStrength.color}
+                      className={`h-full rounded-full ${passwordStrength.color}`}
+                      initial={{ width: 0 }}
+                      animate={{
                         width: `${Math.max(passwordStrength.score * 20, 10)}%`,
                       }}
+                      transition={{ duration: 0.4, ease: 'easeOut' }}
                     />
                   </div>
                   <ul className="space-y-0.5 mt-1">
                     <li
-                      className={`text-[10px] flex items-center gap-1 ${
+                      className={`text-[10px] flex items-center gap-1 transition-colors duration-200 ${
                         newPassword.length >= 8
                           ? 'text-emerald-400'
                           : 'text-muted-foreground'
@@ -629,7 +713,7 @@ export default function AccountSettings() {
                       8 أحرف على الأقل
                     </li>
                     <li
-                      className={`text-[10px] flex items-center gap-1 ${
+                      className={`text-[10px] flex items-center gap-1 transition-colors duration-200 ${
                         /[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword)
                           ? 'text-emerald-400'
                           : 'text-muted-foreground'
@@ -643,7 +727,7 @@ export default function AccountSettings() {
                       أحرف كبيرة وصغيرة
                     </li>
                     <li
-                      className={`text-[10px] flex items-center gap-1 ${
+                      className={`text-[10px] flex items-center gap-1 transition-colors duration-200 ${
                         /\d/.test(newPassword)
                           ? 'text-emerald-400'
                           : 'text-muted-foreground'
@@ -657,7 +741,7 @@ export default function AccountSettings() {
                       أرقام
                     </li>
                     <li
-                      className={`text-[10px] flex items-center gap-1 ${
+                      className={`text-[10px] flex items-center gap-1 transition-colors duration-200 ${
                         /[^a-zA-Z0-9]/.test(newPassword)
                           ? 'text-emerald-400'
                           : 'text-muted-foreground'
@@ -708,7 +792,7 @@ export default function AccountSettings() {
                 !newPassword ||
                 !confirmPassword
               }
-              className="w-full"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {savingPassword && (
                 <Loader2 className="h-4 w-4 ml-2 animate-spin" />
@@ -719,19 +803,12 @@ export default function AccountSettings() {
         </Card>
       </motion.div>
 
-      {/* Section Divider */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Gauge className="h-3 w-3" />
-          الحدود
-        </div>
-        <Separator className="flex-1" />
-      </motion.div>
+      {/* ─── Section Divider: Limits ─── */}
+      <SectionDivider icon={Gauge} label="الحدود" />
 
-      {/* Limits */}
+      {/* ─── Limits ─── */}
       <motion.div variants={itemVariants}>
-        <Card className="border-border/50">
+        <Card className="border-border/50 border-r-2 border-r-emerald-400/30">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -789,23 +866,24 @@ export default function AccountSettings() {
         </Card>
       </motion.div>
 
-      {/* Section Divider */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <div className="flex items-center gap-1.5 text-xs text-red-400/60">
-          <AlertTriangle className="h-3 w-3" />
-          منطقة الخطر
-        </div>
-        <Separator className="flex-1" />
-      </motion.div>
+      {/* ─── Section Divider: Danger Zone ─── */}
+      <SectionDivider icon={AlertTriangle} label="منطقة الخطر" danger />
 
-      {/* Danger Zone - Delete Account */}
+      {/* ─── Danger Zone - Delete Account ─── */}
       <motion.div variants={itemVariants}>
-        <Card className="border-destructive/30 bg-destructive/5 hover:border-destructive/50 transition-colors">
-          <CardHeader>
+        <Card className="relative overflow-hidden border-destructive/30 hover:border-destructive/50 transition-colors">
+          {/* Red gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-red-500/3 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/5 rounded-full blur-3xl translate-x-1/4 -translate-y-1/4 pointer-events-none" />
+          <CardHeader className="relative">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-red-400" />
+                <motion.div
+                  animate={{ rotate: [0, -5, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
+                >
+                  <AlertTriangle className="h-4 w-4 text-red-400" />
+                </motion.div>
               </div>
               <div>
                 <CardTitle className="text-base text-destructive">
@@ -818,10 +896,10 @@ export default function AccountSettings() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full shadow-lg shadow-red-500/10">
+                <Button variant="destructive" className="w-full shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-shadow duration-300">
                   <Trash2 className="h-4 w-4 ml-2" />
                   حذف حسابي نهائياً
                 </Button>

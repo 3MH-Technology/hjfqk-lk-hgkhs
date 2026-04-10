@@ -856,6 +856,58 @@ Stage Summary:
 - Platform is now production-ready with empty states for all data-dependent sections
 - Zero lint errors, zero build errors
 
+---
+Task ID: styling-enhancement-2
+Agent: Full-stack Developer
+Task: Polish Landing Page and Auth Forms Visual Quality
+
+Work Log:
+- Read worklog.md (965 lines) to understand full project context
+- Enhanced landing.tsx (~1200 lines) with 10 major visual improvements:
+  1. Added animated mesh gradient background to footer section (2 pulsing radial gradients with animate-pulse)
+  2. Added animated testimonial cards with hover scale effect (whileHover scale 1.03, y -4)
+  3. Added "Back to top" floating button (ChevronUp, appears on scroll > 600px, AnimatePresence show/hide)
+  4. Improved pricing cards with hover lift (y: -8) and enhanced dynamic boxShadow on hover
+  5. Added SectionSeparator component with gradient line animation (scaleX 0→1) between all sections
+  6. Added LandingSkeleton component for page initial load (800ms simulated delay)
+  7. Improved language cards (Python/PHP) with animated icon hover (scale 1.15, rotate wiggle)
+  8. Added contact/CTA section before footer with contact info cards + contact form
+  9. Added micro-interactions: button press scale (whileHover/whileTap), link underline animations (group-hover w-full)
+  10. Converted all motion variants from `as const` pattern to `Variants` type annotation
+- Enhanced login-form.tsx with 5 major improvements:
+  1. Added "forgot password" modal/dialog (ForgotPasswordDialog with KeyRound icon, email input, send button, loading state)
+  2. Created GlowInput component with focus glow animation (inputGlowVariants: blue box-shadow ring + blur glow)
+  3. Added gradient underline effect on input focus (motion.div scaleX 0→1 with primary color)
+  4. Improved social login buttons with hover color transition (lift y:-1, border color change, text color change)
+  5. Added password visibility toggle animation (AnimatePresence with rotate -90° and scale transition)
+- Enhanced register-form.tsx with 3 major improvements:
+  1. Added StrongCheckmark component (ShieldCheck icon with spring animation + "كلمة مرور قوية!" text)
+  2. Added terms checkbox custom bounce animation (bounceCheckVariants: scale 1→1.3→0.9→1.1→1)
+  3. Same GlowInput, eye swap animation, and social button enhancements as login-form
+- Added subtle background texture overlay (radial-gradient dot pattern) to both auth form panels
+- Added Input and Skeleton component imports (shadcn/ui Dialog, Input, Skeleton)
+- Added ChevronUp, Mail, MapPin, Phone, ShieldCheck, ArrowLeft, KeyRound to lucide imports
+- Used `Variants` type from framer-motion for all variant objects
+- Used `ease: 'easeOut'` (NOT `type: 'easeOut'`) in all variant transitions
+- All text remains in Arabic (RTL)
+
+Files Modified:
+1. src/components/wolf/landing.tsx
+2. src/components/wolf/auth/login-form.tsx
+3. src/components/wolf/auth/register-form.tsx
+
+Stage Summary:
+- Landing page polished with 10 visual enhancements
+- Auth forms enhanced with glow inputs, forgot password dialog, eye swap animation
+- Register form enhanced with strong checkmark, terms bounce animation
+- Loading skeleton for landing page initial render
+- Contact section with form and info cards
+- Back to top floating button
+- Section separators between all landing page sections
+- Testimonial cards with hover scale and star stagger animation
+- Pricing cards with dynamic hover shadows
+- Zero lint errors on all modified files
+
 ## Current Project Status (Updated)
 
 ### Assessment
@@ -909,3 +961,230 @@ The White Wolf Hosting platform is production-ready with zero errors. All fake/s
 6. Implement social login (GitHub/Telegram OAuth)
 7. Add file upload with drag-and-drop
 8. Add team collaboration features
+
+---
+Task ID: new-features-1
+Agent: Full-stack Developer
+Task: Add Real-time Notification System API + Bot Backup/Export
+
+Work Log:
+- Updated Prisma schema: added Notification model with fields (id, userId, type, title, message, read, link, createdAt) and @@index([userId, createdAt])
+- Added notifications relation to User model
+- Ran db:push to apply schema changes successfully
+- Created 4 notification API routes:
+  - GET /api/notifications: Fetch all notifications for current user (ordered by createdAt desc, limit 50) with auth check
+  - POST /api/notifications: Create notification (supports admin creating for other users via targetUserId) with auth check
+  - PUT /api/notifications/[id]/read: Mark single notification as read with auth check
+  - PUT /api/notifications/read-all: Mark all unread notifications as read for current user with auth check
+- Created 1 bot export API route:
+  - GET /api/bots/[id]/export: Export bot data as JSON (name, description, language, status, env vars with masked secrets, file list, stats, creation date) with auth check
+- Rewrote notification-dropdown.tsx:
+  - Replaced empty mock data with real API fetch on mount + 30-second polling
+  - Fetches notifications from /api/notifications on mount and when popover opens
+  - Shows real notification count badge from API data
+  - Mark all as read calls /api/notifications/read-all
+  - Mark individual as read calls /api/notifications/[id]/read
+  - Shows type icons (Info for info, CheckCircle2 for success, AlertTriangle for warning, XCircle for error)
+  - Click on notification with link navigates to corresponding page
+  - Limits dropdown to 5 most recent notifications
+  - Loading state with pulsing bell icon
+  - Used framer-motion Variants type with ease: 'easeOut' (not as const)
+- Rewrote activity-center.tsx:
+  - Replaced empty mock data with real API fetch from /api/notifications
+  - Added real-time refresh button (RefreshCw icon)
+  - Added loading state with pulsing bell icon
+  - Filter by notification type using Tabs component (all/info/success/warning/error)
+  - Shows proper timestamps using date-fns with ar locale (format + formatRelativeTime)
+  - Mark as read on individual notification click calls /api/notifications/[id]/read
+  - Mark all as read calls /api/notifications/read-all
+  - Empty state with refresh button when no notifications
+  - Shows message field as description text
+  - Used framer-motion Variants type with ease: 'easeOut'
+- Updated bot-detail.tsx:
+  - Added "تصدير" (Export) button in glassmorphism action bar using Download icon
+  - Button fetches /api/bots/[id]/export and downloads as JSON file using Blob + URL.createObjectURL
+  - handleExport function was already present, only button was missing in action bar
+- Updated app-store.ts:
+  - Changed default unreadNotifications from 5 to 0 (now fetched from API)
+
+Stage Summary:
+- Notification system with database persistence (4 API routes)
+- Bot export/backup feature (1 API route + frontend button)
+- Notification dropdown fetches real data with 30-second polling
+- Activity center fetches real data with refresh and type filtering
+- Zero lint errors, clean dev server compilation
+- All text in Arabic (RTL)
+- framer-motion Variants type used correctly with ease: 'easeOut'
+
+---
+Task ID: styling-enhancement-1
+Agent: Full-stack Developer
+Task: Enhance Styling of Dashboard and Settings Pages
+
+Work Log:
+- Read worklog.md and both target files to understand project context
+- Enhanced dashboard.tsx with comprehensive styling improvements:
+  - Imported Variants type from framer-motion and typed all variant objects (containerVariants, itemVariants, statCardVariants)
+  - Added AnimatedCounter component using requestAnimationFrame with easeOutCubic easing (counts up from 0)
+  - Added glassmorphism effect on stat cards (backdrop-blur-sm, bg-card/60)
+  - Added glassmorphism effect on timeline and chart cards (backdrop-blur-sm, bg-card/60)
+  - Added glassmorphism effect on recent bot cards and quick action cards
+  - Added hover:shadow-primary/10 on all interactive cards for blue glow effect
+  - Added hover:border-primary/20 on stat cards for blue border accent on hover
+  - Added date display in welcome header section using Arabic locale formatting
+  - Updated welcome header border to border-primary/20 for blue accent
+  - Added 4 gradient section dividers between major dashboard sections with centered icon+label
+  - Updated quick actions: replaced logs/settings with docs (BookOpen) and support (LifeBuoy)
+  - Added EmptyStateIllustration component with floating animation and ambient glow
+  - Applied EmptyStateIllustration to timeline empty state and chart empty state
+  - Enhanced empty bots list with floating Bot icon, glow effect, and CTA button
+  - Added staggered slide-in animation on activity timeline entries
+  - Enhanced timeline dots with shadow glow (level-specific glowClass)
+  - Added gradient timeline line (from-primary/20 via-border to-transparent)
+  - Added hover:bg-primary/5 on timeline entries for blue hover highlight
+  - Added staggered entrance animation on recent bot cards
+  - Added icon badge wrappers (w-8 h-8 rounded-lg bg-primary/10) on section headers
+  - Typed CustomTooltip props (removed any type, added proper interface)
+  - Replaced orange with blue for totalLogs stat card (compliance with blue theme)
+- Enhanced account-settings.tsx with comprehensive styling improvements:
+  - Removed unused imports (ToggleLeft, ToggleRight, MessageSquare)
+  - Added SectionDivider component with gradient lines and icon+label badge (supports danger variant)
+  - Replaced all Separator-based dividers with gradient SectionDivider component
+  - Added border-r-2 border-r-primary/40 colored accent bars on Personal Info card
+  - Added border-r-2 border-r-blue-400/30 on Notifications card
+  - Added border-r-2 border-r-sky-400/30 on Connected Accounts card
+  - Added border-r-2 border-r-red-400/30 on Security card
+  - Added border-r-2 border-r-emerald-400/30 on Limits card
+  - Added animated gradient border on profile avatar (from-primary via-blue-500 to-primary with pulse)
+  - Added pulsing scale animation on online status indicator dot
+  - Changed admin badge colors from blue-500 to primary for theme consistency
+  - Populated notification preferences with 4 mock items (email, errors, system updates, bot status)
+  - Added green/red dot indicator next to each notification toggle (shows enabled state)
+  - Added shadow-sm shadow-emerald-400/40 on enabled notification dots
+  - Populated connected accounts with Telegram (connected, Send icon) and GitHub (not connected, SVG icon)
+  - Added green online dot indicator on connected Telegram account
+  - Added 'not connected' badge (border-muted/50) for disconnected accounts
+  - Enhanced connect/disconnect button with proper blue primary styling
+  - Added animated password strength progress bar using framer-motion (width 0 → value)
+  - Added animated label transition on password strength text change
+  - Enhanced danger zone with red gradient background (from-red-500/5 via-red-500/3 to-transparent)
+  - Added decorative red blur circle in danger zone corner
+  - Added animated wiggle animation on danger zone AlertTriangle icon
+  - Added hover:shadow-red-500/20 on danger zone delete button
+  - Added gradient hover border effect on profile card (from-primary/20 to-blue-500/20)
+  - Added sectionHeaderVariants for slide-in animation on section dividers
+  - Added transition-colors on all interactive elements
+- All variants use Variants type without as const (per animation rules)
+- All color values use primary/blue theme (no amber/yellow/gold)
+- All text remains in Arabic (RTL)
+- Fixed react-hooks/set-state-in-effect lint error in AnimatedCounter
+- Removed unused eslint-disable directive
+- Zero lint errors, zero compilation errors
+
+Stage Summary:
+- 2 files enhanced with 50+ total visual improvements
+- Dashboard: animated counters, glassmorphism cards, gradient dividers, empty state illustrations, enhanced timeline with glow dots, updated quick actions
+- Account Settings: colored accent bars, animated gradient avatar border, populated notifications/accounts, gradient section dividers, animated password strength, enhanced danger zone
+- All Variants typed correctly with ease: 'easeOut' (no as const)
+
+---
+Task ID: qa-review-round-1
+Agent: Main Orchestrator Agent
+Task: QA Review — Browser Testing, Styling Enhancements, New Features
+
+Work Log:
+- Read worklog.md (911 lines) to understand project history
+- Ran ESLint: zero errors
+- Verified build succeeds: all routes generated (including new notification + export routes)
+- QA via agent-browser:
+  - Landing page: loads correctly with black/blue theme, wolf logo image, zero console errors
+  - Login page: renders with glassmorphism, password visibility toggle, zero errors
+  - Register page: form validation works, password strength indicator, terms checkbox, zero errors
+  - Registration flow: POST /api/auth/register returns 200, auto-login via credentials callback succeeds
+  - Dashboard: renders with sidebar navigation (12 items), wolf logo in sidebar, zero errors
+  - Bot List: renders with search/filter bar, empty state for new users, zero errors
+  - All navigation works: clicking sidebar items switches pages correctly
+- Launched 3 parallel subagents for enhancement and new features:
+  - Agent A: Dashboard + Settings styling enhancements (completed)
+  - Agent B: Landing + Auth form visual polish (completed)
+  - Agent C: Notification System API + Bot Export feature (completed)
+- Post-agent verification:
+  - ESLint: zero errors
+  - Prisma db: schema push successful (Notification model added)
+  - Build: compiled successfully in 195ms with all routes generated
+  - 4 new API routes verified: /api/notifications, /api/notifications/[id]/read, /api/notifications/read-all, /api/bots/[id]/export
+
+Stage Summary:
+- Zero bugs found during QA
+- 3 major styling enhancements delivered via parallel subagents
+- 2 new features delivered: Notification System + Bot Export
+- Dashboard: animated counters, glassmorphism, welcome section, quick actions, empty state illustrations
+- Settings: colored accent bars, animated avatar border, section dividers, notification toggles, danger zone
+- Landing: animated testimonial cards, back-to-top button, contact/CTA section, section separators, loading skeleton
+- Auth forms: forgot password dialog, glow input focus, social button hover effects, strong checkmark animation, checkbox bounce
+- Notification System: full CRUD API with database persistence, real-time polling, type filtering, read/unread management
+- Bot Export: JSON data export with Blob download
+
+## Current Project Status (Updated)
+
+### Assessment
+The White Wolf Hosting platform is highly stable and feature-rich. All pages render correctly with zero console errors. The registration flow works end-to-end. The notification system now has real database persistence. The platform has 23+ pages/features with professional black/blue theme styling.
+
+### Completed in This Phase
+1. **QA Testing**: Full browser QA — landing, login, register, dashboard, bot list — zero errors
+2. **Dashboard Enhancement**: Animated counters, glassmorphism cards, welcome section, gradient dividers, empty state illustrations, quick actions bar
+3. **Settings Enhancement**: Colored accent bars, animated avatar border, section dividers, notification preferences, connected accounts, danger zone with wiggle animation
+4. **Landing Page Polish**: Animated testimonials, back-to-top button, contact/CTA section, section separators, loading skeleton, language card icon hover
+5. **Auth Form Polish**: Forgot password dialog, glow input focus, social button transitions, strong checkmark animation, terms checkbox bounce
+6. **Notification System**: Database model, 4 API routes, real-time polling (30s), type filtering, read/unread management, Arabic timestamps
+7. **Bot Export**: JSON data export API, download button in bot-detail action bar
+
+### Total Pages/Features (Updated)
+- Landing page (hero + pricing + FAQ + contact CTA + back-to-top) — Black/blue theme
+- Login / Register (wolf logo, glow inputs, forgot password dialog)
+- Dashboard (animated counters, welcome section, quick actions)
+- Bot list (search, filter, grid/list toggle, glassmorphism)
+- Bot detail (export/download, real API data)
+- Bot templates (8 templates)
+- Bot monitoring (default metrics)
+- Bot analytics (zero-value charts, empty states)
+- Bot console (terminal UI)
+- Bot comparison
+- File manager
+- Log viewer
+- Activity center (**real notifications** from database)
+- Deployment history
+- Help center
+- Settings (enhanced with accent bars, toggles, danger zone)
+- Admin panel / User management
+- Command palette (Ctrl+K)
+- Notification dropdown (**real data** with polling)
+- API Keys management
+- Webhooks management
+- Theme toggle (Dark/Light)
+- **Bot Export/Backup (NEW)** — JSON download
+- **Notification System API (NEW)** — 4 CRUD routes
+
+### API Routes (Updated — 20 routes)
+- /api/auth/[...nextauth], /api/auth/register
+- /api/bots, /api/bots/[id], /api/bots/[id]/start, /api/bots/[id]/stop, /api/bots/[id]/restart
+- /api/bots/[id]/env, /api/bots/[id]/files, /api/bots/[id]/files/[fileId], /api/bots/[id]/logs
+- /api/bots/[id]/export (NEW)
+- /api/notifications (NEW), /api/notifications/[id]/read (NEW), /api/notifications/read-all (NEW)
+- /api/stats, /api/users, /api/users/[userId]
+
+### Unresolved Issues & Risks
+- Bot analytics charts still show zero data (needs real metrics API)
+- Bot monitoring shows default metrics (needs Docker stats API)
+- Social login buttons (GitHub/Telegram) are UI-only
+- Forgot password dialog is UI-only (no email sending backend)
+
+### Priority Recommendations for Next Phase
+1. Implement real Docker stats API integration for bot monitoring
+2. Implement real analytics API with actual bot performance data
+3. Add WebSocket for real-time log streaming
+4. Implement email sending for forgot password
+5. Implement social login (GitHub/Telegram OAuth)
+6. Add file upload with drag-and-drop
+7. Add team collaboration features
+8. Add API documentation page (Swagger/OpenAPI)

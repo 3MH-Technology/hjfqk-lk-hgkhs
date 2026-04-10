@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   Bot,
   Play,
@@ -20,6 +20,10 @@ import {
   Clock,
   ChevronLeft,
   ArrowUpRight,
+  BookOpen,
+  LifeBuoy,
+  Inbox,
+  BarChart3,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +33,7 @@ import { useAppStore } from '@/store/app-store';
 import type { Page } from '@/store/app-store';
 import { CreateBotDialog } from '@/components/wolf/bots/create-bot-dialog';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import {
   BarChart,
   Bar,
@@ -138,11 +142,11 @@ const statCards = [
     key: 'totalLogs' as const,
     label: 'إجمالي السجلات',
     icon: ScrollText,
-    iconBg: 'bg-orange-500/15',
-    iconColor: 'text-orange-400',
-    gradientFrom: 'from-orange-500/20',
-    gradientTo: 'to-orange-500/5',
-    barColor: 'bg-orange-400',
+    iconBg: 'bg-blue-500/15',
+    iconColor: 'text-blue-400',
+    gradientFrom: 'from-blue-500/20',
+    gradientTo: 'to-blue-500/5',
+    barColor: 'bg-blue-400',
     trend: 'up' as const,
   },
 ];
@@ -170,11 +174,11 @@ const statusConfig: Record<string, { label: string; className: string; dotClass:
   },
 };
 
-const levelConfig: Record<string, { color: string; label: string }> = {
-  info: { color: 'bg-emerald-400', label: 'معلومات' },
-  warn: { color: 'bg-blue-400', label: 'تحذير' },
-  error: { color: 'bg-red-400', label: 'خطأ' },
-  debug: { color: 'bg-zinc-400', label: 'تصحيح' },
+const levelConfig: Record<string, { color: string; label: string; glowClass: string }> = {
+  info: { color: 'bg-emerald-400', label: 'معلومات', glowClass: 'shadow-emerald-400/40' },
+  warn: { color: 'bg-blue-400', label: 'تحذير', glowClass: 'shadow-blue-400/40' },
+  error: { color: 'bg-red-400', label: 'خطأ', glowClass: 'shadow-red-400/40' },
+  debug: { color: 'bg-zinc-400', label: 'تصحيح', glowClass: 'shadow-zinc-400/40' },
 };
 
 const languageLabels: Record<string, string> = {
@@ -203,33 +207,60 @@ const quickActions: {
     iconColor: 'text-emerald-400',
   },
   {
-    label: 'إدارة الملفات',
-    description: 'رفع وتعديل ملفات البوت',
-    icon: FolderOpen,
-    page: 'files',
+    label: 'عرض التوثيق',
+    description: 'دليل الاستخدام الكامل',
+    icon: BookOpen,
+    page: 'help',
     gradientFrom: 'from-sky-500/20',
     gradientTo: 'to-sky-500/5',
     iconColor: 'text-sky-400',
   },
   {
-    label: 'عرض السجلات',
-    description: 'مراقبة سجلات البوت',
-    icon: ScrollText,
-    page: 'logs',
-    gradientFrom: 'from-orange-500/20',
-    gradientTo: 'to-orange-500/5',
-    iconColor: 'text-orange-400',
-  },
-  {
-    label: 'الإعدادات',
-    description: 'تخصيص إعدادات حسابك',
-    icon: Settings,
-    page: 'settings',
+    label: 'الدعم الفني',
+    description: 'تواصل مع فريق الدعم',
+    icon: LifeBuoy,
+    page: 'help',
     gradientFrom: 'from-violet-500/20',
     gradientTo: 'to-violet-500/5',
     iconColor: 'text-violet-400',
   },
+  {
+    label: 'إدارة الملفات',
+    description: 'رفع وتعديل ملفات البوت',
+    icon: FolderOpen,
+    page: 'files',
+    gradientFrom: 'from-blue-500/20',
+    gradientTo: 'to-blue-500/5',
+    iconColor: 'text-blue-400',
+  },
 ];
+
+/* ─── Animated Counter Component ─── */
+
+function AnimatedCounter({ target, duration = 1200 }: { target: number; duration?: number }) {
+  const [count, setCount] = useState(0);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+
+  return <>{count}</>;
+}
 
 /* ─── Sparkline Bar Component ─── */
 function MiniSparkline({ bars, color }: { bars: number[]; color: string }) {
@@ -248,12 +279,12 @@ function MiniSparkline({ bars, color }: { bars: number[]; color: string }) {
 }
 
 /* ─── Custom Tooltip for Recharts ─── */
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-sm" dir="rtl">
       <p className="font-semibold mb-1">{label}</p>
-      {payload.map((entry: any, i: number) => (
+      {payload.map((entry, i) => (
         <p key={i} className="flex items-center gap-2">
           <span
             className="inline-block size-2.5 rounded-sm"
@@ -271,8 +302,30 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
+/* ─── Empty State Illustration ─── */
+function EmptyStateIllustration({ icon: Icon, message, subMessage }: { icon: typeof Clock; message: string; subMessage?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-10 text-center">
+      <motion.div
+        className="relative mb-4"
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className="absolute inset-0 blur-xl bg-primary/10 rounded-full scale-150" />
+        <div className="relative bg-primary/10 rounded-2xl p-4">
+          <Icon className="size-10 text-primary/50" />
+        </div>
+      </motion.div>
+      <p className="text-muted-foreground font-medium text-sm">{message}</p>
+      {subMessage && (
+        <p className="text-muted-foreground/60 text-xs mt-1">{subMessage}</p>
+      )}
+    </div>
+  );
+}
+
 /* ─── Animation Variants ─── */
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -280,12 +333,22 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: 'easeOut' as const },
+    transition: { duration: 0.4, ease: 'easeOut' },
+  },
+};
+
+const statCardVariants: Variants = {
+  hidden: { opacity: 0, y: 24, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -373,7 +436,7 @@ export function Dashboard() {
           });
           if (res.ok) {
             const logs = await res.json();
-            return logs.map((log: any) => ({ ...log, bot: { name: bot.name } }));
+            return logs.map((log: LogItem) => ({ ...log, bot: { name: bot.name } }));
           }
         } catch {
           // skip failed fetches
@@ -455,12 +518,18 @@ export function Dashboard() {
   };
 
   const getTrendValue = (key: keyof Stats, statsVal: Stats) => {
-    // Deterministic pseudo-random trend
     const seed = statsVal[key] * 3 + key.length;
     return seed % 5;
   };
 
   const userName = user?.name || user?.email?.split('@')[0] || 'المستخدم';
+
+  const todayDate = new Date().toLocaleDateString('ar-SA', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <motion.div
@@ -472,7 +541,7 @@ export function Dashboard() {
       {/* ─── Welcome Header ─── */}
       <motion.div
         variants={itemVariants}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-bl from-primary/10 via-card to-card border border-border p-6 sm:p-8"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-bl from-primary/10 via-card to-card border border-primary/20 p-6 sm:p-8"
       >
         {/* Decorative background circles */}
         <div className="absolute top-0 left-0 w-48 h-48 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -485,6 +554,10 @@ export function Dashboard() {
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               إليك ملخص نشاطك اليوم
+            </p>
+            <p className="text-muted-foreground/60 mt-1 text-xs flex items-center gap-1.5">
+              <Clock className="size-3" />
+              {todayDate}
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
@@ -509,9 +582,15 @@ export function Dashboard() {
         </div>
       </motion.div>
 
+      {/* ─── Gradient Section Divider ─── */}
+      <motion.div variants={itemVariants} className="relative flex items-center gap-3 -my-1">
+        <div className="flex-1 h-px bg-gradient-to-l from-primary/20 via-primary/10 to-transparent" />
+        <div className="flex-1 h-px bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+      </motion.div>
+
       {/* ─── Stats Grid ─── */}
       <motion.div
-        variants={itemVariants}
+        variants={containerVariants}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         {statsLoading
@@ -525,58 +604,67 @@ export function Dashboard() {
               const bars = sparklineData[card.key] || [];
               const isUp = card.trend === 'up';
               return (
-                <Card
-                  key={card.key}
-                  className={`group bg-gradient-to-bl ${card.gradientFrom} ${card.gradientTo} border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-default`}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
+                <motion.div key={card.key} variants={statCardVariants}>
+                  <Card
+                    className={`group backdrop-blur-sm bg-card/60 bg-gradient-to-bl ${card.gradientFrom} ${card.gradientTo} border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 cursor-default`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`flex items-center justify-center size-11 rounded-xl ${card.iconBg} transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg ${card.iconBg}`}
+                          >
+                            <Icon className={`size-5 ${card.iconColor}`} />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold tabular-nums">
+                              <AnimatedCounter target={stats[card.key]} />
+                            </p>
+                            <p className="text-xs text-muted-foreground">{card.label}</p>
+                          </div>
+                        </div>
                         <div
-                          className={`flex items-center justify-center size-11 rounded-xl ${card.iconBg} transition-transform group-hover:scale-110`}
+                          className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
+                            isUp
+                              ? 'text-emerald-400 bg-emerald-500/10'
+                              : 'text-red-400 bg-red-500/10'
+                          }`}
                         >
-                          <Icon className={`size-5 ${card.iconColor}`} />
-                        </div>
-                        <div>
-                          <p className="text-2xl font-bold">{stats[card.key]}</p>
-                          <p className="text-xs text-muted-foreground">{card.label}</p>
+                          {isUp ? (
+                            <TrendingUp className="size-3" />
+                          ) : (
+                            <TrendingDown className="size-3" />
+                          )}
+                          {trendVal}%
                         </div>
                       </div>
-                      <div
-                        className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-                          isUp
-                            ? 'text-emerald-400 bg-emerald-500/10'
-                            : 'text-red-400 bg-red-500/10'
-                        }`}
-                      >
-                        {isUp ? (
-                          <TrendingUp className="size-3" />
-                        ) : (
-                          <TrendingDown className="size-3" />
-                        )}
-                        {trendVal}%
-                      </div>
-                    </div>
-                    <MiniSparkline bars={bars} color={card.barColor} />
-                  </CardContent>
-                </Card>
+                      <MiniSparkline bars={bars} color={card.barColor} />
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
       </motion.div>
 
+      {/* ─── Gradient Section Divider ─── */}
+      <motion.div variants={itemVariants} className="relative flex items-center gap-3 -my-1">
+        <div className="flex-1 h-px bg-gradient-to-l from-primary/15 via-primary/8 to-transparent" />
+        <div className="flex items-center gap-1.5 px-2">
+          <Activity className="size-3.5 text-primary/50" />
+          <span className="text-[10px] text-primary/40 font-medium">إجراءات</span>
+        </div>
+        <div className="flex-1 h-px bg-gradient-to-r from-primary/15 via-primary/8 to-transparent" />
+      </motion.div>
+
       {/* ─── Quick Actions Grid ─── */}
       <motion.div variants={itemVariants}>
-        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-          <Activity className="size-5 text-primary" />
-          إجراءات سريعة
-        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <Card
                 key={action.label}
-                className={`group bg-gradient-to-bl ${action.gradientFrom} ${action.gradientTo} border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer`}
+                className={`group backdrop-blur-sm bg-card/60 bg-gradient-to-bl ${action.gradientFrom} ${action.gradientTo} border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:border-primary/30 hover:shadow-primary/10 transition-all duration-300 cursor-pointer`}
                 onClick={() => {
                   if (action.page === 'bots') {
                     setCreateDialogOpen(true);
@@ -605,14 +693,26 @@ export function Dashboard() {
         </div>
       </motion.div>
 
+      {/* ─── Gradient Section Divider ─── */}
+      <motion.div variants={itemVariants} className="relative flex items-center gap-3 -my-1">
+        <div className="flex-1 h-px bg-gradient-to-l from-primary/15 via-primary/8 to-transparent" />
+        <div className="flex items-center gap-1.5 px-2">
+          <Clock className="size-3.5 text-primary/50" />
+          <span className="text-[10px] text-primary/40 font-medium">نشاط وموارد</span>
+        </div>
+        <div className="flex-1 h-px bg-gradient-to-r from-primary/15 via-primary/8 to-transparent" />
+      </motion.div>
+
       {/* ─── Middle Row: Activity Timeline + Resource Chart ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ─── Activity Timeline ─── */}
         <motion.div variants={itemVariants}>
-          <Card className="bg-card border border-border rounded-xl h-full">
+          <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Clock className="size-5 text-primary" />
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Clock className="size-4 text-primary" />
+                </div>
                 النشاط الأخير
               </CardTitle>
               <Button
@@ -639,29 +739,35 @@ export function Dashboard() {
                   ))}
                 </div>
               ) : activityLogs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Clock className="size-10 text-muted-foreground/30 mb-2" />
-                  <p className="text-muted-foreground text-sm">لا يوجد نشاط حتى الآن</p>
-                </div>
+                <EmptyStateIllustration
+                  icon={Inbox}
+                  message="لا يوجد نشاط حتى الآن"
+                  subMessage="ستظهر هنا آخر الأنشطة عندما تبدأ باستخدام المنصة"
+                />
               ) : (
                 <div className="space-y-0 relative">
                   {/* Timeline line */}
-                  <div className="absolute top-2 right-[4px] bottom-2 w-px bg-border" />
-                  <div className="max-h-80 overflow-y-auto space-y-0">
-                    {activityLogs.map((log) => {
+                  <div className="absolute top-2 right-[4px] bottom-2 w-px bg-gradient-to-b from-primary/20 via-border to-transparent" />
+                  <div className="max-h-80 overflow-y-auto space-y-0 custom-scrollbar">
+                    {activityLogs.map((log, idx) => {
                       const level = levelConfig[log.level] || levelConfig.info;
                       return (
-                        <div
+                        <motion.div
                           key={log.id}
-                          className="flex items-start gap-3 py-3 pr-0 pl-2 relative group hover:bg-accent/30 rounded-lg px-3 transition-colors"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05, duration: 0.3, ease: 'easeOut' }}
+                          className="flex items-start gap-3 py-3 pr-0 pl-2 relative group hover:bg-primary/5 rounded-lg px-3 transition-colors"
                         >
-                          {/* Dot */}
-                          <div
-                            className={`size-[10px] rounded-full mt-1.5 shrink-0 relative z-10 ring-4 ring-card ${level.color}`}
-                          />
+                          {/* Dot with glow */}
+                          <div className="relative shrink-0 z-10 flex items-center justify-center">
+                            <div
+                              className={`size-[10px] rounded-full mt-1.5 ring-4 ring-card ${level.color} shadow-sm ${level.glowClass}`}
+                            />
+                          </div>
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm leading-relaxed truncate group-hover:text-foreground text-foreground/90">
+                            <p className="text-sm leading-relaxed truncate group-hover:text-foreground text-foreground/90 transition-colors">
                               {log.message}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
@@ -678,7 +784,7 @@ export function Dashboard() {
                           {/* Level Badge */}
                           <Badge
                             variant="outline"
-                            className={`shrink-0 text-[10px] px-1.5 py-0 ${
+                            className={`shrink-0 text-[10px] px-1.5 py-0 transition-colors ${
                               log.level === 'error'
                                 ? 'text-red-400 border-red-500/25 bg-red-500/10'
                                 : log.level === 'warn'
@@ -688,7 +794,7 @@ export function Dashboard() {
                           >
                             {level.label}
                           </Badge>
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </div>
@@ -700,10 +806,12 @@ export function Dashboard() {
 
         {/* ─── Resource Usage Chart ─── */}
         <motion.div variants={itemVariants}>
-          <Card className="bg-card border border-border rounded-xl h-full">
+          <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Cpu className="size-5 text-primary" />
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Cpu className="size-4 text-primary" />
+                </div>
                 استخدام الموارد
               </CardTitle>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -721,10 +829,11 @@ export function Dashboard() {
               {loading ? (
                 <Skeleton className="h-64 rounded-xl" />
               ) : bots.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <MemoryStick className="size-10 text-muted-foreground/30 mb-2" />
-                  <p className="text-muted-foreground text-sm">لا توجد بوتات لعرض الموارد</p>
-                </div>
+                <EmptyStateIllustration
+                  icon={BarChart3}
+                  message="لا توجد بوتات لعرض الموارد"
+                  subMessage="سيظهر الرسم البياني بعد إنشاء أول بوت"
+                />
               ) : (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart
@@ -780,11 +889,23 @@ export function Dashboard() {
         </motion.div>
       </div>
 
+      {/* ─── Gradient Section Divider ─── */}
+      <motion.div variants={itemVariants} className="relative flex items-center gap-3 -my-1">
+        <div className="flex-1 h-px bg-gradient-to-l from-primary/15 via-primary/8 to-transparent" />
+        <div className="flex items-center gap-1.5 px-2">
+          <Bot className="size-3.5 text-primary/50" />
+          <span className="text-[10px] text-primary/40 font-medium">بوتات</span>
+        </div>
+        <div className="flex-1 h-px bg-gradient-to-r from-primary/15 via-primary/8 to-transparent" />
+      </motion.div>
+
       {/* ─── Recent Bots (Horizontal Scroll) ─── */}
       <motion.div variants={itemVariants}>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Bot className="size-5 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Bot className="size-4 text-primary" />
+            </div>
             البوتات الأخيرة
           </h2>
           <Button
@@ -805,11 +926,20 @@ export function Dashboard() {
             ))}
           </div>
         ) : recentBots.length === 0 ? (
-          <Card className="bg-card border border-border rounded-xl">
+          <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <Bot className="size-12 text-muted-foreground/40 mb-3" />
+              <motion.div
+                className="relative mb-4"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <div className="absolute inset-0 blur-xl bg-primary/10 rounded-full scale-150" />
+                <div className="relative bg-primary/10 rounded-2xl p-5">
+                  <Bot className="size-12 text-primary/40" />
+                </div>
+              </motion.div>
               <p className="text-muted-foreground font-medium">لا توجد بوتات بعد</p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
+              <p className="text-sm text-muted-foreground/60 mt-1">
                 ابدأ بإنشاء بوتك الأول
               </p>
               <Button
@@ -823,58 +953,64 @@ export function Dashboard() {
             </CardContent>
           </Card>
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory">
-            {recentBots.map((bot) => {
+          <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory custom-scrollbar">
+            {recentBots.map((bot, idx) => {
               const status = statusConfig[bot.status] || statusConfig.stopped;
               return (
-                <Card
+                <motion.div
                   key={bot.id}
-                  className="shrink-0 w-72 bg-card border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 hover:shadow-primary/5 transition-all duration-300 cursor-pointer snap-start"
-                  onClick={() => handleBotClick(bot.id)}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.06, duration: 0.4, ease: 'easeOut' }}
                 >
-                  <CardContent className="p-4 flex flex-col gap-3">
-                    {/* Bot name + status */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`size-2.5 rounded-full shrink-0 ${status.dotClass}`}
-                          />
-                          <p className="font-semibold truncate">{bot.name}</p>
+                  <Card
+                    className="shrink-0 w-72 backdrop-blur-sm bg-card/60 border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 hover:shadow-primary/10 transition-all duration-300 cursor-pointer snap-start"
+                    onClick={() => handleBotClick(bot.id)}
+                  >
+                    <CardContent className="p-4 flex flex-col gap-3">
+                      {/* Bot name + status */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`size-2.5 rounded-full shrink-0 ${status.dotClass}`}
+                            />
+                            <p className="font-semibold truncate">{bot.name}</p>
+                          </div>
+                          {bot.description && (
+                            <p className="text-xs text-muted-foreground mt-1 truncate pr-[18px]">
+                              {bot.description}
+                            </p>
+                          )}
                         </div>
-                        {bot.description && (
-                          <p className="text-xs text-muted-foreground mt-1 truncate pr-[18px]">
-                            {bot.description}
-                          </p>
-                        )}
+                        <Badge
+                          variant="outline"
+                          className={`shrink-0 text-[10px] ${status.className}`}
+                        >
+                          {status.label}
+                        </Badge>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={`shrink-0 text-[10px] ${status.className}`}
-                      >
-                        {status.label}
-                      </Badge>
-                    </div>
 
-                    {/* Bot details */}
-                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <FileText className="size-3.5" />
-                        <span>{languageLabels[bot.language] || bot.language}</span>
+                      {/* Bot details */}
+                      <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="size-3.5" />
+                          <span>{languageLabels[bot.language] || bot.language}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="size-3.5" />
+                          <span>{bot._count.files} ملف</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <FileText className="size-3.5" />
-                        <span>{bot._count.files} ملف</span>
-                      </div>
-                    </div>
 
-                    {/* Last updated */}
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 pt-1 border-t border-border/50">
-                      <Clock className="size-3" />
-                      <span>آخر تحديث: {formatRelativeTime(bot.updatedAt)}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                      {/* Last updated */}
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 pt-1 border-t border-border/50">
+                        <Clock className="size-3" />
+                        <span>آخر تحديث: {formatRelativeTime(bot.updatedAt)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
           </div>

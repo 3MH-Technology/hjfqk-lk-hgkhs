@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      String   @default("user")
-  isBanned  Boolean  @default(false)
-  maxBots   Int      @default(5)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  bots      Bot[]
+  id             String         @id @default(cuid())
+  email          String         @unique
+  password       String
+  name           String?
+  role           String         @default("user")
+  isBanned       Boolean        @default(false)
+  maxBots        Int            @default(5)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  bots           Bot[]
+  notifications  Notification[]
 }
 
 model Bot {
@@ -70,4 +71,18 @@ model BotEnv {
   bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
 
   @@unique([botId, key])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @default("info")
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

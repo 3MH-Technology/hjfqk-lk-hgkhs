@@ -25,6 +25,7 @@ import {
   AlertTriangle,
   Power,
   RefreshCw,
+  Download,
 } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
@@ -223,6 +224,29 @@ export function BotDetail() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await fetch(`/api/bots/${bot!.id}/export`, { credentials: 'include' });
+      if (!res.ok) {
+        toast.error('فشل في تصدير بيانات البوت');
+        return;
+      }
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${bot!.name}-export.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('تم تصدير بيانات البوت بنجاح');
+    } catch {
+      toast.error('حدث خطأ أثناء التصدير');
+    }
+  };
+
   const handleDelete = async () => {
     setActionLoading(true);
     try {
@@ -363,6 +387,17 @@ export function BotDetail() {
             >
               <Terminal className="h-4 w-4" />
               وحدة التحكم
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 text-primary border-primary/30 hover:bg-primary/10"
+              onClick={handleExport}
+            >
+              <Download className="h-4 w-4" />
+              تصدير
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>

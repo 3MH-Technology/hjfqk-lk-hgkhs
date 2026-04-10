@@ -1,15 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   Bell,
   CheckCircle2,
   AlertTriangle,
   XCircle,
   Info,
-  Upload,
-  RotateCcw,
   CheckCheck,
   ArrowLeft,
 } from 'lucide-react';
@@ -31,10 +29,11 @@ type NotificationType = 'info' | 'success' | 'warning' | 'error';
 interface NotificationItem {
   id: string;
   type: NotificationType;
-  icon: typeof Bell;
   title: string;
+  message: string;
   timeAgo: string;
   read: boolean;
+  link?: string | null;
 }
 
 /* ─── Type Config ─── */
@@ -42,40 +41,41 @@ interface NotificationItem {
 const typeConfig: Record<
   NotificationType,
   {
+    icon: typeof Bell;
     iconBg: string;
     iconColor: string;
     barColor: string;
   }
 > = {
   success: {
+    icon: CheckCircle2,
     iconBg: 'bg-emerald-500/15',
     iconColor: 'text-emerald-400',
     barColor: 'bg-emerald-400',
   },
   error: {
+    icon: XCircle,
     iconBg: 'bg-red-500/15',
     iconColor: 'text-red-400',
     barColor: 'bg-red-400',
   },
   warning: {
+    icon: AlertTriangle,
     iconBg: 'bg-blue-500/15',
     iconColor: 'text-blue-400',
     barColor: 'bg-blue-400',
   },
   info: {
+    icon: Info,
     iconBg: 'bg-sky-500/15',
     iconColor: 'text-sky-400',
     barColor: 'bg-sky-400',
   },
 };
 
-/* ─── Notifications loaded from API ─── */
-
-const initialNotifications: NotificationItem[] = [];
-
 /* ─── Animation Variants ─── */
 
-const listItemVariants = {
+const listItemVariants: Variants = {
   hidden: { opacity: 0, x: 12, height: 0 },
   visible: (i: number) => ({
     opacity: 1,
@@ -84,7 +84,7 @@ const listItemVariants = {
     transition: {
       delay: i * 0.04,
       duration: 0.25,
-      ease: 'easeOut' as const,
+      ease: 'easeOut',
     },
   }),
   exit: {
@@ -95,40 +95,146 @@ const listItemVariants = {
   },
 };
 
+/* ─── Relative Time ─── */
+
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const diffMs = Date.now() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHours = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffSec < 60) return 'الآن';
+  if (diffMin < 60)
+    return diffMin === 1 ? 'منذ دقيقة' : `منذ ${diffMin} دقيقة`;
+  if (diffHours < 24)
+    return diffHours === 1 ? 'منذ ساعة' : `منذ ${diffHours} ساعة`;
+  if (diffDays < 7)
+    return diffDays === 1 ? 'منذ يوم' : `منذ ${diffDays} يوم`;
+  return date.toLocaleDateString('ar-SA', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 /* ─── Main Component ─── */
 
 export function NotificationDropdown() {
   const { unreadNotifications, setUnreadNotifications, setCurrentPage } =
     useAppStore();
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(
-    () => initialNotifications
-  );
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/notifications', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const items: NotificationItem[] = data.map((n: { id: string; type: string; title: string; message: string; read: boolean; link?: string | null; createdAt: string }) => ({
+          id: n.id,
+          type: (n.type as NotificationType) || 'info',
+          title: n.title,
+          message: n.message,
+          timeAgo: formatRelativeTime(n.createdAt),
+          read: n.read,
+          link: n.link,
+        }));
+        setNotifications(items);
+        const unread = items.filter((n) => !n.read).length;
+        setUnreadNotifications(unread);
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, [setUnreadNotifications]);
+
+  // Fetch on mount and every 30 seconds
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  // Refetch when popover opens
+  useEffect(() => {
+    if (open) {
+      fetchNotifications();
+    }
+  }, [open, fetchNotifications]);
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
     [notifications]
   );
 
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadNotifications(0);
+  const displayNotifications = useMemo(
+    () => notifications.slice(0, 5),
+    [notifications]
+  );
+
+  const handleMarkAllRead = async () => {
+    try {
+      const res = await fetch('/api/notifications/read-all', {
+        method: 'PUT',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        setUnreadNotifications(0);
+      }
+    } catch {
+      // Silently fail
+    }
   };
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) => {
-      const updated = prev.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      );
-      const newUnread = updated.filter((n) => !n.read).length;
-      setUnreadNotifications(newUnread);
-      return updated;
-    });
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const res = await fetch(`/api/notifications/${id}/read`, {
+        method: 'PUT',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setNotifications((prev) => {
+          const updated = prev.map((n) =>
+            n.id === id ? { ...n, read: true } : n
+          );
+          const newUnread = updated.filter((n) => !n.read).length;
+          setUnreadNotifications(newUnread);
+          return updated;
+        });
+      }
+    } catch {
+      // Silently fail
+    }
   };
 
   const handleViewAll = () => {
     setOpen(false);
     setCurrentPage('activity');
+  };
+
+  const handleNotificationClick = (notif: NotificationItem) => {
+    if (!notif.read) handleMarkAsRead(notif.id);
+    if (notif.link) {
+      const pageMap: Record<string, string> = {
+        'bot-detail': 'bot-detail',
+        'bots': 'bots',
+        'dashboard': 'dashboard',
+        'settings': 'settings',
+        'bot-monitoring': 'bot-monitoring',
+        'bot-analytics': 'bot-analytics',
+      };
+      if (pageMap[notif.link]) {
+        setCurrentPage(notif.link as 'bot-detail' | 'bots' | 'dashboard' | 'settings' | 'bot-monitoring' | 'bot-analytics');
+        setOpen(false);
+      }
+    }
   };
 
   return (
@@ -186,7 +292,14 @@ export function NotificationDropdown() {
         <ScrollArea className="max-h-72">
           <AnimatePresence initial={false}>
             <div className="p-1.5">
-              {notifications.length === 0 ? (
+              {loading && notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-muted/50 mb-3 animate-pulse">
+                    <Bell className="size-6 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">جاري التحميل...</p>
+                </div>
+              ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
                   <div className="flex size-12 items-center justify-center rounded-xl bg-muted/50 mb-3">
                     <Bell className="size-6 text-muted-foreground/40" />
@@ -196,9 +309,9 @@ export function NotificationDropdown() {
                     ستظهر الإشعارات الجديدة هنا تلقائياً
                   </p>
                 </div>
-              ) : notifications.map((notif, index) => {
+              ) : displayNotifications.map((notif, index) => {
                 const config = typeConfig[notif.type];
-                const NotifIcon = notif.icon;
+                const NotifIcon = config.icon;
 
                 return (
                   <motion.button
@@ -209,9 +322,7 @@ export function NotificationDropdown() {
                     animate="visible"
                     exit="exit"
                     layout
-                    onClick={() => {
-                      if (!notif.read) handleMarkAsRead(notif.id);
-                    }}
+                    onClick={() => handleNotificationClick(notif)}
                     className={`
                       group relative flex items-start gap-3 w-full text-right p-2.5 rounded-lg
                       transition-all duration-200 cursor-pointer

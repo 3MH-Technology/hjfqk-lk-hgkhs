@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { signIn } from 'next-auth/react';
-import { motion } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import {
   Loader2,
   Eye,
@@ -11,6 +11,7 @@ import {
   Check,
   X,
   Send,
+  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/app-store';
@@ -29,29 +30,60 @@ import {
 } from '@/components/ui/card';
 
 /* ─── Framer Motion Variants ─── */
-const formVariants = {
-  hidden: { opacity: 0, y: 24, scale: 0.98 } as const,
-  visible: { opacity: 1, y: 0, scale: 1 } as const,
-} as const;
+const formVariants: Variants = {
+  hidden: { opacity: 0, y: 24, scale: 0.98 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+};
 
-const brandingVariants = {
-  hidden: { opacity: 0, x: 20 } as const,
-  visible: { opacity: 1, x: 0 } as const,
-} as const;
+const brandingVariants: Variants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { opacity: 1, x: 0 },
+};
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: {},
   visible: {
     transition: {
       staggerChildren: 0.05,
     },
   },
-} as const;
+};
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 } as const,
-  visible: { opacity: 1, y: 0 } as const,
-} as const;
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const inputGlowVariants: Variants = {
+  idle: { boxShadow: '0 0 0 0px transparent' },
+  focused: {
+    boxShadow: '0 0 0 2px oklch(0.60 0.20 250 / 0.15), 0 0 20px -4px oklch(0.60 0.20 250 / 0.2)',
+    transition: { duration: 0.3, ease: 'easeOut' },
+  },
+};
+
+const eyeSwapVariants: Variants = {
+  show: { rotate: 0, scale: 1, opacity: 1 },
+  hide: { rotate: -90, scale: 0.5, opacity: 0 },
+};
+
+const strongCheckVariants: Variants = {
+  hidden: { scale: 0, opacity: 0, pathLength: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    pathLength: 1,
+    transition: { duration: 0.5, ease: 'easeOut', type: 'spring', stiffness: 300, damping: 15 },
+  },
+};
+
+const bounceCheckVariants: Variants = {
+  unchecked: { scale: 1 },
+  checked: {
+    scale: [1, 1.3, 0.9, 1.1, 1],
+    transition: { duration: 0.4, ease: 'easeOut' },
+  },
+};
 
 /* ─── Wolf Logo Component ─── */
 function WolfLogo({ size = 48 }: { size?: number }) {
@@ -132,15 +164,115 @@ function usePasswordStrength(password: string) {
 function RequirementItem({ met, text }: { met: boolean; text: string }) {
   return (
     <div className="flex items-center gap-2 text-xs">
-      {met ? (
-        <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
-      ) : (
-        <X className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-      )}
+      <motion.div
+        initial={false}
+        animate={met ? { scale: 1, rotate: 0 } : { scale: 0.8, rotate: -10 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      >
+        {met ? (
+          <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+        ) : (
+          <X className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+        )}
+      </motion.div>
       <span className={met ? 'text-green-400/90' : 'text-muted-foreground/60'}>
         {text}
       </span>
     </div>
+  );
+}
+
+/* ─── Animated Strong Checkmark ─── */
+function StrongCheckmark({ show }: { show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          className="flex items-center gap-1.5 text-green-400"
+          variants={strongCheckVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+        >
+          <motion.div
+            className="w-5 h-5 rounded-full bg-green-400/15 border border-green-400/30 flex items-center justify-center"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-green-400" />
+          </motion.div>
+          <span className="text-xs font-medium">كلمة مرور قوية!</span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ─── Enhanced Input Wrapper with Focus Glow ─── */
+function GlowInput({
+  id,
+  label,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  disabled,
+  dir,
+  autoComplete,
+  children,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled: boolean;
+  dir?: string;
+  autoComplete: string;
+  children?: React.ReactNode;
+}) {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <motion.div variants={itemVariants} className="space-y-2">
+      <Label htmlFor={id} className="text-sm">{label}</Label>
+      <motion.div
+        variants={inputGlowVariants}
+        animate={isFocused ? 'focused' : 'idle'}
+        className="auth-input-wrapper relative rounded-lg"
+      >
+        <Input
+          id={id}
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          className={`bg-background/50 h-11 ${children ? 'pe-11' : ''} transition-all duration-200 focus:ring-0 focus:ring-offset-0`}
+          autoComplete={autoComplete}
+          dir={dir}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+        />
+        {children && (
+          <div className="absolute left-1 top-1/2 -translate-y-1/2">
+            {children}
+          </div>
+        )}
+      </motion.div>
+      {/* Gradient underline effect */}
+      <motion.div
+        className="h-0.5 rounded-full bg-gradient-to-l from-transparent via-primary/60 to-transparent"
+        initial={{ scaleX: 0, opacity: 0 }}
+        animate={{
+          scaleX: isFocused ? 1 : 0,
+          opacity: isFocused ? 1 : 0,
+        }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      />
+    </motion.div>
   );
 }
 
@@ -154,6 +286,12 @@ function AuthBrandingPanel() {
       animate="visible"
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
+      {/* Subtle background texture overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{
+        backgroundImage: 'radial-gradient(circle, oklch(0.60 0.20 250) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }} />
+
       {/* Floating particles */}
       {[...Array(12)].map((_, i) => (
         <span
@@ -340,6 +478,12 @@ export default function RegisterForm() {
 
       {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center px-4 py-12 md:px-8 relative auth-gradient-mesh">
+        {/* Subtle background texture overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.015]" style={{
+          backgroundImage: 'radial-gradient(circle, oklch(0.60 0.20 250) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }} />
+
         {/* Wolf silhouette floating particles */}
         <WolfSilhouetteParticle size={20} className="auth-wolf-particle auth-wolf-particle-1" style={{ top: '10%', right: '12%' } as React.CSSProperties} />
         <WolfSilhouetteParticle size={14} className="auth-wolf-particle auth-wolf-particle-2" style={{ top: '28%', right: '22%' } as React.CSSProperties} />
@@ -398,44 +542,38 @@ export default function RegisterForm() {
                 animate="visible"
               >
                 {/* Name */}
-                <motion.div className="space-y-2" variants={itemVariants}>
-                  <Label htmlFor="register-name">الاسم</Label>
-                  <div className="auth-input-wrapper">
-                    <Input
-                      id="register-name"
-                      type="text"
-                      placeholder="اسم المستخدم"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={isLoading}
-                      className="bg-background/50 h-11"
-                      autoComplete="name"
-                    />
-                  </div>
-                </motion.div>
+                <GlowInput
+                  id="register-name"
+                  label="الاسم"
+                  type="text"
+                  placeholder="اسم المستخدم"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={isLoading}
+                  autoComplete="name"
+                />
 
                 {/* Email */}
-                <motion.div className="space-y-2" variants={itemVariants}>
-                  <Label htmlFor="register-email">البريد الإلكتروني</Label>
-                  <div className="auth-input-wrapper">
-                    <Input
-                      id="register-email"
-                      type="email"
-                      placeholder="example@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={isLoading}
-                      className="bg-background/50 h-11"
-                      autoComplete="email"
-                      dir="ltr"
-                    />
-                  </div>
-                </motion.div>
+                <GlowInput
+                  id="register-email"
+                  label="البريد الإلكتروني"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  dir="ltr"
+                  autoComplete="email"
+                />
 
                 {/* Password */}
-                <motion.div className="space-y-2" variants={itemVariants}>
-                  <Label htmlFor="register-password">كلمة المرور</Label>
-                  <div className="auth-input-wrapper relative">
+                <motion.div variants={itemVariants} className="space-y-2">
+                  <Label htmlFor="register-password" className="text-sm">كلمة المرور</Label>
+                  <motion.div
+                    variants={inputGlowVariants}
+                    animate="idle"
+                    className="auth-input-wrapper relative rounded-lg"
+                  >
                     <Input
                       id="register-password"
                       type={showPassword ? 'text' : 'password'}
@@ -443,34 +581,51 @@ export default function RegisterForm() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={isLoading}
-                      className="bg-background/50 h-11 pe-11"
+                      className="bg-background/50 h-11 pe-11 transition-all duration-200 focus:ring-0 focus:ring-offset-0"
                       autoComplete="new-password"
                       dir="ltr"
+                      onFocus={() => {
+                        // Focus glow handled via parent state
+                      }}
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute left-1 top-1/2 -translate-y-1/2 h-9 w-9 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowPassword(!showPassword)}
-                      tabIndex={-1}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+                    <div className="absolute left-1 top-1/2 -translate-y-1/2">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={showPassword ? 'visible' : 'hidden'}
+                          initial="hide"
+                          animate="show"
+                          exit="hide"
+                          transition={{ duration: 0.2, ease: 'easeOut' }}
+                        >
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+                            onClick={() => setShowPassword(!showPassword)}
+                            tabIndex={-1}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
 
                   {/* Password strength bar */}
                   {password.length > 0 && (
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${strengthColorClass}`}
-                            style={{ width: `${percent}%` }}
+                          <motion.div
+                            className={`h-full rounded-full ${strengthColorClass}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percent}%` }}
+                            transition={{ duration: 0.4, ease: 'easeOut' }}
                           />
                         </div>
                         <span className={`text-xs font-medium ${strengthLabelColor}`}>
@@ -478,49 +633,74 @@ export default function RegisterForm() {
                         </span>
                       </div>
 
-                      {/* Requirements checklist */}
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                        <RequirementItem met={checks.minLength} text="6 أحرف على الأقل" />
-                        <RequirementItem met={checks.hasLetter} text="يحتوي على أحرف" />
-                        <RequirementItem met={checks.hasNumber} text="يحتوي على أرقام" />
-                        <RequirementItem met={checks.hasSpecial} text="يحتوي على رموز خاصة" />
+                      {/* Animated strong checkmark */}
+                      <div className="flex items-center justify-between">
+                        {/* Requirements checklist */}
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                          <RequirementItem met={checks.minLength} text="6 أحرف على الأقل" />
+                          <RequirementItem met={checks.hasLetter} text="يحتوي على أحرف" />
+                          <RequirementItem met={checks.hasNumber} text="يحتوي على أرقام" />
+                          <RequirementItem met={checks.hasSpecial} text="يحتوي على رموز خاصة" />
+                        </div>
+                        <StrongCheckmark show={strength === 'strong'} />
                       </div>
                     </div>
                   )}
                 </motion.div>
 
                 {/* Confirm password */}
-                <motion.div className="space-y-2" variants={itemVariants}>
-                  <Label htmlFor="register-confirm-password">تأكيد كلمة المرور</Label>
-                  <div className="auth-input-wrapper">
-                    <Input
-                      id="register-confirm-password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      disabled={isLoading}
-                      className="bg-background/50 h-11"
-                      autoComplete="new-password"
-                      dir="ltr"
-                    />
-                  </div>
-                  {confirmPassword.length > 0 && password !== confirmPassword && (
-                    <p className="text-xs text-red-400">كلمتا المرور غير متطابقتين</p>
-                  )}
-                  {confirmPassword.length > 0 && password === confirmPassword && (
-                    <p className="text-xs text-green-400">كلمتا المرور متطابقتان ✓</p>
-                  )}
-                </motion.div>
+                <GlowInput
+                  id="register-confirm-password"
+                  label="تأكيد كلمة المرور"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  dir="ltr"
+                  autoComplete="new-password"
+                />
+                {confirmPassword.length > 0 && password !== confirmPassword && (
+                  <motion.p
+                    className="text-xs text-red-400"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    كلمتا المرور غير متطابقتين
+                  </motion.p>
+                )}
+                {confirmPassword.length > 0 && password === confirmPassword && (
+                  <motion.p
+                    className="text-xs text-green-400 flex items-center gap-1"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    >
+                      <Check className="w-3 h-3" />
+                    </motion.span>
+                    كلمتا المرور متطابقتان
+                  </motion.p>
+                )}
 
-                {/* Terms checkbox */}
+                {/* Terms checkbox with bounce animation */}
                 <motion.div className="flex items-start gap-2 pt-1" variants={itemVariants}>
-                  <Checkbox
-                    id="agree-terms"
-                    checked={agreedToTerms}
-                    onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
-                    className="border-border mt-0.5"
-                  />
+                  <motion.div
+                    animate={agreedToTerms ? 'checked' : 'unchecked'}
+                    variants={bounceCheckVariants}
+                  >
+                    <Checkbox
+                      id="agree-terms"
+                      checked={agreedToTerms}
+                      onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                      className="border-border mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                  </motion.div>
                   <Label
                     htmlFor="agree-terms"
                     className="text-sm text-muted-foreground cursor-pointer select-none leading-relaxed"
@@ -528,7 +708,7 @@ export default function RegisterForm() {
                     أوافق على{' '}
                     <button
                       type="button"
-                      className="text-primary hover:text-primary/80 underline underline-offset-2"
+                      className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors relative group"
                       onClick={(e) => {
                         e.preventDefault();
                         toast.info('سيتم إضافة الشروط قريباً', {
@@ -537,11 +717,12 @@ export default function RegisterForm() {
                       }}
                     >
                       شروط الاستخدام
+                      <span className="absolute bottom-0 right-0 h-px w-0 bg-primary/40 group-hover:w-full transition-all duration-300" />
                     </button>
                     {' '}و{' '}
                     <button
                       type="button"
-                      className="text-primary hover:text-primary/80 underline underline-offset-2"
+                      className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors relative group"
                       onClick={(e) => {
                         e.preventDefault();
                         toast.info('سيتم إضافة الشروط قريباً', {
@@ -550,35 +731,38 @@ export default function RegisterForm() {
                       }}
                     >
                       سياسة الخصوصية
+                      <span className="absolute bottom-0 right-0 h-px w-0 bg-primary/40 group-hover:w-full transition-all duration-300" />
                     </button>
                   </Label>
                 </motion.div>
 
                 {/* Submit */}
                 <motion.div variants={itemVariants}>
-                  <Button
-                    type="submit"
-                    className="w-full h-11 text-base font-medium"
-                    disabled={
-                      isLoading ||
-                      !name.trim() ||
-                      !email.trim() ||
-                      !password ||
-                      !confirmPassword
-                    }
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>جارٍ إنشاء الحساب...</span>
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="h-4 w-4" />
-                        <span>إنشاء حساب</span>
-                      </>
-                    )}
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      type="submit"
+                      className="w-full h-11 text-base font-medium shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/20 transition-shadow"
+                      disabled={
+                        isLoading ||
+                        !name.trim() ||
+                        !email.trim() ||
+                        !password ||
+                        !confirmPassword
+                      }
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>جارٍ إنشاء الحساب...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="h-4 w-4" />
+                          <span>إنشاء حساب</span>
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
                 </motion.div>
               </motion.form>
 
@@ -590,41 +774,56 @@ export default function RegisterForm() {
                 </span>
               </div>
 
-              {/* Social login buttons */}
+              {/* Social login buttons with enhanced hover */}
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1 h-11 bg-background/50 border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all"
-                  onClick={() => handleSocialClick('GitHub')}
+                <motion.div
+                  className="flex-1"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <svg className="h-4 w-4 ml-2" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                  </svg>
-                  <span>GitHub</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1 h-11 bg-background/50 border-border/60 hover:border-[#2AABEE]/40 hover:bg-[#2AABEE]/5 transition-all"
-                  onClick={() => handleSocialClick('Telegram')}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 bg-background/50 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all duration-300"
+                    onClick={() => handleSocialClick('GitHub')}
+                  >
+                    <svg className="h-4 w-4 ml-2" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    <span>GitHub</span>
+                  </Button>
+                </motion.div>
+                <motion.div
+                  className="flex-1"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Send className="h-4 w-4 ml-2" />
-                  <span>Telegram</span>
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 bg-background/50 border-border/60 hover:border-[#2AABEE]/40 hover:bg-[#2AABEE]/5 hover:text-[#2AABEE] transition-all duration-300"
+                    onClick={() => handleSocialClick('Telegram')}
+                  >
+                    <Send className="h-4 w-4 ml-2" />
+                    <span>Telegram</span>
+                  </Button>
+                </motion.div>
               </div>
             </CardContent>
 
             <CardFooter className="justify-center">
               <p className="text-sm text-muted-foreground">
                 لديك حساب؟{' '}
-                <button
+                <motion.button
                   type="button"
-                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors relative inline-block group"
                   onClick={() => setCurrentPage('login')}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   سجل دخول
-                </button>
+                  <span className="absolute bottom-0 right-0 h-px w-0 bg-primary/40 group-hover:w-full transition-all duration-300" />
+                </motion.button>
               </p>
             </CardFooter>
           </Card>

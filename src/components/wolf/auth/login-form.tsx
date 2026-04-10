@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { motion } from 'framer-motion';
-import { Loader2, Eye, EyeOff, LogIn, Send } from 'lucide-react';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { Loader2, Eye, EyeOff, LogIn, Send, Mail, ArrowLeft, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
@@ -19,31 +19,62 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /* ─── Framer Motion Variants ─── */
-const formVariants = {
-  hidden: { opacity: 0, y: 24, scale: 0.98 } as const,
-  visible: { opacity: 1, y: 0, scale: 1 } as const,
-} as const;
+const formVariants: Variants = {
+  hidden: { opacity: 0, y: 24, scale: 0.98 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+};
 
-const brandingVariants = {
-  hidden: { opacity: 0, x: 20 } as const,
-  visible: { opacity: 1, x: 0 } as const,
-} as const;
+const brandingVariants: Variants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { opacity: 1, x: 0 },
+};
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: {},
   visible: {
     transition: {
       staggerChildren: 0.06,
     },
   },
-} as const;
+};
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 } as const,
-  visible: { opacity: 1, y: 0 } as const,
-} as const;
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const inputGlowVariants: Variants = {
+  idle: { boxShadow: '0 0 0 0px transparent' },
+  focused: {
+    boxShadow: '0 0 0 2px oklch(0.60 0.20 250 / 0.15), 0 0 20px -4px oklch(0.60 0.20 250 / 0.2)',
+    transition: { duration: 0.3, ease: 'easeOut' },
+  },
+};
+
+const eyeSwapVariants: Variants = {
+  show: { rotate: 0, scale: 1, opacity: 1 },
+  hide: { rotate: -90, scale: 0.5, opacity: 0 },
+};
+
+const dialogOverlayVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+};
+
+const dialogContentVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.95, y: 10 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+};
 
 /* ─── Wolf Logo Component ─── */
 function WolfLogo({ size = 48 }: { size?: number }) {
@@ -69,6 +100,166 @@ function WolfSilhouetteParticle({ size = 16, className = '', style }: { size?: n
   );
 }
 
+/* ─── Enhanced Input Wrapper with Focus Glow ─── */
+function GlowInput({
+  id,
+  label,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  disabled,
+  dir,
+  autoComplete,
+  children,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled: boolean;
+  dir?: string;
+  autoComplete: string;
+  children?: React.ReactNode;
+}) {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <motion.div variants={itemVariants} className="space-y-2">
+      <Label htmlFor={id} className="text-sm">{label}</Label>
+      <motion.div
+        variants={inputGlowVariants}
+        animate={isFocused ? 'focused' : 'idle'}
+        className="auth-input-wrapper relative rounded-lg"
+      >
+        <Input
+          id={id}
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          className={`bg-background/50 h-11 ${children ? 'pe-11' : ''} transition-all duration-200 focus:ring-0 focus:ring-offset-0`}
+          autoComplete={autoComplete}
+          dir={dir}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+        />
+        {children && (
+          <div className="absolute left-1 top-1/2 -translate-y-1/2">
+            {children}
+          </div>
+        )}
+      </motion.div>
+      {/* Gradient underline effect */}
+      <motion.div
+        className="h-0.5 rounded-full bg-gradient-to-l from-transparent via-primary/60 to-transparent"
+        initial={{ scaleX: 0, opacity: 0 }}
+        animate={{
+          scaleX: isFocused ? 1 : 0,
+          opacity: isFocused ? 1 : 0,
+        }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      />
+    </motion.div>
+  );
+}
+
+/* ─── Forgot Password Dialog ─── */
+function ForgotPasswordDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [resetEmail, setResetEmail] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const handleReset = async () => {
+    if (!resetEmail.trim()) {
+      toast.error('يرجى إدخال البريد الإلكتروني');
+      return;
+    }
+    setIsSending(true);
+    // Simulate sending
+    setTimeout(() => {
+      toast.success('تم إرسال رابط إعادة التعيين', {
+        description: 'تحقق من بريدك الإلكتروني للحصول على رابط إعادة تعيين كلمة المرور',
+      });
+      setIsSending(false);
+      setResetEmail('');
+      onOpenChange(false);
+    }, 1500);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="auth-glass-card border-border/40 max-w-sm">
+        <DialogHeader className="text-center sm:text-center">
+          <motion.div
+            className="mx-auto mb-3"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
+              <KeyRound className="h-7 w-7 text-primary" />
+            </div>
+          </motion.div>
+          <DialogTitle className="text-lg">نسيت كلمة المرور؟</DialogTitle>
+          <DialogDescription className="text-sm mt-2">
+            أدخل بريدك الإلكتروني وسنرسل لك رابط لإعادة تعيين كلمة المرور
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 mt-2">
+          <div className="relative">
+            <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="example@email.com"
+              type="email"
+              dir="ltr"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              className="bg-background/50 h-11 pr-10"
+              disabled={isSending}
+            />
+          </div>
+          <Button
+            className="w-full h-11 shadow-md shadow-primary/10"
+            onClick={handleReset}
+            disabled={isSending || !resetEmail.trim()}
+          >
+            {isSending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>جارٍ الإرسال...</span>
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 ml-2" />
+                <span>إرسال رابط إعادة التعيين</span>
+              </>
+            )}
+          </Button>
+        </div>
+        <DialogFooter className="sm:justify-center mt-2">
+          <button
+            type="button"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <ArrowLeft className="h-3 w-3" />
+            العودة لتسجيل الدخول
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ─── Left branding panel (shared visual, only shown md+) ─── */
 function AuthBrandingPanel({ subtitle }: { subtitle?: string }) {
   return (
@@ -79,6 +270,12 @@ function AuthBrandingPanel({ subtitle }: { subtitle?: string }) {
       animate="visible"
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
+      {/* Subtle background texture overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{
+        backgroundImage: 'radial-gradient(circle, oklch(0.60 0.20 250) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }} />
+
       {/* Floating particles */}
       {[...Array(12)].map((_, i) => (
         <span
@@ -150,6 +347,7 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const { setUser, setCurrentPage } = useAppStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -212,6 +410,12 @@ export default function LoginForm() {
 
       {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center px-4 py-12 md:px-8 relative auth-gradient-mesh">
+        {/* Subtle background texture overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.015]" style={{
+          backgroundImage: 'radial-gradient(circle, oklch(0.60 0.20 250) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }} />
+
         {/* Wolf silhouette floating particles */}
         <WolfSilhouetteParticle size={20} className="auth-wolf-particle auth-wolf-particle-1" style={{ top: '12%', right: '15%' } as React.CSSProperties} />
         <WolfSilhouetteParticle size={14} className="auth-wolf-particle auth-wolf-particle-2" style={{ top: '35%', right: '8%' } as React.CSSProperties} />
@@ -270,57 +474,58 @@ export default function LoginForm() {
                 animate="visible"
               >
                 {/* Email */}
-                <motion.div className="space-y-2" variants={itemVariants}>
-                  <Label htmlFor="login-email">البريد الإلكتروني</Label>
-                  <div className="auth-input-wrapper">
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="example@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={isLoading}
-                      className="bg-background/50 h-11"
-                      autoComplete="email"
-                      dir="ltr"
-                    />
-                  </div>
-                </motion.div>
+                <GlowInput
+                  id="login-email"
+                  label="البريد الإلكتروني"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  dir="ltr"
+                  autoComplete="email"
+                />
 
                 {/* Password */}
-                <motion.div className="space-y-2" variants={itemVariants}>
-                  <Label htmlFor="login-password">كلمة المرور</Label>
-                  <div className="auth-input-wrapper relative">
-                    <Input
-                      id="login-password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                      className="bg-background/50 h-11 pe-11"
-                      autoComplete="current-password"
-                      dir="ltr"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute left-1 top-1/2 -translate-y-1/2 h-9 w-9 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowPassword(!showPassword)}
-                      tabIndex={-1}
+                <GlowInput
+                  id="login-password"
+                  label="كلمة المرور"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  dir="ltr"
+                  autoComplete="current-password"
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={showPassword ? 'visible' : 'hidden'}
+                      initial="hide"
+                      animate="show"
+                      exit="hide"
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    كلمة المرور يجب أن تكون 6 أحرف على الأقل
-                  </p>
-                </motion.div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </motion.div>
+                  </AnimatePresence>
+                </GlowInput>
+                <p className="text-xs text-muted-foreground -mt-1">
+                  كلمة المرور يجب أن تكون 6 أحرف على الأقل
+                </p>
 
                 {/* Remember me + Forgot password row */}
                 <motion.div className="flex items-center justify-between" variants={itemVariants}>
@@ -338,38 +543,39 @@ export default function LoginForm() {
                       تذكرني
                     </Label>
                   </div>
-                  <button
+                  <motion.button
                     type="button"
-                    className="text-sm text-primary hover:text-primary/80 transition-colors"
-                    onClick={() =>
-                      toast.info('قريباً', {
-                        description: 'سيتم إضافة هذه الميزة قريباً',
-                      })
-                    }
+                    className="text-sm text-primary hover:text-primary/80 transition-colors relative inline-block group"
+                    onClick={() => setForgotPasswordOpen(true)}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                   >
                     نسيت كلمة المرور؟
-                  </button>
+                    <span className="absolute bottom-0 right-0 h-px w-0 bg-primary/40 group-hover:w-full transition-all duration-300" />
+                  </motion.button>
                 </motion.div>
 
                 {/* Submit */}
                 <motion.div variants={itemVariants}>
-                  <Button
-                    type="submit"
-                    className="w-full h-11 text-base font-medium"
-                    disabled={isLoading || !email.trim() || !password.trim()}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>جارٍ تسجيل الدخول...</span>
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="h-4 w-4" />
-                        <span>تسجيل الدخول</span>
-                      </>
-                    )}
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      type="submit"
+                      className="w-full h-11 text-base font-medium shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/20 transition-shadow"
+                      disabled={isLoading || !email.trim() || !password.trim()}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>جارٍ تسجيل الدخول...</span>
+                        </>
+                      ) : (
+                        <>
+                          <LogIn className="h-4 w-4" />
+                          <span>تسجيل الدخول</span>
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
                 </motion.div>
               </motion.form>
 
@@ -381,46 +587,64 @@ export default function LoginForm() {
                 </span>
               </div>
 
-              {/* Social login buttons */}
+              {/* Social login buttons with enhanced hover */}
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1 h-11 bg-background/50 border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all"
-                  onClick={() => handleSocialClick('GitHub')}
+                <motion.div
+                  className="flex-1"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <svg className="h-4 w-4 ml-2" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                  </svg>
-                  <span>GitHub</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1 h-11 bg-background/50 border-border/60 hover:border-[#2AABEE]/40 hover:bg-[#2AABEE]/5 transition-all"
-                  onClick={() => handleSocialClick('Telegram')}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 bg-background/50 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all duration-300"
+                    onClick={() => handleSocialClick('GitHub')}
+                  >
+                    <svg className="h-4 w-4 ml-2" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    <span>GitHub</span>
+                  </Button>
+                </motion.div>
+                <motion.div
+                  className="flex-1"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Send className="h-4 w-4 ml-2" />
-                  <span>Telegram</span>
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 bg-background/50 border-border/60 hover:border-[#2AABEE]/40 hover:bg-[#2AABEE]/5 hover:text-[#2AABEE] transition-all duration-300"
+                    onClick={() => handleSocialClick('Telegram')}
+                  >
+                    <Send className="h-4 w-4 ml-2" />
+                    <span>Telegram</span>
+                  </Button>
+                </motion.div>
               </div>
             </CardContent>
 
             <CardFooter className="justify-center">
               <p className="text-sm text-muted-foreground">
                 ليس لديك حساب؟{' '}
-                <button
+                <motion.button
                   type="button"
-                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors relative inline-block group"
                   onClick={() => setCurrentPage('register')}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   سجل الآن
-                </button>
+                  <span className="absolute bottom-0 right-0 h-px w-0 bg-primary/40 group-hover:w-full transition-all duration-300" />
+                </motion.button>
               </p>
             </CardFooter>
           </Card>
         </motion.div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <ForgotPasswordDialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen} />
     </div>
   );
 }

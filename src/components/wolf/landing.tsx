@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import {
   Shield,
   Zap,
@@ -22,6 +22,7 @@ import {
   Send,
   ExternalLink,
   ChevronDown,
+  ChevronUp,
   Menu,
   X,
   MessageSquare,
@@ -31,18 +32,23 @@ import {
   Crown,
   Sparkles,
   Building2,
+  Mail,
+  Phone,
+  MapPin,
 } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 /* ─── Data ────────────────────────────────────────────── */
 
@@ -97,8 +103,8 @@ const supportedLanguages = [
     icon: FileCode,
     name: 'PHP',
     description: 'PHP 8.2+ مع إضافات متقدمة',
-    color: 'from-indigo-500/20 to-purple-500/20',
-    iconColor: 'text-indigo-400',
+    color: 'from-sky-500/20 to-sky-500/20',
+    iconColor: 'text-sky-400',
   },
 ];
 
@@ -266,7 +272,7 @@ const faqItems = [
 
 /* ─── Animation Variants ──────────────────────────────── */
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -276,29 +282,145 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' as const },
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (delay: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, delay, ease: 'easeOut' as const },
+    transition: { duration: 0.6, delay, ease: 'easeOut' },
   }),
 };
+
+const testimonialCardVariants: Variants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+};
+
+const pricingCardVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+};
+
+const backToTopVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.5, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: 'easeOut' },
+  },
+};
+
+const sectionSeparatorVariants: Variants = {
+  hidden: { scaleX: 0 },
+  visible: {
+    scaleX: 1,
+    transition: { duration: 0.8, ease: 'easeOut' },
+  },
+};
+
+/* ─── Section Separator Decoration ────────────────────── */
+function SectionSeparator() {
+  return (
+    <motion.div
+      variants={sectionSeparatorVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      className="max-w-6xl mx-auto px-8 py-4"
+    >
+      <div className="h-px bg-gradient-to-l from-transparent via-primary/20 to-transparent origin-center" />
+    </motion.div>
+  );
+}
+
+/* ─── Loading Skeleton ────────────────────────────────── */
+function LandingSkeleton() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Nav skeleton */}
+      <div className="sticky top-0 z-50 h-16 border-b border-border/20 bg-background/80 backdrop-blur-md flex items-center px-4">
+        <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
+          <Skeleton className="h-8 w-32" />
+          <div className="hidden md:flex gap-8">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-24" />
+          </div>
+        </div>
+      </div>
+      {/* Hero skeleton */}
+      <div className="flex-1 flex flex-col items-center justify-center py-32 px-4">
+        <Skeleton className="w-32 h-32 rounded-full mb-8" />
+        <Skeleton className="h-12 w-72 mb-4" />
+        <Skeleton className="h-6 w-96 mb-8" />
+        <Skeleton className="h-5 w-80 mb-6" />
+        <div className="flex gap-3">
+          <Skeleton className="h-12 w-40 rounded-lg" />
+          <Skeleton className="h-12 w-40 rounded-lg" />
+        </div>
+      </div>
+      {/* Stats skeleton */}
+      <div className="max-w-6xl mx-auto px-4 py-16 grid grid-cols-3 gap-8">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-3">
+            <Skeleton className="w-14 h-14 rounded-2xl" />
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /* ─── Component ───────────────────────────────────────── */
 
 export default function Landing() {
   const { setCurrentPage } = useAppStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+
+  // Simulate initial load
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Back to top scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 600);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToSection = useCallback((id: string) => {
     setMobileMenuOpen(false);
@@ -307,6 +429,14 @@ export default function Landing() {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  if (isLoading) {
+    return <LandingSkeleton />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -319,64 +449,61 @@ export default function Landing() {
       >
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Brand — right side (RTL) */}
-          <div className="flex items-center gap-2.5">
+          <motion.button
+            onClick={scrollToTop}
+            className="flex items-center gap-2.5"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
             <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-8 h-8 rounded-full object-cover" />
             <span className="font-bold gradient-text text-base md:text-lg">
               استضافة الذئب
             </span>
-          </div>
+          </motion.button>
 
           {/* Center Nav Links — desktop */}
           <div className="hidden md:flex items-center gap-8">
-            <button
-              onClick={() => scrollToSection('features')}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              المميزات
-            </button>
-            <button
-              onClick={() => scrollToSection('pricing')}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              الأسعار
-            </button>
-            <button
-              onClick={() => scrollToSection('languages')}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              اللغات
-            </button>
-            <button
-              onClick={() => scrollToSection('faq')}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              الأسئلة الشائعة
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              تواصل
-            </button>
+            {[
+              { label: 'المميزات', id: 'features' },
+              { label: 'الأسعار', id: 'pricing' },
+              { label: 'اللغات', id: 'languages' },
+              { label: 'الأسئلة الشائعة', id: 'faq' },
+              { label: 'تواصل', id: 'contact' },
+            ].map((link) => (
+              <motion.button
+                key={link.id}
+                onClick={() => scrollToSection(link.id)}
+                className="relative text-sm text-muted-foreground hover:text-foreground transition-colors group py-1"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {link.label}
+                <span className="absolute bottom-0 right-0 h-px w-0 bg-primary/50 group-hover:w-full transition-all duration-300" />
+              </motion.button>
+            ))}
           </div>
 
           {/* Buttons — left side (RTL) */}
           <div className="hidden md:flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => setCurrentPage('login')}
-            >
-              تسجيل الدخول
-            </Button>
-            <Button
-              size="sm"
-              className="text-sm shadow-md shadow-primary/10"
-              onClick={() => setCurrentPage('register')}
-            >
-              إنشاء حساب
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => setCurrentPage('login')}
+              >
+                تسجيل الدخول
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="sm"
+                className="text-sm shadow-md shadow-primary/10"
+                onClick={() => setCurrentPage('register')}
+              >
+                إنشاء حساب
+              </Button>
+            </motion.div>
           </div>
 
           {/* Mobile menu button */}
@@ -401,36 +528,21 @@ export default function Landing() {
             className="md:hidden border-t border-border/30 navbar-glass"
           >
             <div className="px-4 py-4 space-y-3">
-              <button
-                onClick={() => scrollToSection('features')}
-                className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
-              >
-                المميزات
-              </button>
-              <button
-                onClick={() => scrollToSection('pricing')}
-                className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
-              >
-                الأسعار
-              </button>
-              <button
-                onClick={() => scrollToSection('languages')}
-                className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
-              >
-                اللغات
-              </button>
-              <button
-                onClick={() => scrollToSection('faq')}
-                className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
-              >
-                الأسئلة الشائعة
-              </button>
-              <button
-                onClick={() => scrollToSection('contact')}
-                className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
-              >
-                تواصل
-              </button>
+              {[
+                { label: 'المميزات', id: 'features' },
+                { label: 'الأسعار', id: 'pricing' },
+                { label: 'اللغات', id: 'languages' },
+                { label: 'الأسئلة الشائعة', id: 'faq' },
+                { label: 'تواصل', id: 'contact' },
+              ].map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => scrollToSection(link.id)}
+                  className="block w-full text-right text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
+                >
+                  {link.label}
+                </button>
+              ))}
               <Separator />
               <div className="flex gap-2 pt-1">
                 <Button
@@ -476,29 +588,17 @@ export default function Landing() {
             />
 
             {/* ── Floating Geometric Particles ── */}
-            {/* 1 - Circle, top-right */}
             <div className="hero-particle hero-particle-1 rounded-full bg-primary/20 w-3 h-3 md:w-4 md:h-4" style={{ top: '12%', right: '18%' }} />
-            {/* 2 - Hexagon, upper-left */}
             <div className="hero-particle hero-particle-2 particle-hexagon bg-primary/15 w-4 h-4 md:w-5 md:h-5" style={{ top: '18%', left: '12%' }} />
-            {/* 3 - Circle, mid-right */}
             <div className="hero-particle hero-particle-3 rounded-full bg-primary/25 w-2 h-2 md:w-3 md:h-3" style={{ top: '35%', right: '8%' }} />
-            {/* 4 - Diamond, lower-left */}
             <div className="hero-particle hero-particle-4 particle-diamond bg-primary/20 w-3 h-3 md:w-4 md:h-4" style={{ top: '55%', left: '6%' }} />
-            {/* 5 - Hexagon, top-center */}
             <div className="hero-particle hero-particle-5 particle-hexagon bg-primary/10 w-5 h-5 md:w-6 md:h-6" style={{ top: '8%', left: '45%' }} />
-            {/* 6 - Circle, bottom-right */}
             <div className="hero-particle hero-particle-6 rounded-full bg-primary/18 w-2.5 h-2.5 md:w-3 md:h-3" style={{ top: '70%', right: '14%' }} />
-            {/* 7 - Triangle, mid-left */}
             <div className="hero-particle hero-particle-7 particle-triangle bg-primary/15 w-3 h-3 md:w-4 md:h-4" style={{ top: '42%', left: '18%' }} />
-            {/* 8 - Circle, bottom-center */}
             <div className="hero-particle hero-particle-8 rounded-full bg-primary/12 w-2 h-2 md:w-3 md:h-3" style={{ top: '80%', left: '55%' }} />
-            {/* 9 - Diamond, upper area */}
             <div className="hero-particle hero-particle-9 particle-diamond bg-primary/10 w-3.5 h-3.5 md:w-4 md:h-4" style={{ top: '22%', right: '38%' }} />
-            {/* 10 - Hexagon, lower area */}
             <div className="hero-particle hero-particle-10 particle-hexagon bg-primary/14 w-2.5 h-2.5 md:w-3 md:h-3" style={{ top: '65%', left: '32%' }} />
-            {/* 11 - Circle, far right */}
             <div className="hero-particle hero-particle-11 rounded-full bg-primary/20 w-1.5 h-1.5 md:w-2 md:h-2" style={{ top: '48%', right: '4%' }} />
-            {/* 12 - Triangle, bottom-left */}
             <div className="hero-particle hero-particle-12 particle-triangle bg-primary/12 w-4 h-4 md:w-5 md:h-5" style={{ top: '75%', left: '8%' }} />
           </div>
 
@@ -520,13 +620,11 @@ export default function Landing() {
                 <div className="relative float-animation w-[140px] h-[140px] md:w-[180px] md:h-[180px]">
                   {/* Outer orbit ring */}
                   <div className="wolf-orbit-ring absolute inset-0 rounded-full" style={{ border: '1.5px dashed oklch(0.60 0.20 250 / 15%)' }}>
-                    {/* Orbiting dot */}
                     <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/60" />
                   </div>
 
                   {/* Inner orbit ring (reverse) */}
                   <div className="wolf-orbit-ring-reverse absolute rounded-full" style={{ inset: '18px', border: '1px solid oklch(0.60 0.20 250 / 10%)' }}>
-                    {/* Orbiting dot */}
                     <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/40" />
                   </div>
 
@@ -564,7 +662,6 @@ export default function Landing() {
                   </Badge>
                 </div>
 
-                {/* Subtitle with typewriter reveal */}
                 <p className="typewriter-reveal text-lg md:text-2xl text-primary/80 font-medium">
                   منصة استضافة احترافية لبوتات تيليجرام
                 </p>
@@ -587,18 +684,21 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.6 }}
                 className="flex flex-wrap justify-center gap-2 md:gap-3"
               >
-                <div className="stat-badge-inline flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs md:text-sm text-primary/80 font-medium">
-                  <Bot className="h-3.5 w-3.5" />
-                  <span>+1000 بوت</span>
-                </div>
-                <div className="stat-badge-inline flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs md:text-sm text-primary/80 font-medium">
-                  <Activity className="h-3.5 w-3.5" />
-                  <span>99.9% وقت تشغيل</span>
-                </div>
-                <div className="stat-badge-inline flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs md:text-sm text-primary/80 font-medium">
-                  <Headphones className="h-3.5 w-3.5" />
-                  <span>24/7 دعم</span>
-                </div>
+                {[
+                  { icon: Bot, text: '+1000 بوت' },
+                  { icon: Activity, text: '99.9% وقت تشغيل' },
+                  { icon: Headphones, text: '24/7 دعم' },
+                ].map((badge) => (
+                  <motion.div
+                    key={badge.text}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="stat-badge-inline flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs md:text-sm text-primary/80 font-medium"
+                  >
+                    <badge.icon className="h-3.5 w-3.5" />
+                    <span>{badge.text}</span>
+                  </motion.div>
+                ))}
               </motion.div>
 
               {/* ═══ CTA Buttons ═══ */}
@@ -608,22 +708,26 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.7 }}
                 className="flex flex-col sm:flex-row gap-3 justify-center pt-2"
               >
-                <Button
-                  size="lg"
-                  className="cta-gradient-border h-12 px-8 text-base font-medium shadow-lg shadow-primary/20"
-                  onClick={() => setCurrentPage('login')}
-                >
-                  تسجيل الدخول
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="btn-shimmer-effect h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50"
-                  onClick={() => setCurrentPage('register')}
-                >
-                  إنشاء حساب
-                </Button>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                  <Button
+                    size="lg"
+                    className="cta-gradient-border h-12 px-8 text-base font-medium shadow-lg shadow-primary/20"
+                    onClick={() => setCurrentPage('login')}
+                  >
+                    تسجيل الدخول
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="btn-shimmer-effect h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+                    onClick={() => setCurrentPage('register')}
+                  >
+                    إنشاء حساب
+                  </Button>
+                </motion.div>
               </motion.div>
 
               {/* Watch Demo decorative link */}
@@ -633,52 +737,43 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.85 }}
                 className="pt-1"
               >
-                <button className="demo-link-animated inline-flex items-center gap-1.5 text-xs md:text-sm text-muted-foreground/60 hover:text-primary/70 transition-colors">
+                <motion.button
+                  className="demo-link-animated inline-flex items-center gap-1.5 text-xs md:text-sm text-muted-foreground/60 hover:text-primary/70 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <PlayCircle className="h-3.5 w-3.5" />
                   <span>مشاهدة العرض التوضيحي</span>
                   <span className="text-[10px]">▶</span>
-                </button>
+                </motion.button>
               </motion.div>
 
-              {/* ═══ Trust Indicators (Enhanced) ═══ */}
+              {/* ═══ Trust Indicators ═══ */}
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.9 }}
                 className="flex flex-wrap justify-center gap-3 pt-4"
               >
-                {/* SSL Security */}
-                <div className="trust-badge-animated flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/40 backdrop-blur-sm">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
-                    <Lock className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-foreground/80">حماية SSL</p>
-                    <p className="text-[10px] text-muted-foreground">تشفير متقدم</p>
-                  </div>
-                </div>
-
-                {/* Uptime */}
-                <div className="trust-badge-animated flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/40 backdrop-blur-sm">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
-                    <Clock className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-foreground/80">وقت تشغيل عالي</p>
-                    <p className="text-[10px] text-muted-foreground">99.9% ضمان</p>
-                  </div>
-                </div>
-
-                {/* Support */}
-                <div className="trust-badge-animated flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/40 backdrop-blur-sm">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
-                    <Headphones className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-foreground/80">دعم فني متواصل</p>
-                    <p className="text-[10px] text-muted-foreground">24/7 جاهزون</p>
-                  </div>
-                </div>
+                {[
+                  { icon: Lock, title: 'حماية SSL', desc: 'تشفير متقدم' },
+                  { icon: Clock, title: 'وقت تشغيل عالي', desc: '99.9% ضمان' },
+                  { icon: Headphones, title: 'دعم فني متواصل', desc: '24/7 جاهزون' },
+                ].map((badge) => (
+                  <motion.div
+                    key={badge.title}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="trust-badge-animated flex items-center gap-2 px-4 py-2 rounded-xl bg-card/50 border border-border/40 backdrop-blur-sm cursor-default"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center">
+                      <badge.icon className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-medium text-foreground/80">{badge.title}</p>
+                      <p className="text-[10px] text-muted-foreground">{badge.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
               </motion.div>
             </motion.div>
 
@@ -730,6 +825,8 @@ export default function Landing() {
           </div>
         </section>
 
+        <SectionSeparator />
+
         {/* ──────── FEATURES SECTION ──────── */}
         <section id="features" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
           <motion.div
@@ -771,10 +868,10 @@ export default function Landing() {
               <motion.div
                 key={feature.title}
                 variants={itemVariants}
-                className="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 transition-all duration-300 gradient-border-hover"
+                whileHover={{ y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
+                className="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 transition-all duration-300 gradient-border-hover cursor-default"
               >
                 <div className="flex items-start gap-4 relative">
-                  {/* Icon with glow effect */}
                   <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 rounded-xl bg-primary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="relative w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-xl group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
@@ -792,6 +889,8 @@ export default function Landing() {
             ))}
           </motion.div>
         </section>
+
+        <SectionSeparator />
 
         {/* ──────── HOW IT WORKS SECTION ──────── */}
         <section className="max-w-6xl mx-auto px-4 py-16 md:py-24">
@@ -839,7 +938,6 @@ export default function Landing() {
                 variants={itemVariants}
                 className="relative flex flex-col items-center text-center gap-4 p-6"
               >
-                {/* Step number badge */}
                 <div className="relative">
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center relative z-10">
                     <step.icon className="h-7 w-7 text-primary" />
@@ -854,7 +952,6 @@ export default function Landing() {
                     {step.description}
                   </p>
                 </div>
-                {/* Arrow for mobile */}
                 {step.step < 3 && (
                   <div className="md:hidden text-primary/30">
                     <ArrowLeft className="h-5 w-5 rotate-90" />
@@ -864,6 +961,8 @@ export default function Landing() {
             ))}
           </motion.div>
         </section>
+
+        <SectionSeparator />
 
         {/* ──────── SUPPORTED LANGUAGES SECTION ──────── */}
         <section id="languages" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
@@ -905,17 +1004,22 @@ export default function Landing() {
               <motion.div
                 key={lang.name}
                 variants={itemVariants}
-                className={`group relative rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 hover:border-primary/20 transition-all duration-300 overflow-hidden gradient-border-hover`}
+                whileHover={{ y: -6, transition: { duration: 0.3, ease: 'easeOut' } }}
+                className={`group relative rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 hover:border-primary/20 transition-all duration-300 overflow-hidden gradient-border-hover cursor-default`}
               >
                 {/* Subtle gradient background */}
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${lang.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                 />
                 <div className="relative flex flex-col items-center text-center gap-3">
-                  <div className="relative w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  {/* Animated icon container */}
+                  <motion.div
+                    className="relative w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center"
+                    whileHover={{ scale: 1.15, rotate: [0, -5, 5, 0], transition: { duration: 0.5, ease: 'easeOut' } }}
+                  >
                     <div className="absolute inset-0 rounded-2xl bg-primary/15 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <lang.icon className={`relative h-7 w-7 ${lang.iconColor}`} />
-                  </div>
+                  </motion.div>
                   <div>
                     <h3 className="font-bold text-lg">{lang.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -927,6 +1031,8 @@ export default function Landing() {
             ))}
           </motion.div>
         </section>
+
+        <SectionSeparator />
 
         {/* ──────── TESTIMONIALS SECTION ──────── */}
         <section className="max-w-6xl mx-auto px-4 py-16 md:py-24">
@@ -967,32 +1073,36 @@ export default function Landing() {
             {testimonials.map((t, i) => (
               <motion.div
                 key={i}
-                variants={itemVariants}
-                className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/70 transition-all duration-300 gradient-border-hover"
+                variants={testimonialCardVariants}
+                whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.3, ease: 'easeOut' } }}
+                className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/70 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 gradient-border-hover cursor-default"
               >
-                {/* Quote icon */}
                 <div className="mb-4">
                   <Quote className="h-6 w-6 text-primary/30 rotate-180" />
                 </div>
 
-                {/* Quote text */}
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5">
                   &ldquo;{t.quote}&rdquo;
                 </p>
 
-                {/* Star rating */}
                 <div className="flex gap-0.5 mb-4">
                   {Array.from({ length: t.stars }).map((_, j) => (
-                    <Star
+                    <motion.div
                       key={j}
-                      className="h-3.5 w-3.5 fill-primary text-primary"
-                    />
+                      initial={{ opacity: 0, scale: 0 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.8 + j * 0.1, duration: 0.3, ease: 'easeOut' }}
+                    >
+                      <Star
+                        className="h-3.5 w-3.5 fill-primary text-primary"
+                      />
+                    </motion.div>
                   ))}
                 </div>
 
                 <Separator className="mb-4" />
 
-                {/* Author */}
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center">
                     <span className="text-sm font-bold text-primary">
@@ -1009,6 +1119,8 @@ export default function Landing() {
           </motion.div>
         </section>
 
+        <SectionSeparator />
+
         {/* ──────── PRICING SECTION ──────── */}
         <section id="pricing" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
           <motion.div
@@ -1018,7 +1130,6 @@ export default function Landing() {
             transition={{ duration: 0.5 }}
             className="text-center mb-12"
           >
-            {/* Section header decoration */}
             <div className="flex items-center justify-center gap-3 mb-5">
               <div className="flex gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
@@ -1049,14 +1160,20 @@ export default function Landing() {
             {pricingPlans.map((plan) => (
               <motion.div
                 key={plan.name}
-                variants={itemVariants}
+                variants={pricingCardVariants}
+                whileHover={{
+                  y: -8,
+                  transition: { duration: 0.3, ease: 'easeOut' },
+                  boxShadow: plan.highlighted
+                    ? '0 20px 60px -12px oklch(0.60 0.20 250 / 0.25)'
+                    : '0 20px 40px -12px oklch(0.60 0.20 250 / 0.1)',
+                }}
                 className={`relative rounded-xl border p-6 flex flex-col backdrop-blur-sm transition-all duration-300 ${
                   plan.highlighted
                     ? 'bg-card/80 border-primary/40 shadow-lg shadow-primary/10 ring-1 ring-primary/20'
                     : 'bg-card/50 border-border/50 hover:border-border hover:bg-card/70'
                 }`}
               >
-                {/* Badge */}
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground shadow-md shadow-primary/20 text-xs px-3">
@@ -1065,7 +1182,6 @@ export default function Landing() {
                   </div>
                 )}
 
-                {/* Plan header */}
                 <div className="text-center space-y-3 mb-6">
                   <div
                     className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center ${
@@ -1098,7 +1214,6 @@ export default function Landing() {
 
                 <Separator className="mb-5" />
 
-                {/* Feature list */}
                 <ul className="space-y-3 flex-1 mb-6">
                   {plan.features.map((feature) => (
                     <li
@@ -1127,27 +1242,30 @@ export default function Landing() {
                   ))}
                 </ul>
 
-                {/* CTA Button */}
-                <Button
-                  variant={plan.ctaVariant}
-                  className={`w-full ${
-                    plan.highlighted
-                      ? 'shadow-lg shadow-primary/20'
-                      : 'border-primary/30 hover:bg-primary/10 hover:border-primary/50'
-                  }`}
-                  onClick={() =>
-                    plan.name === 'مؤسسات'
-                      ? scrollToSection('contact')
-                      : setCurrentPage('register')
-                  }
-                >
-                  {plan.ctaLabel}
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Button
+                    variant={plan.ctaVariant}
+                    className={`w-full ${
+                      plan.highlighted
+                        ? 'shadow-lg shadow-primary/20'
+                        : 'border-primary/30 hover:bg-primary/10 hover:border-primary/50'
+                    }`}
+                    onClick={() =>
+                      plan.name === 'مؤسسات'
+                        ? scrollToSection('contact')
+                        : setCurrentPage('register')
+                    }
+                  >
+                    {plan.ctaLabel}
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </motion.div>
               </motion.div>
             ))}
           </motion.div>
         </section>
+
+        <SectionSeparator />
 
         {/* ──────── FAQ SECTION ──────── */}
         <section id="faq" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
@@ -1158,7 +1276,6 @@ export default function Landing() {
             transition={{ duration: 0.5 }}
             className="text-center mb-12"
           >
-            {/* Section header decoration */}
             <div className="flex items-center justify-center gap-3 mb-5">
               <div className="flex gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
@@ -1205,6 +1322,117 @@ export default function Landing() {
           </motion.div>
         </section>
 
+        <SectionSeparator />
+
+        {/* ──────── CONTACT/CTA SECTION ──────── */}
+        <section id="contact" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+              </div>
+              <div className="h-px w-8 bg-gradient-to-l from-primary/30 to-transparent" />
+              <div className="h-px w-8 bg-gradient-to-r from-primary/30 to-transparent" />
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">تواصل معنا</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              هل لديك سؤال أو تحتاج مساعدة؟ فريقنا جاهز للتواصل معك
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Contact Info */}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              {[
+                { icon: Mail, label: 'البريد الإلكتروني', value: 'support@white-wolf.host', color: 'bg-primary/10 text-primary' },
+                { icon: MessageSquare, label: 'تيليجرام', value: '@WhiteWolfSupport', color: 'bg-primary/10 text-primary' },
+                { icon: Clock, label: 'ساعات العمل', value: '24/7 متواصلون', color: 'bg-primary/10 text-primary' },
+                { icon: MapPin, label: 'الموقع', value: 'خوادم عالمية متعددة', color: 'bg-primary/10 text-primary' },
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  variants={itemVariants}
+                  whileHover={{ x: 4, transition: { duration: 0.2, ease: 'easeOut' } }}
+                  className="flex items-center gap-4 p-4 rounded-xl bg-card/50 border border-border/40 hover:border-primary/20 hover:bg-card/70 transition-all duration-300 cursor-default"
+                >
+                  <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0`}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{item.label}</p>
+                    <p className="text-sm text-muted-foreground">{item.value}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Contact Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm p-6 space-y-4"
+            >
+              <div className="space-y-2">
+                <label className="text-sm font-medium">الاسم</label>
+                <Input
+                  placeholder="اسمك"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  className="bg-background/50 h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">البريد الإلكتروني</label>
+                <Input
+                  placeholder="example@email.com"
+                  type="email"
+                  dir="ltr"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  className="bg-background/50 h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">الرسالة</label>
+                <textarea
+                  placeholder="اكتب رسالتك هنا..."
+                  rows={4}
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  className="w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+                />
+              </div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button className="w-full h-11 shadow-md shadow-primary/10">
+                  <Send className="h-4 w-4 ml-2" />
+                  إرسال الرسالة
+                </Button>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* ──────── CTA SECTION ──────── */}
         <section className="cta-gradient-bg border-y border-border/30">
           <div className="max-w-6xl mx-auto px-4 py-16 md:py-24">
@@ -1224,23 +1452,27 @@ export default function Landing() {
                 سجّل الآن واحصل على تجربة استضافة احترافية بدون تكلفة.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <Button
-                  size="lg"
-                  className="h-12 px-8 text-base font-medium shadow-lg shadow-primary/20"
-                  onClick={() => setCurrentPage('register')}
-                >
-                  إنشاء حساب مجاني
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50"
-                  onClick={() => scrollToSection('contact')}
-                >
-                  <Send className="h-4 w-4 ml-2" />
-                  تواصل معنا
-                </Button>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                  <Button
+                    size="lg"
+                    className="h-12 px-8 text-base font-medium shadow-lg shadow-primary/20"
+                    onClick={() => setCurrentPage('register')}
+                  >
+                    إنشاء حساب مجاني
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+                    onClick={() => scrollToSection('contact')}
+                  >
+                    <Send className="h-4 w-4 ml-2" />
+                    تواصل معنا
+                  </Button>
+                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -1248,8 +1480,14 @@ export default function Landing() {
       </main>
 
       {/* ═══════════ FOOTER ═══════════ */}
-      <footer className="border-t border-border/50 bg-card/30">
-        <div id="contact" className="max-w-6xl mx-auto px-4 py-12 scroll-mt-20">
+      <footer className="relative border-t border-border/50 bg-card/30 overflow-hidden">
+        {/* Animated mesh gradient background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 right-[20%] w-[400px] h-[200px] rounded-full bg-primary/3 blur-[80px] animate-pulse" style={{ animationDuration: '8s' }} />
+          <div className="absolute bottom-0 left-[10%] w-[300px] h-[150px] rounded-full bg-primary/3 blur-[60px] animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+        </div>
+
+        <div id="contact" className="relative max-w-6xl mx-auto px-4 py-12 scroll-mt-20">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
             {/* Column 1 — Brand */}
             <div className="space-y-4">
@@ -1279,12 +1517,14 @@ export default function Landing() {
                   { label: 'إنشاء حساب', action: () => setCurrentPage('register') },
                 ].map((link) => (
                   <li key={link.label}>
-                    <button
+                    <motion.button
                       onClick={link.action}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="relative text-sm text-muted-foreground hover:text-foreground transition-colors group inline-block"
+                      whileHover={{ x: 4 }}
                     >
                       {link.label}
-                    </button>
+                      <span className="absolute bottom-0 right-0 h-px w-0 bg-primary/40 group-hover:w-full transition-all duration-300" />
+                    </motion.button>
                   </li>
                 ))}
               </ul>
@@ -1316,7 +1556,6 @@ export default function Landing() {
 
           <Separator className="my-8" />
 
-          {/* Bottom bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground/60">
               جميع الحقوق محفوظة © {new Date().getFullYear()} استضافة الذئب
@@ -1333,6 +1572,23 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* ═══════════ BACK TO TOP BUTTON ═══════════ */}
+      {showBackToTop && (
+        <motion.button
+          variants={backToTopVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          onClick={scrollToTop}
+          className="fixed bottom-6 left-6 z-50 w-11 h-11 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:bg-primary transition-colors"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          aria-label="العودة إلى الأعلى"
+        >
+          <ChevronUp className="h-5 w-5" />
+        </motion.button>
+      )}
     </div>
   );
 }
