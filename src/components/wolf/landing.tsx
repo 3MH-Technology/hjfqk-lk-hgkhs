@@ -32,13 +32,9 @@ import {
   Crown,
   Sparkles,
   Building2,
-  Mail,
-  Phone,
-  MapPin,
 } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -403,9 +399,7 @@ export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [contactName, setContactName] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactMessage, setContactMessage] = useState('');
+
 
   // Simulate initial load
   useEffect(() => {
@@ -1355,7 +1349,7 @@ export default function Landing() {
 
         <SectionSeparator />
 
-        {/* ──────── CONTACT/CTA SECTION ──────── */}
+        {/* ──────── CONTACT/TELEGRAM SECTION ──────── */}
         <section id="contact" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1380,86 +1374,63 @@ export default function Landing() {
             </div>
             <h2 className="text-2xl md:text-3xl font-bold mb-3">تواصل معنا</h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              هل لديك سؤال أو تحتاج مساعدة؟ فريقنا جاهز للتواصل معك
+              طريقة التواصل الوحيدة عبر تيليجرام — نساعدك في أسرع وقت
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Contact Info */}
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="space-y-6"
-            >
-              {[
-                { icon: Mail, label: 'البريد الإلكتروني', value: 'support@white-wolf.host', color: 'bg-primary/10 text-primary' },
-                { icon: MessageSquare, label: 'تيليجرام', value: '@WhiteWolfSupport', color: 'bg-primary/10 text-primary' },
-                { icon: Clock, label: 'ساعات العمل', value: '24/7 متواصلون', color: 'bg-primary/10 text-primary' },
-                { icon: MapPin, label: 'الموقع', value: 'خوادم عالمية متعددة', color: 'bg-primary/10 text-primary' },
-              ].map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  variants={itemVariants}
-                  whileHover={{ x: 4, transition: { duration: 0.2, ease: 'easeOut' } }}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-card/50 border border-border/40 hover:border-primary/20 hover:bg-card/70 transition-all duration-300 cursor-default"
-                >
-                  <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0`}>
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-sm text-muted-foreground">{item.value}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Contact Form */}
+          <div className="max-w-2xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm p-6 space-y-4"
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="rounded-2xl border border-primary/20 bg-gradient-to-b from-primary/5 to-card/50 backdrop-blur-sm p-8 text-center space-y-6"
             >
-              <div className="space-y-2">
-                <label className="text-sm font-medium">الاسم</label>
-                <Input
-                  placeholder="اسمك"
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  className="bg-background/50 h-11"
-                />
+              {/* Telegram Icon */}
+              <div className="relative mx-auto w-20 h-20">
+                <div className="absolute inset-0 rounded-2xl bg-primary/10 animate-pulse" style={{ animationDuration: '3s' }} />
+                <div className="relative w-20 h-20 rounded-2xl bg-primary/15 border border-primary/25 flex items-center justify-center">
+                  <svg className="w-10 h-10 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                  </svg>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">البريد الإلكتروني</label>
-                <Input
-                  placeholder="example@email.com"
-                  type="email"
-                  dir="ltr"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  className="bg-background/50 h-11"
-                />
+
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold">تواصل عبر تيليجرام</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  للحصول على دعم فني أو الاستفسار عن خطط الأسعار أو أي طلب آخر، تواصل معنا مباشرة عبر تيليجرام
+                </p>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">الرسالة</label>
-                <textarea
-                  placeholder="اكتب رسالتك هنا..."
-                  rows={4}
-                  value={contactMessage}
-                  onChange={(e) => setContactMessage(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
-                />
-              </div>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="w-full h-11 shadow-md shadow-primary/10">
-                  <Send className="h-4 w-4 ml-2" />
-                  إرسال الرسالة
-                </Button>
+
+              {/* Telegram Contact Button */}
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <a
+                  href="https://t.me/j49_c"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 h-12 px-8 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white font-medium shadow-lg shadow-[#0088cc]/20 transition-all duration-300 text-base"
+                >
+                  <Send className="h-5 w-5" />
+                  تواصل مع المطور عبر تيليجرام
+                  <ExternalLink className="h-4 w-4 opacity-70" />
+                </a>
               </motion.div>
+
+              {/* Additional Info */}
+              <div className="grid grid-cols-3 gap-4 pt-4">
+                {[
+                  { icon: Clock, label: 'ساعات العمل', value: '24/7' },
+                  { icon: Zap, label: 'وقت الاستجابة', value: 'سريع' },
+                  { icon: Shield, label: 'دعم آمن', value: 'مباشر' },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-background/40 border border-border/30">
+                    <item.icon className="h-4 w-4 text-primary/70" />
+                    <span className="text-[10px] text-muted-foreground">{item.label}</span>
+                    <span className="text-xs font-semibold">{item.value}</span>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
@@ -1563,25 +1534,23 @@ export default function Landing() {
               </ul>
             </div>
 
-            {/* Column 3 — Support */}
+            {/* Column 3 — Support / Telegram Only */}
             <div className="space-y-4">
               <h4 className="font-semibold text-sm">الدعم</h4>
               <ul className="space-y-2.5">
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Headphones className="h-4 w-4 text-primary/60" />
-                  دعم فني متواصل 24/7
+                  <MessageSquare className="h-4 w-4 text-[#0088cc]" />
+                  <a href="https://t.me/j49_c" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    @j49_c — المطور
+                  </a>
                 </li>
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 text-primary/60" />
-                  وقت استجابة سريع
+                  متواصل 24/7 عبر تيليجرام
                 </li>
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MessageSquare className="h-4 w-4 text-primary/60" />
-                  قناة المطور 1
-                </li>
-                <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MessageSquare className="h-4 w-4 text-primary/60" />
-                  القناة الرسمية لاستضافة الذئب
+                  <Headphones className="h-4 w-4 text-primary/60" />
+                  دعم فني مباشر وسريع
                 </li>
               </ul>
             </div>

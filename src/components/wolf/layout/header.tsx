@@ -25,7 +25,6 @@ const pageTitles: Record<Page, string> = {
   admin: 'لوحة المدير',
   'admin-users': 'إدارة المستخدمين',
   'admin-bots': 'إدارة البوتات العامة',
-  'bot-comparison': 'مقارنة البوتات',
   'bot-analytics': 'تحليلات البوتات',
   'api-keys': 'مفاتيح API',
   webhooks: 'وخدمات الويب',

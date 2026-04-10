@@ -18,7 +18,6 @@ export type Page =
   | "admin"
   | "admin-users"
   | "admin-bots"
-  | "bot-comparison"
   | "bot-analytics"
   | "api-keys"
   | "webhooks"

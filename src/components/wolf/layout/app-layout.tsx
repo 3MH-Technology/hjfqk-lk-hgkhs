@@ -103,11 +103,6 @@ const AdminBots = dynamic(
   { loading: () => loadingFallback }
 );
 
-const BotComparison = dynamic(
-  () => import('@/components/wolf/bots/bot-comparison').then((m) => m.BotComparison),
-  { loading: () => loadingFallback }
-);
-
 const BotAnalytics = dynamic(
   () => import('@/components/wolf/bots/bot-analytics').then((m) => m.BotAnalytics),
   { loading: () => loadingFallback }
@@ -186,8 +181,6 @@ function PageContent() {
       return <UserManagement />;
     case 'admin-bots':
       return <AdminBots />;
-    case 'bot-comparison':
-      return <BotComparison />;
     case 'bot-analytics':
       return <BotAnalytics />;
     case 'deployment-history':
