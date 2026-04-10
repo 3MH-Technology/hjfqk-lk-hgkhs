@@ -705,18 +705,23 @@ export default function Landing() {
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                   <Button
                     size="lg"
-                    className="cta-gradient-border h-12 px-8 text-base font-medium shadow-lg shadow-primary/20"
+                    className="cta-gradient-border h-12 px-8 text-base font-medium shadow-lg shadow-primary/25"
                     onClick={() => setCurrentPage('login')}
                   >
                     تسجيل الدخول
-                    <ArrowLeft className="h-4 w-4" />
+                    <motion.span
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' as const }}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </motion.span>
                   </Button>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                   <Button
                     size="lg"
                     variant="outline"
-                    className="btn-shimmer-effect h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+                    className="btn-shimmer-effect glass-shimmer h-12 px-8 text-base font-medium border-primary/30 hover:bg-primary/10 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
                     onClick={() => setCurrentPage('register')}
                   >
                     إنشاء حساب
@@ -862,13 +867,13 @@ export default function Landing() {
               <motion.div
                 key={feature.title}
                 variants={itemVariants}
-                whileHover={{ y: -4, transition: { duration: 0.25, ease: 'easeOut' } }}
-                className="group rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 transition-all duration-300 gradient-border-hover cursor-default"
+                whileHover={{ y: -4, transition: { duration: 0.25, ease: 'easeOut' as const } }}
+                className="group card-glow-hover fade-scale-in rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 transition-all duration-300 gradient-border-hover cursor-default"
               >
                 <div className="flex items-start gap-4 relative">
                   <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 rounded-xl bg-primary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-xl group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
+                    <div className="glow-pulse-active relative w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-xl group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
                       {feature.emoji}
                     </div>
                   </div>
@@ -998,8 +1003,8 @@ export default function Landing() {
               <motion.div
                 key={lang.name}
                 variants={itemVariants}
-                whileHover={{ y: -6, transition: { duration: 0.3, ease: 'easeOut' } }}
-                className={`group relative rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 hover:border-primary/20 transition-all duration-300 overflow-hidden gradient-border-hover cursor-default`}
+                whileHover={{ y: -6, transition: { duration: 0.3, ease: 'easeOut' as const } }}
+                className={`group card-glow-hover fade-scale-in relative rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/80 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/8 transition-all duration-300 overflow-hidden gradient-border-hover cursor-default`}
               >
                 {/* Subtle gradient background */}
                 <div
@@ -1164,16 +1169,21 @@ export default function Landing() {
                 }}
                 className={`relative rounded-xl border p-6 flex flex-col backdrop-blur-sm transition-all duration-300 ${
                   plan.highlighted
-                    ? 'bg-card/80 border-primary/40 shadow-lg shadow-primary/10 ring-1 ring-primary/20'
-                    : 'bg-card/50 border-border/50 hover:border-border hover:bg-card/70'
+                    ? 'pricing-card-recommended card-glow-hover bg-card/80 border-primary/40 shadow-lg shadow-primary/10 ring-1 ring-primary/20'
+                    : 'card-glow-hover bg-card/50 border-border/50 hover:border-border hover:bg-card/70 hover:shadow-lg hover:shadow-primary/5'
                 }`}
               >
                 {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <motion.div
+                    className="absolute -top-3 left-1/2 -translate-x-1/2"
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.3, type: 'spring' as const, stiffness: 300, damping: 15 }}
+                  >
                     <Badge className="bg-primary text-primary-foreground shadow-md shadow-primary/20 text-xs px-3">
                       {plan.badge}
                     </Badge>
-                  </div>
+                  </motion.div>
                 )}
 
                 <div className="text-center space-y-3 mb-6">
@@ -1254,7 +1264,7 @@ export default function Landing() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     variant={plan.ctaVariant}
-                    className={`w-full ${
+                    className={`btn-shimmer-effect w-full ${
                       plan.highlighted
                         ? 'shadow-lg shadow-primary/20'
                         : 'border-primary/30 hover:bg-primary/10 hover:border-primary/50'
@@ -1333,9 +1343,9 @@ export default function Landing() {
                 <AccordionItem
                   key={index}
                   value={`faq-${index}`}
-                  className="border-border/40 bg-card/30 rounded-lg px-4 mb-2 data-[state=open]:bg-card/60 transition-colors"
+                  className="faq-item border-border/40 bg-card/30 rounded-lg px-4 mb-2 data-[state=open]:bg-card/60 data-[state=open]:border-primary/20 hover:bg-primary/5 hover:border-primary/15 transition-colors"
                 >
-                  <AccordionTrigger className="text-right font-semibold text-sm md:text-base hover:no-underline hover:text-primary/90 py-4">
+                  <AccordionTrigger className="text-right font-semibold text-sm md:text-base hover:no-underline hover:text-primary/90 py-4 transition-colors duration-200 [&>svg]:transition-transform [&>svg]:duration-300">
                     {item.question}
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-4">
@@ -1599,7 +1609,7 @@ export default function Landing() {
           animate="visible"
           exit="hidden"
           onClick={scrollToTop}
-          className="fixed bottom-6 left-6 z-50 w-11 h-11 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:bg-primary transition-colors"
+          className="scroll-to-top-btn fixed bottom-6 left-6 z-50 w-11 h-11 rounded-full bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:bg-primary transition-colors"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           aria-label="العودة إلى الأعلى"

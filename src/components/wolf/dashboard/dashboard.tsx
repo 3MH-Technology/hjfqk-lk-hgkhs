@@ -19,6 +19,7 @@ import {
   ArrowUpRight,
   BookOpen,
   LifeBuoy,
+  BarChart3,
   Sparkles,
   Zap,
   Terminal,
@@ -218,13 +219,13 @@ const quickActions: {
     iconColor: 'text-sky-400',
   },
   {
-    label: 'الدعم الفني',
-    description: 'تواصل مع فريق الدعم',
-    icon: LifeBuoy,
-    page: 'help',
-    gradientFrom: 'from-sky-500/20',
-    gradientTo: 'to-sky-500/5',
-    iconColor: 'text-sky-400',
+    label: 'تحليلات البوتات',
+    description: 'إحصائيات مفصلة وأداء',
+    icon: BarChart3,
+    page: 'bot-analytics',
+    gradientFrom: 'from-violet-500/20',
+    gradientTo: 'to-violet-500/5',
+    iconColor: 'text-violet-400',
   },
   {
     label: 'إدارة الملفات',
@@ -234,6 +235,38 @@ const quickActions: {
     gradientFrom: 'from-sky-500/20',
     gradientTo: 'to-sky-500/5',
     iconColor: 'text-sky-400',
+  },
+];
+
+const quickStartSteps: {
+  step: number;
+  emoji: string;
+  title: string;
+  description: string;
+}[] = [
+  {
+    step: 1,
+    emoji: '📝',
+    title: 'أنشئ حسابك',
+    description: 'سجل في أقل من دقيقة وابدأ فوراً',
+  },
+  {
+    step: 2,
+    emoji: '🤖',
+    title: 'أنشئ بوتك الأول',
+    description: 'ارفع ملفات البوت وأعد متغيرات البيئة',
+  },
+  {
+    step: 3,
+    emoji: '▶️',
+    title: 'شغّل بوتك',
+    description: 'اضغط زر التشغيل وسيبدأ العمل فوراً',
+  },
+  {
+    step: 4,
+    emoji: '📊',
+    title: 'راقب الأداء',
+    description: 'تتبع استهلاك الموارد والسجلات مباشرة',
   },
 ];
 
@@ -914,6 +947,61 @@ export function Dashboard() {
                 />
               ))}
             </div>
+          </motion.div>
+
+          {/* ─── Quick Start Steps Guide ─── */}
+          <motion.div variants={itemVariants} className="mt-6">
+            <SectionDivider icon={BookOpen} label="خطوات البدء السريع" />
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="mt-4 space-y-0"
+            >
+              {quickStartSteps.map((step, idx) => {
+                const isLast = idx === quickStartSteps.length - 1;
+                return (
+                  <motion.div
+                    key={step.step}
+                    variants={itemVariants}
+                    className="relative flex items-stretch"
+                  >
+                    {/* Connecting line (right side for RTL) */}
+                    <div className="flex flex-col items-center shrink-0 w-10">
+                      {/* Step number circle */}
+                      <motion.div
+                        className="relative z-10 flex items-center justify-center size-10 rounded-full bg-primary/15 border-2 border-primary/40 shadow-lg shadow-primary/10"
+                        whileHover={{ scale: 1.12 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' as const }}
+                      >
+                        <span className="text-sm font-bold text-primary">{step.step}</span>
+                      </motion.div>
+                      {/* Gradient connecting line */}
+                      {!isLast && (
+                        <div className="w-0.5 flex-1 min-h-[24px] bg-gradient-to-b from-primary/40 via-primary/20 to-primary/5" />
+                      )}
+                    </div>
+
+                    {/* Step card content */}
+                    <motion.div
+                      className="flex-1 mb-4 mr-4"
+                      whileHover={{ x: 4 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' as const }}
+                    >
+                      <Card className="glass rounded-xl border border-border hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                        <CardContent className="p-4 flex items-center gap-4">
+                          <span className="text-2xl shrink-0">{step.emoji}</span>
+                          <div className="min-w-0">
+                            <p className="font-bold text-sm text-foreground">{step.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </motion.div>
         </motion.div>
       ) : (

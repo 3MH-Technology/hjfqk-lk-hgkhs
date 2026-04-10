@@ -5,6 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from './header';
 import { Sidebar } from './sidebar';
 import { CommandPalette } from '../command-palette';
+import { QuickActionsWidget } from '../quick-actions-widget';
+import { WelcomeBanner } from '../welcome-banner';
 import { useAppStore } from '@/store/app-store';
 
 // Loading skeleton for lazy-loaded pages
@@ -203,6 +205,8 @@ function PageContent() {
 }
 
 export function AppLayout() {
+  const { user } = useAppStore();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar - fixed on right for RTL */}
@@ -213,6 +217,16 @@ export function AppLayout() {
 
       {/* Command Palette */}
       <CommandPalette />
+
+      {/* Quick Actions Widget */}
+      <QuickActionsWidget />
+
+      {/* Welcome Banner - only shown when user is logged in */}
+      {user && (
+        <div className="fixed top-16 left-0 right-0 md:right-64 z-40">
+          <WelcomeBanner />
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="pt-16 min-h-screen md:mr-64">

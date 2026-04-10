@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   Bell,
+  BellOff,
   CheckCircle2,
   AlertTriangle,
   XCircle,
@@ -259,7 +260,7 @@ export function NotificationDropdown() {
         align="end"
         side="bottom"
         sideOffset={8}
-        className="w-80 p-0 rounded-xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/30 overflow-hidden"
+        className="w-80 p-0 rounded-xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/30 overflow-hidden glass-shimmer fade-scale-in"
       >
         {/* ─── Header ─── */}
         <div className="px-4 pt-3 pb-2">
@@ -301,11 +302,11 @@ export function NotificationDropdown() {
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-muted/50 mb-3">
-                    <Bell className="size-6 text-muted-foreground/40" />
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/50 mb-3">
+                    <BellOff className="size-6 text-muted-foreground/30" />
                   </div>
-                  <p className="text-sm text-muted-foreground">لا توجد إشعارات</p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">
+                  <p className="text-sm font-medium text-muted-foreground/70">لا توجد إشعارات</p>
+                  <p className="text-xs text-muted-foreground/40 mt-1">
                     ستظهر الإشعارات الجديدة هنا تلقائياً
                   </p>
                 </div>

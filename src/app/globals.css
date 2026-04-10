@@ -772,9 +772,19 @@ html {
 /* FAQ accordion styling */
 .faq-item {
   transition: all 0.3s ease;
+  border-right: 3px solid transparent;
 }
 .faq-item:hover {
   background-color: oklch(0.15 0.01 260 / 50%);
+  border-right-color: oklch(0.60 0.20 250 / 40%);
+}
+.faq-item[data-state="open"] {
+  border-right-color: oklch(0.60 0.20 250 / 50%);
+}
+
+/* FAQ chevron smooth rotation */
+.faq-item [data-state="open"] > button > svg {
+  transform: rotate(180deg);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1490,4 +1500,416 @@ html {
 
 .empty-wolf-float {
   animation: empty-wolf-float 4s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD & GLOBAL — New CSS Enhancements
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Subtle Grid Pattern Background ─── */
+.grid-pattern-bg {
+  position: relative;
+}
+
+.grid-pattern-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(oklch(0.20 0.01 260 / 12%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.20 0.01 260 / 12%) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, oklch(1 0 0 / 40%) 0%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, oklch(1 0 0 / 40%) 0%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Glassmorphism with Animated Shimmer ─── */
+@keyframes glass-shimmer-move {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(200%) rotate(25deg); }
+}
+
+.glass-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: oklch(0.11 0.008 260 / 60%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid oklch(0.20 0.01 260 / 40%);
+  box-shadow:
+    0 4px 24px oklch(0 0 0 / 25%),
+    inset 0 1px 0 oklch(0.95 0.01 260 / 6%);
+}
+
+.glass-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.60 0.20 250 / 6%),
+    oklch(0.70 0.12 240 / 10%),
+    oklch(0.60 0.20 250 / 6%),
+    transparent
+  );
+  animation: glass-shimmer-move 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─── Card Hover Glow with Pulse ─── */
+@keyframes card-glow-anim {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 oklch(0.60 0.20 250 / 0%),
+      0 4px 16px oklch(0 0 0 / 15%);
+  }
+  50% {
+    box-shadow:
+      0 0 20px 2px oklch(0.60 0.20 250 / 12%),
+      0 0 40px 4px oklch(0.60 0.20 250 / 6%),
+      0 8px 24px oklch(0 0 0 / 20%);
+  }
+}
+
+.card-glow-hover {
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  border: 1px solid oklch(0.20 0.01 260 / 40%);
+}
+
+.card-glow-hover:hover {
+  animation: card-glow-anim 2.5s ease-in-out infinite;
+  border-color: oklch(0.60 0.20 250 / 30%);
+  transform: translateY(-2px);
+}
+
+/* ─── Smooth Number Counter Animation ─── */
+@keyframes counter-tick {
+  0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+  30% { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  60% { transform: translateY(1px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.counter-animate {
+  display: inline-block;
+  animation: counter-tick 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Status Indicator Rings (New) ─── */
+@keyframes status-ring-pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.70 0.20 160 / 40%); }
+  50% { box-shadow: 0 0 0 4px oklch(0.70 0.20 160 / 0%); }
+}
+
+@keyframes status-ring-pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.65 0.22 25 / 40%); }
+  50% { box-shadow: 0 0 0 4px oklch(0.65 0.22 25 / 0%); }
+}
+
+@keyframes status-ring-pulse-amber {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.80 0.18 70 / 40%); }
+  50% { box-shadow: 0 0 0 4px oklch(0.80 0.18 70 / 0%); }
+}
+
+.status-ring-green {
+  position: relative;
+  animation: status-ring-pulse-green 2s ease-in-out infinite;
+}
+
+.status-ring-red {
+  position: relative;
+  animation: status-ring-pulse-red 2s ease-in-out infinite;
+}
+
+.status-ring-amber {
+  position: relative;
+  animation: status-ring-pulse-amber 2s ease-in-out infinite;
+}
+
+/* ─── Loading Skeleton Shimmer ─── */
+@keyframes skeleton-shimmer-move {
+  0% { background-position: -300% 0; }
+  100% { background-position: 300% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0.12 0.01 260) 0%,
+    oklch(0.16 0.01 260) 15%,
+    oklch(0.20 0.015 260) 30%,
+    oklch(0.16 0.01 260) 45%,
+    oklch(0.12 0.01 260) 60%,
+    oklch(0.12 0.01 260) 100%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer-move 2s ease-in-out infinite;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.skeleton-shimmer-circle {
+  border-radius: 50%;
+}
+
+/* ─── Welcome Banner Component ─── */
+@keyframes welcome-banner-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes welcome-banner-slide-in {
+  0% { opacity: 0; transform: translateY(-100%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes welcome-banner-slide-out {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-100%); }
+}
+
+.welcome-banner {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    oklch(0.60 0.20 250 / 25%),
+    oklch(0.55 0.22 245 / 15%),
+    oklch(0.70 0.12 240 / 20%),
+    oklch(0.60 0.20 250 / 25%)
+  );
+  background-size: 300% 300%;
+  animation: welcome-banner-gradient 8s ease-in-out infinite, welcome-banner-slide-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border-bottom: 1px solid oklch(0.60 0.20 250 / 20%);
+  overflow: hidden;
+}
+
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 10% 50%, oklch(0.60 0.20 250 / 10%) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 50%, oklch(0.70 0.12 240 / 8%) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.welcome-banner-closing {
+  animation: welcome-banner-slide-out 0.4s ease-in forwards;
+}
+
+/* ─── Enhanced Animation Keyframes ─── */
+
+/* Gentle up/down float for decorative elements */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.float-gentle {
+  animation: float-gentle 5s ease-in-out infinite;
+}
+
+/* Pulsing glow effect for active items */
+@keyframes glow-pulse-active {
+  0%, 100% {
+    box-shadow:
+      0 0 8px oklch(0.60 0.20 250 / 20%),
+      0 0 20px oklch(0.60 0.20 250 / 10%);
+  }
+  50% {
+    box-shadow:
+      0 0 14px oklch(0.60 0.20 250 / 35%),
+      0 0 35px oklch(0.60 0.20 250 / 18%),
+      0 0 60px oklch(0.60 0.20 250 / 8%);
+  }
+}
+
+.glow-pulse-active {
+  animation: glow-pulse-active 2.5s ease-in-out infinite;
+}
+
+/* RTL-aware slide from right */
+@keyframes slide-in-right {
+  0% { opacity: 0; transform: translateX(40px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-right {
+  animation: slide-in-right 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade + scale entrance */
+@keyframes fade-scale-in {
+  0% { opacity: 0; transform: scale(0.92); }
+  60% { opacity: 1; transform: scale(1.01); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.fade-scale-in {
+  animation: fade-scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── Scroll Behavior Improvements ─── */
+
+/* Enhanced scrollbar with gradient thumb */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(0.09 0.005 260);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    oklch(0.35 0.02 250),
+    oklch(0.25 0.01 260)
+  );
+  border-radius: 4px;
+  border: 1px solid oklch(0.10 0.005 260);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    to bottom,
+    oklch(0.45 0.03 250),
+    oklch(0.35 0.02 260)
+  );
+}
+
+::-webkit-scrollbar-corner {
+  background: oklch(0.09 0.005 260);
+}
+
+/* Scroll-to-top button */
+@keyframes scroll-top-appear {
+  0% { opacity: 0; transform: translateY(16px) scale(0.8); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scroll-top-disappear {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(16px) scale(0.8); }
+}
+
+.scroll-to-top-btn {
+  animation: scroll-top-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scroll-to-top-btn-exit {
+  animation: scroll-top-disappear 0.2s ease-in forwards;
+}
+
+.scroll-to-top-btn:hover {
+  box-shadow:
+    0 0 0 2px oklch(0.60 0.20 250 / 30%),
+    0 0 16px oklch(0.60 0.20 250 / 15%);
+}
+
+/* Smooth scroll progress indicator at page top */
+@keyframes scroll-progress-shimmer {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 100;
+  background: linear-gradient(
+    90deg,
+    oklch(0.60 0.20 250),
+    oklch(0.70 0.12 240),
+    oklch(0.60 0.20 250),
+    oklch(0.70 0.12 240)
+  );
+  background-size: 200% 100%;
+  animation: scroll-progress-shimmer 2s linear infinite;
+  transform-origin: right;
+  pointer-events: none;
+}
+
+/* ─── Light Theme Overrides for New Classes ─── */
+
+.light .grid-pattern-bg::before {
+  background-image:
+    linear-gradient(oklch(0.80 0.01 260 / 30%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.80 0.01 260 / 30%) 1px, transparent 1px);
+}
+
+.light .glass-shimmer {
+  background: oklch(1.0 0 0 / 60%);
+  border: 1px solid oklch(0.88 0.01 260 / 50%);
+  box-shadow:
+    0 4px 24px oklch(0 0 0 / 6%),
+    inset 0 1px 0 oklch(1.0 0 0 / 100%);
+}
+
+.light .glass-shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.55 0.22 250 / 6%),
+    oklch(0.65 0.12 240 / 8%),
+    oklch(0.55 0.22 250 / 6%),
+    transparent
+  );
+}
+
+.light .card-glow-hover {
+  border: 1px solid oklch(0.88 0.01 260 / 50%);
+}
+
+.light .card-glow-hover:hover {
+  border-color: oklch(0.55 0.22 250 / 25%);
+  animation: card-glow-light 2.5s ease-in-out infinite;
+}
+
+.light .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0.93 0.005 260) 0%,
+    oklch(0.95 0.005 260) 15%,
+    oklch(0.97 0.005 260) 30%,
+    oklch(0.95 0.005 260) 45%,
+    oklch(0.93 0.005 260) 60%,
+    oklch(0.93 0.005 260) 100%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer-move 2s ease-in-out infinite;
+}
+
+.light .welcome-banner {
+  background: linear-gradient(
+    135deg,
+    oklch(0.55 0.22 250 / 15%),
+    oklch(0.65 0.12 240 / 10%),
+    oklch(0.55 0.22 250 / 15%)
+  );
+  background-size: 300% 300%;
+  border-bottom: 1px solid oklch(0.55 0.22 250 / 15%);
+}
+
+.light .welcome-banner::before {
+  background:
+    radial-gradient(ellipse at 10% 50%, oklch(0.55 0.22 250 / 6%) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 50%, oklch(0.65 0.12 240 / 4%) 0%, transparent 50%);
+}
+
+.light .scroll-to-top-btn:hover {
+  box-shadow:
+    0 0 0 2px oklch(0.55 0.22 250 / 25%),
+    0 0 16px oklch(0.55 0.22 250 / 10%);
 }
