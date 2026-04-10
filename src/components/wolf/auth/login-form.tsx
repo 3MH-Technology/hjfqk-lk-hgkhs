@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
-import { Loader2, Eye, EyeOff, LogIn, Send, Mail, ArrowLeft, KeyRound } from 'lucide-react';
+import { Loader2, Eye, EyeOff, LogIn, Send, Mail, ArrowLeft, KeyRound, AlertCircle, AlertTriangle, Info, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
@@ -56,7 +56,7 @@ const inputGlowVariants: Variants = {
   idle: { boxShadow: '0 0 0 0px transparent' },
   focused: {
     boxShadow: '0 0 0 2px oklch(0.60 0.20 250 / 0.15), 0 0 20px -4px oklch(0.60 0.20 250 / 0.2)',
-    transition: { duration: 0.3, ease: 'easeOut' },
+    transition: { duration: 0.3, ease: 'easeOut' as const },
   },
 };
 
@@ -72,7 +72,17 @@ const dialogOverlayVariants: Variants = {
 
 const dialogContentVariants: Variants = {
   hidden: { opacity: 0, scale: 0.95, y: 10 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+};
+
+const errorShakeVariants: Variants = {
+  hidden: { opacity: 0, y: -4, x: 0 },
+  visible: { opacity: 1, y: 0, x: 0, transition: { duration: 0.3 } },
+  shake: {
+    opacity: 1, y: 0,
+    x: [0, -6, 6, -4, 4, 0],
+    transition: { duration: 0.4 },
+  },
 };
 
 /* ─── Wolf Logo Component ─── */
@@ -111,6 +121,7 @@ function GlowInput({
   dir,
   autoComplete,
   children,
+  error,
 }: {
   id: string;
   label: string;
@@ -122,8 +133,10 @@ function GlowInput({
   dir?: string;
   autoComplete: string;
   children?: React.ReactNode;
+  error?: string;
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  const hasError = !!error;
 
   return (
     <motion.div variants={itemVariants} className="space-y-2">
@@ -131,7 +144,7 @@ function GlowInput({
       <motion.div
         variants={inputGlowVariants}
         animate={isFocused ? 'focused' : 'idle'}
-        className="auth-input-wrapper relative rounded-lg"
+        className={`auth-input-wrapper relative rounded-lg ${hasError ? '[&>input]:border-red-500/50 [&>input]:focus:ring-red-500/20' : ''}`}
       >
         <Input
           id={id}
@@ -145,6 +158,7 @@ function GlowInput({
           dir={dir}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          aria-invalid={hasError}
         />
         {children && (
           <div className="absolute left-1 top-1/2 -translate-y-1/2">
@@ -154,14 +168,42 @@ function GlowInput({
       </motion.div>
       {/* Gradient underline effect */}
       <motion.div
-        className="h-0.5 rounded-full bg-gradient-to-l from-transparent via-primary/60 to-transparent"
+        className={`h-0.5 rounded-full ${hasError ? 'bg-gradient-to-l from-transparent via-red-500/60 to-transparent' : 'bg-gradient-to-l from-transparent via-primary/60 to-transparent'}`}
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{
           scaleX: isFocused ? 1 : 0,
           opacity: isFocused ? 1 : 0,
         }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.3, ease: 'easeOut' as const }}
       />
+      {/* Inline validation error */}
+      {hasError && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-1.5"
+        >
+          <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+          <span className="text-xs text-red-400">{error}</span>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+/* ─── Enhanced Validation Error ─── */
+function ValidationError({ message, icon: Icon }: { message: string; icon: React.ElementType }) {
+  return (
+    <motion.div
+      variants={errorShakeVariants}
+      initial="hidden"
+      animate="shake"
+      className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2.5"
+    >
+      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20 shrink-0">
+        <Icon className="w-3.5 h-3.5 text-red-400" />
+      </div>
+      <span className="text-xs text-red-400 font-medium">{message}</span>
     </motion.div>
   );
 }
@@ -179,7 +221,9 @@ function ForgotPasswordDialog({
 
   const handleReset = async () => {
     if (!resetEmail.trim()) {
-      toast.error('يرجى إدخال البريد الإلكتروني');
+      toast.error('يرجى إدخال البريد الإلكتروني', {
+        icon: <AlertCircle className="w-4 h-4 text-red-400" />,
+      });
       return;
     }
     setIsSending(true);
@@ -202,7 +246,7 @@ function ForgotPasswordDialog({
             className="mx-auto mb-3"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+            transition={{ type: 'spring' as const, stiffness: 300, damping: 20, delay: 0.1 }}
           >
             <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
               <KeyRound className="h-7 w-7 text-primary" />
@@ -267,7 +311,7 @@ function AuthBrandingPanel({ subtitle }: { subtitle?: string }) {
       variants={brandingVariants}
       initial="hidden"
       animate="visible"
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: 'easeOut' as const }}
     >
       {/* Subtle background texture overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{
@@ -347,14 +391,47 @@ export default function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { setUser, setCurrentPage } = useAppStore();
+
+  const validateField = (field: string, value: string): string | null => {
+    switch (field) {
+      case 'email':
+        if (!value.trim()) return 'يرجى إدخال البريد الإلكتروني';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return 'صيغة البريد الإلكتروني غير صالحة';
+        return null;
+      case 'password':
+        if (!value.trim()) return 'يرجى إدخال كلمة المرور';
+        if (value.length < 6) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const validateForm = (): string | null => {
+    const errors: Record<string, string> = {};
+
+    const emailErr = validateField('email', email);
+    if (emailErr) errors.email = emailErr;
+
+    const passwordErr = validateField('password', password);
+    if (passwordErr) errors.password = passwordErr;
+
+    setFormErrors(errors);
+
+    const firstError = Object.values(errors)[0];
+    return firstError || null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.trim() || !password.trim()) {
+    const error = validateForm();
+    if (error) {
       toast.error('حقول مطلوبة', {
-        description: 'يرجى إدخال البريد الإلكتروني وكلمة المرور',
+        description: error,
+        icon: <AlertCircle className="w-4 h-4 text-red-400" />,
       });
       return;
     }
@@ -369,8 +446,10 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
+        setFormErrors({ general: result.error || 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
         toast.error('فشل تسجيل الدخول', {
           description: result.error || 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+          icon: <AlertTriangle className="w-4 h-4 text-red-400" />,
         });
         return;
       }
@@ -392,6 +471,7 @@ export default function LoginForm() {
     } catch {
       toast.error('خطأ غير متوقع', {
         description: 'حدث خطأ أثناء تسجيل الدخول، يرجى المحاولة مرة أخرى',
+        icon: <AlertTriangle className="w-4 h-4 text-red-400" />,
       });
     } finally {
       setIsLoading(false);
@@ -462,6 +542,20 @@ export default function LoginForm() {
             </CardHeader>
 
             <CardContent>
+              {/* Global/general error */}
+              <AnimatePresence>
+                {formErrors.general && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-4 overflow-hidden"
+                  >
+                    <ValidationError message={formErrors.general} icon={ShieldAlert} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <motion.form
                 onSubmit={handleSubmit}
                 className="space-y-4"
@@ -476,10 +570,15 @@ export default function LoginForm() {
                   type="email"
                   placeholder="example@email.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (formErrors.email) setFormErrors((prev) => { const n = { ...prev }; delete n.email; return n; });
+                    if (formErrors.general) setFormErrors((prev) => { const n = { ...prev }; delete n.general; return n; });
+                  }}
                   disabled={isLoading}
                   dir="ltr"
                   autoComplete="email"
+                  error={formErrors.email}
                 />
 
                 {/* Password */}
@@ -489,10 +588,15 @@ export default function LoginForm() {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (formErrors.password) setFormErrors((prev) => { const n = { ...prev }; delete n.password; return n; });
+                    if (formErrors.general) setFormErrors((prev) => { const n = { ...prev }; delete n.general; return n; });
+                  }}
                   disabled={isLoading}
                   dir="ltr"
                   autoComplete="current-password"
+                  error={formErrors.password}
                 >
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -500,7 +604,7 @@ export default function LoginForm() {
                       initial="hide"
                       animate="show"
                       exit="hide"
-                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      transition={{ duration: 0.2, ease: 'easeOut' as const }}
                     >
                       <Button
                         type="button"

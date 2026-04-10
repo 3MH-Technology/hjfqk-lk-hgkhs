@@ -22,8 +22,11 @@ export type Page =
   | "api-keys"
   | "webhooks"
   | "deployment-history"
+  | "bot-health"
   | "team"
   | "dev-admin"
+  | "api-docs"
+  | "changelog"
   | "privacy"
   | "terms"
   | "404";

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import {
   Shield,
   Zap,
@@ -23,6 +23,8 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Menu,
   X,
   MessageSquare,
@@ -31,6 +33,10 @@ import {
   Check,
   Crown,
   Sparkles,
+  Box,
+  Database,
+  Radio,
+  Globe,
   Building2,
 } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
@@ -148,23 +154,40 @@ const howItWorksSteps = [
 
 const testimonials = [
   {
-    quote: 'أفضل منصة استضافة بوتات تيليجرام استخدمتها. السرعة والأمان لا مثيل لهما، والدعم الفني يستجيب فوراً.',
-    name: 'مستخدم مجهول',
+    quote: 'أفضل منصة استضافة بوتات تيليجرام استخدمتها على الإطلاق. السرعة والأمان لا مثيل لهما، والدعم الفني يستجيب فوراً عند الحاجة.',
+    name: 'أحمد الراشد',
     role: 'مطور بوتات',
     stars: 5,
+    initials: 'أر',
+    avatarColor: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   },
   {
-    quote: 'استضافة الذئب وفّرت عليّ الكثير من الوقت والجهد. الواجهة سهلة جداً والبوت يعمل بدون انقطاع منذ أشهر.',
-    name: 'مستخدم مجهول',
-    role: 'صاحب مشروع',
+    quote: 'استضافة الذئب وفّرت عليّ الكثير من الوقت والجهد. الواجهة سهلة جداً والبوت يعمل بدون انقطاع منذ أشهر طويلة.',
+    name: 'سارة المنصوري',
+    role: 'مديرة مشاريع',
     stars: 5,
+    initials: 'سم',
+    avatarColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
   },
   {
-    quote: 'الميزات المتقدمة مثل السجلات المباشرة وإعادة التشغيل التلقائي جعلت إدارة البوتات تجربة ممتعة.',
-    name: 'مستخدم مجهول',
+    quote: 'الميزات المتقدمة مثل السجلات المباشرة وإعادة التشغيل التلقائي جعلت إدارة البوتات تجربة ممتعة ومريحة بالفعل.',
+    name: 'محمد العتيبي',
     role: 'مبرمج مستقل',
-    stars: 5,
+    stars: 4,
+    initials: 'مع',
+    avatarColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   },
+];
+
+const techStack = [
+  { icon: Box, name: 'Docker', description: 'حاويات معزولة' },
+  { icon: Server, name: 'Node.js', description: 'بيئة تشغيل سريعة' },
+  { icon: FileCode, name: 'TypeScript', description: 'أنواع آمنة' },
+  { icon: Database, name: 'PostgreSQL', description: 'قاعدة بيانات قوية' },
+  { icon: Zap, name: 'Redis', description: 'تخزين مؤقت سريع' },
+  { icon: Radio, name: 'WebSocket', description: 'اتصال فوري في الوقت الحقيقي' },
+  { icon: Globe, name: 'Nginx', description: 'خادم ويب عالي الأداء' },
+  { icon: Shield, name: 'SSL/TLS', description: 'تشفير آمن' },
 ];
 
 const trustBadges = [
@@ -397,6 +420,7 @@ function LandingSkeleton() {
 export default function Landing() {
   const { setCurrentPage } = useAppStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -414,6 +438,14 @@ export default function Landing() {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Auto-scroll testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const scrollToSection = useCallback((id: string) => {
@@ -461,6 +493,8 @@ export default function Landing() {
               { label: 'المميزات', id: 'features' },
               { label: 'الأسعار', id: 'pricing' },
               { label: 'اللغات', id: 'languages' },
+              { label: 'التقنيات', id: 'technologies' },
+              { label: 'آراء العملاء', id: 'testimonials' },
               { label: 'الأسئلة الشائعة', id: 'faq' },
               { label: 'تواصل', id: 'contact' },
             ].map((link) => (
@@ -526,6 +560,8 @@ export default function Landing() {
                 { label: 'المميزات', id: 'features' },
                 { label: 'الأسعار', id: 'pricing' },
                 { label: 'اللغات', id: 'languages' },
+                { label: 'التقنيات', id: 'technologies' },
+                { label: 'آراء العملاء', id: 'testimonials' },
                 { label: 'الأسئلة الشائعة', id: 'faq' },
                 { label: 'تواصل', id: 'contact' },
               ].map((link) => (
@@ -1033,8 +1069,8 @@ export default function Landing() {
 
         <SectionSeparator />
 
-        {/* ──────── TESTIMONIALS SECTION ──────── */}
-        <section className="max-w-6xl mx-auto px-4 py-16 md:py-24">
+        {/* ──────── TECHNOLOGIES SECTION ──────── */}
+        <section id="technologies" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1056,9 +1092,9 @@ export default function Landing() {
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
               </div>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">ماذا يقول مستخدمونا؟</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">التقنيات المستخدمة</h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              آراء حقيقية من مطورين يستخدمون استضافة الذئب يومياً
+              نبني منصتنا باستخدام أحدث التقنيات لضمان الأداء والاستقرار
             </p>
           </motion.div>
 
@@ -1067,50 +1103,25 @@ export default function Landing() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
           >
-            {testimonials.map((t, i) => (
+            {techStack.map((tech) => (
               <motion.div
-                key={i}
-                variants={testimonialCardVariants}
-                whileHover={{ scale: 1.03, y: -4, transition: { duration: 0.3, ease: 'easeOut' } }}
-                className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:bg-card/70 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 gradient-border-hover cursor-default"
+                key={tech.name}
+                variants={itemVariants}
+                whileHover={{ y: -4, transition: { duration: 0.25, ease: 'easeOut' as const } }}
+                className="group card-glow-hover fade-scale-in rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-5 hover:bg-card/80 transition-all duration-300 gradient-border-hover cursor-default text-center"
               >
-                <div className="mb-4">
-                  <Quote className="h-6 w-6 text-primary/30 rotate-180" />
-                </div>
-
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.stars }).map((_, j) => (
-                    <motion.div
-                      key={j}
-                      initial={{ opacity: 0, scale: 0 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.8 + j * 0.1, duration: 0.3, ease: 'easeOut' }}
-                    >
-                      <Star
-                        className="h-3.5 w-3.5 fill-primary text-primary"
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-
-                <Separator className="mb-4" />
-
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center">
-                    <span className="text-sm font-bold text-primary">
-                      {t.name.charAt(0)}
-                    </span>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-xl bg-primary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
+                      <tech.icon className="h-6 w-6 text-primary" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-sm">{tech.name}</h3>
+                    <p className="text-xs text-muted-foreground">{tech.description}</p>
                   </div>
                 </div>
               </motion.div>
@@ -1298,6 +1309,120 @@ export default function Landing() {
               </span>
             </div>
           </motion.div>
+        </section>
+
+        <SectionSeparator />
+
+        {/* ──────── TESTIMONIALS SECTION ──────── */}
+        <section id="testimonials" className="max-w-6xl mx-auto px-4 py-16 md:py-24 scroll-mt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+              </div>
+              <div className="h-px w-8 bg-gradient-to-l from-primary/30 to-transparent" />
+              <div className="h-px w-8 bg-gradient-to-r from-primary/30 to-transparent" />
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">ماذا يقول عملاؤنا</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              آراء حقيقية من مطورين يستخدمون استضافة الذئب يومياً
+            </p>
+          </motion.div>
+
+          {/* Testimonial Carousel */}
+          <div className="relative max-w-2xl mx-auto">
+            <div className="overflow-hidden rounded-2xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTestimonial}
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -30 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' as const }}
+                  className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 md:p-8 hover:bg-card/70 hover:border-primary/20 transition-all duration-300 gradient-border-hover"
+                >
+                  <div className="mb-4">
+                    <Quote className="h-8 w-8 text-primary/20 rotate-180" />
+                  </div>
+
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed mb-6">
+                    &ldquo;{testimonials[activeTestimonial].quote}&rdquo;
+                  </p>
+
+                  <div className="flex gap-1 mb-5">
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <Star
+                        key={j}
+                        className={`h-4 w-4 ${j < testimonials[activeTestimonial].stars ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`}
+                      />
+                    ))}
+                  </div>
+
+                  <Separator className="mb-5" />
+
+                  <div className="flex items-center gap-3">
+                    <div className={`w-11 h-11 rounded-full flex items-center justify-center border ${testimonials[activeTestimonial].avatarColor}`}>
+                      <span className="text-sm font-bold">
+                        {testimonials[activeTestimonial].initials}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{testimonials[activeTestimonial].name}</p>
+                      <p className="text-xs text-muted-foreground">{testimonials[activeTestimonial].role}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex justify-center gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setActiveTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
+                className="w-9 h-9 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center hover:bg-card/80 hover:border-primary/30 transition-all duration-200"
+              >
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setActiveTestimonial((prev) => (prev + 1) % testimonials.length)}
+                className="w-9 h-9 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm flex items-center justify-center hover:bg-card/80 hover:border-primary/30 transition-all duration-200"
+              >
+                <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+              </motion.button>
+            </div>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 mt-4">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveTestimonial(i)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === activeTestimonial
+                      ? 'w-8 bg-primary'
+                      : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </section>
 
         <SectionSeparator />
@@ -1523,6 +1648,8 @@ export default function Landing() {
                   { label: 'المميزات', action: () => scrollToSection('features') },
                   { label: 'خطط الأسعار', action: () => scrollToSection('pricing') },
                   { label: 'اللغات المدعومة', action: () => scrollToSection('languages') },
+                  { label: 'التقنيات المستخدمة', action: () => scrollToSection('technologies') },
+                  { label: 'آراء العملاء', action: () => scrollToSection('testimonials') },
                   { label: 'الأسئلة الشائعة', action: () => scrollToSection('faq') },
                   { label: 'كيف تبدأ', action: () => {} },
                   { label: 'تسجيل الدخول', action: () => setCurrentPage('login') },

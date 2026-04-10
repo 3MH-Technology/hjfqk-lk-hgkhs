@@ -115,6 +115,11 @@ const DeploymentHistory = dynamic(
   { loading: () => loadingFallback }
 );
 
+const BotHealth = dynamic(
+  () => import('@/components/wolf/bots/bot-health').then((m) => m.BotHealth),
+  { loading: () => loadingFallback }
+);
+
 const ApiKeysPage = dynamic(
   () => import('@/components/wolf/settings/api-keys'),
   { loading: () => loadingFallback }
@@ -125,6 +130,11 @@ const WebhooksPage = dynamic(
   { loading: () => loadingFallback }
 );
 
+const ApiDocsPage = dynamic(
+  () => import('@/components/wolf/settings/api-docs'),
+  { loading: () => loadingFallback }
+);
+
 const TeamManagementPage = dynamic(
   () => import('@/components/wolf/settings/team-management'),
   { loading: () => loadingFallback }
@@ -132,6 +142,11 @@ const TeamManagementPage = dynamic(
 
 const HelpCenter = dynamic(
   () => import('@/components/wolf/help-center'),
+  { loading: () => loadingFallback }
+);
+
+const Changelog = dynamic(
+  () => import('@/components/wolf/changelog'),
   { loading: () => loadingFallback }
 );
 
@@ -177,6 +192,8 @@ function PageContent() {
       return <AccountSettings />;
     case 'help':
       return <HelpCenter />;
+    case 'changelog':
+      return <Changelog />;
     case 'admin':
       return <AdminPanel />;
     case 'admin-users':
@@ -187,10 +204,14 @@ function PageContent() {
       return <BotAnalytics />;
     case 'deployment-history':
       return <DeploymentHistory />;
+    case 'bot-health':
+      return <BotHealth />;
     case 'api-keys':
       return <ApiKeysPage />;
     case 'webhooks':
       return <WebhooksPage />;
+    case 'api-docs':
+      return <ApiDocsPage />;
     case 'team':
       return <TeamManagementPage />;
     case 'dev-admin':

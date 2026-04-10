@@ -13,11 +13,39 @@ import {
   LogIn,
   Send,
   ChevronDown,
+  Play,
+  Clock,
+  BookOpen,
+  HelpCircle,
+  AlertTriangle,
+  CheckCircle2,
+  ExternalLink,
+  MessageSquare,
+  Lightbulb,
+  Bug,
+  Settings,
+  Users,
+  FileDown,
+  MonitorDot,
+  Sparkles,
+  Layers,
+  Zap,
+  ChevronLeft,
+  ThumbsUp,
+  ThumbsDown,
+  KeyRound,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion';
+import { useAppStore } from '@/store/app-store';
 
 /* ─── Animation Variants ─── */
 
@@ -38,7 +66,255 @@ const itemVariants: Variants = {
   },
 };
 
-/* ─── FAQ Data ─── */
+/* ─── Interactive FAQ Data (Enhancement 1) ─── */
+
+type FAQCategory = 'عام' | 'البوتات' | 'الفواتير' | 'الفريق' | 'تقني';
+
+interface InteractiveFAQ {
+  id: string;
+  question: string;
+  answer: string;
+  category: FAQCategory;
+}
+
+const faqItems: InteractiveFAQ[] = [
+  {
+    id: 'faq-1',
+    question: 'كيف أنشئ بوت جديد؟',
+    answer: 'انتقل إلى صفحة البوتات من القائمة الجانبية، ثم اضغط على زر "إنشاء بوت جديد". أدخل اسم البوت، اختر لغة البرمجة (Python أو PHP)، وحدد إعدادات الموارد. سيتم إنشاء البوت وبيئة التشغيل تلقائياً.',
+    category: 'البوتات',
+  },
+  {
+    id: 'faq-2',
+    question: 'كيف أربط بوتي بتيليجرام؟',
+    answer: 'احصل على توكن البوت من BotFather عبر تيليجرام. انتقل إلى صفحة تفاصيل البوت، ثم أضف التوكن في قسم المتغيرات البيئية تحت اسم BOT_TOKEN. أعد تشغيل البوت لتفعيل الاتصال.',
+    category: 'البوتات',
+  },
+  {
+    id: 'faq-3',
+    question: 'ما هي خطط الأسعار؟',
+    answer: 'نوفر 3 خطط: مجانية (بوت واحد، موارد محدودة)، احترافية (5 بوتات، موارد أعلى، دعم أولوية)، ومؤسسية (بوتات غير محدودة، موارد مخصصة، دعم مخصص). تحقق من صفحة الأسعار للحصول على التفاصيل الكاملة.',
+    category: 'الفواتير',
+  },
+  {
+    id: 'faq-4',
+    question: 'كيف أرفع ملفات البوت؟',
+    answer: 'انتقل إلى صفحة تفاصيل البوت، ثم افتح علامة التبويب "الملفات". استخدم زر "رفع ملف" أو اسحب وأفلت الملفات مباشرة. يمكنك أيضاً استخدام محرر الكود المدمج لإنشاء وتعديل الملفات.',
+    category: 'البوتات',
+  },
+  {
+    id: 'faq-5',
+    question: 'كيف أراقب أداء البوت؟',
+    answer: 'انتقل إلى صفحة "مراقبة الأداء" من القائمة الجانبية. ستعرض لك لوحة المراقبة مقاييس الأداء في الوقت الفعلي مثل CPU، الذاكرة، الشبكة، ومعدل الطلبات. يمكنك أيضاً مراجعة صفحة "تحليلات البوتات" لمزيد من التفاصيل.',
+    category: 'تقني',
+  },
+  {
+    id: 'faq-6',
+    question: 'كيف أضيف متغيرات البيئة؟',
+    answer: 'افتح صفحة تفاصيل البوت وانتقل إلى علامة التبويب "المتغيرات البيئية". أضف أزواج المفتاح والقيمة المطلوبة (مثل BOT_TOKEN، API_KEY). احفظ التغييرات وأعد تشغيل البوت لتطبيقها.',
+    category: 'تقني',
+  },
+  {
+    id: 'faq-7',
+    question: 'ما هي حدود الاستضافة المجانية؟',
+    answer: 'الخطة المجانية توفر: 3 بوتات، 512MB ذاكرة RAM، 1GB مساحة تخزين. يمكنك الترقية إلى الخطة الاحترافية أو المؤسسية لمزيد من الموارد والميزات المتقدمة.',
+    category: 'الفواتير',
+  },
+  {
+    id: 'faq-8',
+    question: 'كيف أتواصل مع الدعم؟',
+    answer: 'يمكنك التواصل مع فريق الدعم عبر تيليجرام @j49_c مباشرة. نقدم دعم على مدار الساعة. يمكنك أيضاً استخدام قسم "الإبلاغ عن مشكلة" في صفحة المساعدة.',
+    category: 'عام',
+  },
+  {
+    id: 'faq-9',
+    question: 'هل يمكنني تصدير البوت؟',
+    answer: 'نعم، يمكنك تصدير جميع ملفات البوت وبيئته. انتقل إلى صفحة تفاصيل البوت، ثم اختر "تصدير" من قائمة الإعدادات. سيتم تنزيل أرشيف يحتوي على جميع ملفات البوت ومتغيرات البيئة.',
+    category: 'البوتات',
+  },
+  {
+    id: 'faq-10',
+    question: 'كيف أدير فريق العمل؟',
+    answer: 'انتقل إلى صفحة "إدارة الفريق" من القائمة الجانبية. يمكنك إضافة أعضاء جدد، تعيين أدوار (مدير، مطور، مشاهد)، وإدارة صلاحيات الوصول لكل بوت وميزة في المنصة.',
+    category: 'الفريق',
+  },
+  {
+    id: 'faq-11',
+    question: 'كيف أحمي بوتي؟',
+    answer: 'فعّل المصادقة الثنائية (2FA) لحسابك، راجع صلاحيات API وتأكد من استخدامها بشكل صحيح، لا تشارك توكن البوت مع أي شخص، واستخدم متغيرات البيئة لتخزين المفاتيح الحساسة بدلاً من وضعها في الكود مباشرة.',
+    category: 'تقني',
+  },
+  {
+    id: 'faq-12',
+    question: 'ما هي متطلبات بوت تيليجرام؟',
+    answer: 'تحتاج إلى Python 3.9+ أو Node.js 18+ كبيئة تشغيل. مع Python، استخدم مكتبة python-telegram-bot أو aiogram. مع Node.js، استخدم مكتبة telegraf أو grammy. تأكد من وجود ملف requirements.txt أو package.json.',
+    category: 'تقني',
+  },
+];
+
+const faqCategories: { value: FAQCategory; label: string; color: string }[] = [
+  { value: 'عام', label: 'عام', color: 'bg-slate-500/15 text-slate-400 border-slate-500/20' },
+  { value: 'البوتات', label: 'البوتات', color: 'bg-primary/15 text-primary border-primary/20' },
+  { value: 'الفواتير', label: 'الفواتير', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' },
+  { value: 'الفريق', label: 'الفريق', color: 'bg-violet-500/15 text-violet-400 border-violet-500/20' },
+  { value: 'تقني', label: 'تقني', color: 'bg-sky-500/15 text-sky-400 border-sky-500/20' },
+];
+
+/* ─── Video Tutorials Data (Enhancement 2) ─── */
+
+interface VideoTutorial {
+  id: string;
+  title: string;
+  duration: string;
+  difficulty: 'مبتدئ' | 'متوسط' | 'متقدم';
+  gradient: string;
+  icon: React.ElementType;
+}
+
+const videoTutorials: VideoTutorial[] = [
+  {
+    id: 'vid-1',
+    title: 'إنشاء بوت تيليجرام من الصفر',
+    duration: '12:30',
+    difficulty: 'مبتدئ',
+    gradient: 'from-blue-600/30 to-cyan-600/20',
+    icon: Bot,
+  },
+  {
+    id: 'vid-2',
+    title: 'ربط البوت بـ BotFather والحصول على التوكن',
+    duration: '08:45',
+    difficulty: 'مبتدئ',
+    gradient: 'from-primary/30 to-blue-600/20',
+    icon: KeyRound,
+  },
+  {
+    id: 'vid-3',
+    title: 'إدارة المتغيرات البيئية بشكل احترافي',
+    duration: '15:20',
+    difficulty: 'متوسط',
+    gradient: 'from-emerald-600/30 to-teal-600/20',
+    icon: Settings,
+  },
+  {
+    id: 'vid-4',
+    title: 'مراقبة الأداء وحل المشاكل',
+    duration: '18:10',
+    difficulty: 'متوسط',
+    gradient: 'from-amber-600/30 to-orange-600/20',
+    icon: MonitorDot,
+  },
+  {
+    id: 'vid-5',
+    title: 'نشر البوت باستخدام Git والتحديث التلقائي',
+    duration: '22:00',
+    difficulty: 'متقدم',
+    gradient: 'from-violet-600/30 to-purple-600/20',
+    icon: Code2,
+  },
+  {
+    id: 'vid-6',
+    title: 'بناء بوت متقدم مع قاعدة بيانات',
+    duration: '28:45',
+    difficulty: 'متقدم',
+    gradient: 'from-rose-600/30 to-pink-600/20',
+    icon: Zap,
+  },
+];
+
+/* ─── Troubleshooting Guide Data (Enhancement 3) ─── */
+
+interface TroubleshootIssue {
+  id: string;
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  color: string;
+  bg: string;
+  steps: string[];
+  advancedSolution: string;
+}
+
+const troubleshootIssues: TroubleshootIssue[] = [
+  {
+    id: 'ts-1',
+    icon: AlertTriangle,
+    title: 'البوت يتوقف بعد بدء التشغيل',
+    description: 'يتوقف البوت تلقائياً بعد ثوانٍ قليلة من بدء التشغيل دون رسالة خطأ واضحة.',
+    color: 'text-red-400',
+    bg: 'bg-red-500/15',
+    steps: [
+      'افتح صفحة السجلات (Logs) من تفاصيل البوت',
+      'ابحث عن رسائل الخطأ الحمراء في آخر 50 سطر',
+      'تحقق من صحة ملف requirements.txt أو composer.json',
+      'تأكد من أن جميع المتغيرات البيئية مُعرّفة بشكل صحيح',
+      'جرب تشغيل البوت محلياً أولاً للتأكد من عمل الكود',
+    ],
+    advancedSolution: 'إذا لم تحل المشكلة، تحقق من وجود تبعيات دائرية في الكود أو استدعاءات asyncio غير صحيحة. استخدم الأمر `python -c "import main"` في وحدة التحكم لاختبار الاستيرادات.',
+  },
+  {
+    id: 'ts-2',
+    icon: Wifi,
+    title: 'البوت لا يستجيب للرسائل',
+    description: 'البوت يعمل ولكنه لا يرد على الرسائل المرسلة من المستخدمين.',
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/15',
+    steps: [
+      'تحقق من صحة توكن البوت BOT_TOKEN',
+      'تأكد من أن معالج الرسائل (message handler) مفعّل في الكود',
+      'تحقق من أن البوت ليس في وضع privacy (إعدادات BotFather)',
+      'راجع السجلات للتأكد من استقبال الرسائل',
+      'أرسل رسالة اختبار مباشرة للبوت (ليس في مجموعة)',
+    ],
+    advancedSolution: 'إذا كنت تستخدم webhooks، تأكد من أن عنوان URL صحيح ويمكن الوصول إليه. في وضع polling، تحقق من عدم وجود أخطاء في حلقة التحديث. جرب إعادة تعيين webhook باستخدام `deleteWebhook` قبل التبديل إلى polling.',
+  },
+  {
+    id: 'ts-3',
+    icon: Bug,
+    title: 'خطأ ModuleNotFoundError عند التشغيل',
+    description: 'ظهور خطأ يتعلق بمكتبة غير موجودة عند محاولة تشغيل البوت.',
+    color: 'text-violet-400',
+    bg: 'bg-violet-500/15',
+    steps: [
+      'حدد اسم المكتبة المفقودة من رسالة الخطأ',
+      'أضف اسم المكتبة في ملف requirements.txt',
+      'ارفع ملف requirements.txt المحدّث',
+      'أعد تشغيل البوت لتثبيت المكتبات الجديدة',
+    ],
+    advancedSolution: 'تأكد من إصدار المكتبة المطلوب. بعض المكتبات قد تحتاج إصدارات محددة. استخدم `package==version` في requirements.txt. إذا كانت المكتبة ليست في PyPI، قد تحتاج إلى تثبيتها يدوياً عبر وحدة التحكم.',
+  },
+  {
+    id: 'ts-4',
+    icon: HardDrive,
+    title: 'استهلاك ذاكرة مرتفع',
+    description: 'البوت يستهلك كمية كبيرة من الذاكرة مما يؤثر على الأداء.',
+    color: 'text-sky-400',
+    bg: 'bg-sky-500/15',
+    steps: [
+      'افتح صفحة مراقبة الأداء لمراجعة استهلاك الموارد',
+      'تحقق من وجود تسرب للذاكرة (memory leak) في الكود',
+      'تأكد من إغلاق الاتصالات والملفات بعد الاستخدام',
+      'راجع القوائم والكائنات الكبيرة المُخزّنة في الذاكرة',
+      'فعّل جمع القمامة (garbage collection) يدوياً إذا لزم الأمر',
+    ],
+    advancedSolution: 'استخدم أدوات مثل `tracemalloc` في Python لتتبع تخصيص الذاكرة. أضف `gc.collect()` في نقاط استراتيجية. فكر في استخدام redis أو قاعدة بيانات بدلاً من تخزين البيانات في الذاكرة.',
+  },
+];
+
+/* ─── Quick Links Data (Enhancement 4) ─── */
+
+interface QuickLink {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  action: () => void;
+  external?: boolean;
+  color: string;
+  bg: string;
+}
+
+/* ─── Original FAQ Data ─── */
 
 interface FAQItem {
   question: string;
@@ -213,6 +489,92 @@ function FAQAccordion({ faqs }: { faqs: FAQItem[] }) {
   );
 }
 
+/* ─── Troubleshoot Card Component ─── */
+
+function TroubleshootCard({ issue }: { issue: TroubleshootIssue }) {
+  const [expanded, setExpanded] = useState(false);
+  const Icon = issue.icon;
+
+  return (
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2, ease: 'easeOut' as const }}
+    >
+      <Card className="glass-enhanced border-border/50 overflow-hidden card-hover-lift">
+        <CardContent className="p-5 space-y-3">
+          {/* Header */}
+          <div className="flex items-start gap-3">
+            <div
+              className={`size-10 rounded-xl ${issue.bg} flex items-center justify-center shrink-0 mt-0.5`}
+            >
+              <Icon className={`size-5 ${issue.color}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-sm mb-1">{issue.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {issue.description}
+              </p>
+            </div>
+          </div>
+
+          {/* Steps Toggle */}
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            <motion.div
+              animate={{ rotate: expanded ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronLeft className="size-3.5" />
+            </motion.div>
+            <span>{expanded ? 'إخفاء الخطوات' : `عرض ${issue.steps.length} خطوات`}</span>
+          </button>
+
+          {/* Steps Content */}
+          <motion.div
+            initial={false}
+            animate={{
+              height: expanded ? 'auto' : 0,
+              opacity: expanded ? 1 : 0,
+            }}
+            transition={{ duration: 0.3, ease: 'easeOut' as const }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-2 pt-2 border-t border-border/30">
+              {issue.steps.map((step, idx) => (
+                <div key={idx} className="flex items-start gap-2.5">
+                  <span
+                    className={`size-5 rounded-full ${issue.bg} flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold ${issue.color}`}
+                  >
+                    {idx + 1}
+                  </span>
+                  <span className="text-xs text-muted-foreground leading-relaxed">
+                    {step}
+                  </span>
+                </div>
+              ))}
+              {issue.advancedSolution && (
+                <div className="mt-3 p-3 rounded-lg bg-muted/40 border border-border/30">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Lightbulb className="size-3.5 text-amber-400" />
+                    <span className="text-[10px] font-bold text-amber-400">
+                      حل متقدم
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    {issue.advancedSolution}
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
 /* ─── Main Component ─── */
 
 export default function HelpCenter() {
@@ -230,6 +592,24 @@ export default function HelpCenter() {
       }))
       .filter((cat) => cat.faqs.length > 0);
   }, [searchQuery]);
+
+  // Interactive FAQ state & filter
+  const [faqSearch, setFaqSearch] = useState('');
+  const [activeFaqCategory, setActiveFaqCategory] = useState<FAQCategory | 'الكل'>('الكل');
+
+  const filteredFaqs = useMemo(() => {
+    let items = faqItems;
+    if (activeFaqCategory !== 'الكل') {
+      items = items.filter((f) => f.category === activeFaqCategory);
+    }
+    if (faqSearch.trim()) {
+      const q = faqSearch.trim();
+      items = items.filter(
+        (f) => f.question.includes(q) || f.answer.includes(q)
+      );
+    }
+    return items;
+  }, [faqSearch, activeFaqCategory]);
 
   return (
     <motion.div
@@ -337,6 +717,241 @@ export default function HelpCenter() {
           })}
         </div>
       )}
+
+      {/* ─── Interactive FAQ Section ─── */}
+      <motion.div variants={itemVariants}>
+        <Card className="rounded-xl border border-border overflow-hidden neon-border-glow">
+          <div className="absolute inset-0 bg-gradient-to-bl from-primary/5 via-transparent to-transparent pointer-events-none" />
+          <CardContent className="relative p-5 md:p-6 space-y-4">
+            {/* Section Header */}
+            <div className="flex items-center gap-3">
+              <div className="size-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                <HelpCircle className="size-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">الأسئلة الشائعة</h2>
+                <p className="text-xs text-muted-foreground">
+                  ابحث عن إجابات سريعة لأسئلتك
+                </p>
+              </div>
+              <Badge
+                variant="outline"
+                className="text-[10px] bg-primary/10 text-primary border-primary/20 mr-auto"
+              >
+                {filteredFaqs.length} سؤال
+              </Badge>
+            </div>
+
+            {/* FAQ Search */}
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="ابحث في الأسئلة..."
+                value={faqSearch}
+                onChange={(e) => setFaqSearch(e.target.value)}
+                className="pr-10 pl-4 h-10 bg-muted/50 border-border/50 rounded-lg text-sm focus:ring-primary/30 focus:border-primary/50"
+              />
+              {faqSearch && (
+                <button
+                  onClick={() => setFaqSearch('')}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <span className="text-xs">✕</span>
+                </button>
+              )}
+            </div>
+
+            {/* Category Filter Tags */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveFaqCategory('الكل')}
+                className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 border ${
+                  activeFaqCategory === 'الكل'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border/50 hover:border-primary/30 hover:text-foreground'
+                }`}
+              >
+                الكل
+              </button>
+              {faqCategories.map((cat) => (
+                <button
+                  key={cat.value}
+                  onClick={() =>
+                    setActiveFaqCategory(
+                      activeFaqCategory === cat.value ? 'الكل' : cat.value
+                    )
+                  }
+                  className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 border ${
+                    activeFaqCategory === cat.value
+                      ? cat.color
+                      : 'bg-muted/50 text-muted-foreground border-border/50 hover:border-border hover:text-foreground'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* FAQ Accordion */}
+            {filteredFaqs.length === 0 ? (
+              <div className="py-8 text-center">
+                <HelpCircle className="size-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  لا توجد نتائج تطابق بحثك
+                </p>
+              </div>
+            ) : (
+              <Accordion type="multiple" className="space-y-1">
+                {filteredFaqs.map((faq) => {
+                  const cat = faqCategories.find(
+                    (c) => c.value === faq.category
+                  );
+                  return (
+                    <AccordionItem
+                      key={faq.id}
+                      value={faq.id}
+                      className="rounded-lg px-1 bg-muted/20 hover:bg-muted/30 transition-colors border-0"
+                    >
+                      <AccordionTrigger className="text-right text-sm font-medium hover:no-underline py-3">
+                        <div className="flex items-center gap-2 flex-1">
+                          <span className="flex-1 text-right">
+                            {faq.question}
+                          </span>
+                          {cat && (
+                            <Badge
+                              variant="outline"
+                              className={`text-[9px] px-1.5 py-0 border shrink-0 ${cat.color}`}
+                            >
+                              {cat.label}
+                            </Badge>
+                          )}
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground text-xs leading-relaxed">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* ─── Video Tutorials Section ─── */}
+      <motion.div variants={itemVariants}>
+        <div className="space-y-4">
+          {/* Section Header */}
+          <div className="flex items-center gap-3">
+            <div className="size-11 rounded-xl bg-sky-500/15 flex items-center justify-center shrink-0">
+              <Play className="size-5 text-sky-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">دروس الفيديو</h2>
+              <p className="text-xs text-muted-foreground">
+                تعلّم خطوة بخطوة مع فيديوهات تعليمية
+              </p>
+            </div>
+          </div>
+
+          {/* Video Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {videoTutorials.map((tutorial, idx) => {
+              const Icon = tutorial.icon;
+              const diffColor =
+                tutorial.difficulty === 'مبتدئ'
+                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20'
+                  : tutorial.difficulty === 'متوسط'
+                    ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                    : 'bg-red-500/15 text-red-400 border-red-500/20';
+
+              return (
+                <motion.div
+                  key={tutorial.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    ease: 'easeOut' as const,
+                    delay: idx * 0.08,
+                  }}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Card className="glass-enhanced border-border/50 overflow-hidden card-hover-lift cursor-pointer group">
+                    {/* Thumbnail */}
+                    <div
+                      className={`relative h-40 bg-gradient-to-br ${tutorial.gradient} flex items-center justify-center`}
+                    >
+                      {/* Background Icon */}
+                      <Icon className="size-20 text-white/10 absolute" />
+
+                      {/* Play Button */}
+                      <div className="size-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:bg-primary/60 group-hover:border-primary/40 transition-all duration-300">
+                        <Play className="size-6 text-white mr-[-2px]" />
+                      </div>
+
+                      {/* Difficulty Badge */}
+                      <Badge
+                        variant="outline"
+                        className={`absolute top-3 left-3 text-[9px] ${diffColor}`}
+                      >
+                        {tutorial.difficulty}
+                      </Badge>
+
+                      {/* Duration */}
+                      <span className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/50 backdrop-blur-sm text-[10px] text-white/90 font-medium">
+                        <Clock className="size-3" />
+                        {tutorial.duration}
+                      </span>
+                    </div>
+
+                    {/* Content */}
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-sm leading-relaxed group-hover:text-primary transition-colors">
+                        {tutorial.title}
+                      </h3>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ─── Troubleshooting Guide Section ─── */}
+      <motion.div variants={itemVariants}>
+        <div className="space-y-4">
+          {/* Section Header */}
+          <div className="flex items-center gap-3">
+            <div className="size-11 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+              <Wrench className="size-5 text-amber-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">دليل حل المشاكل</h2>
+              <p className="text-xs text-muted-foreground">
+                حلول مقترحة للمشاكل الشائعة
+              </p>
+            </div>
+            <Badge
+              variant="outline"
+              className="text-[10px] bg-muted/50 mr-auto"
+            >
+              {troubleshootIssues.length} مشكلة
+            </Badge>
+          </div>
+
+          {/* Issues Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {troubleshootIssues.map((issue) => (
+              <TroubleshootCard key={issue.id} issue={issue} />
+            ))}
+          </div>
+        </div>
+      </motion.div>
 
       {/* ─── Contact Developer Section ─── */}
       <motion.div variants={itemVariants}>

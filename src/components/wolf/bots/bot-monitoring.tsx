@@ -24,6 +24,10 @@ import {
   Minus,
   Bot,
   Disc3,
+  Play,
+  Square,
+  CircleDot,
+  Radio,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -508,7 +512,17 @@ function StatusDot({ status, size = 8 }: { status: string; size?: number }) {
 /* ─── Auto-Refresh Indicator ─── */
 function AutoRefreshIndicator({ isRefreshing }: { isRefreshing: boolean }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
+      <Badge
+        variant="outline"
+        className="gap-1.5 bg-emerald-500/10 text-emerald-400 border-emerald-500/25 px-2.5 py-0.5"
+      >
+        <span className="relative flex size-2">
+          <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />
+          <span className="relative rounded-full size-2 bg-emerald-400" />
+        </span>
+        مباشر
+      </Badge>
       <motion.div
         variants={refreshSpinVariants}
         animate={isRefreshing ? 'spin' : 'idle'}
@@ -531,21 +545,25 @@ function BotHealthDashboardCard({
   onClick: () => void;
 }) {
   const cfg = botStatusConfig[botCard.status] || botStatusConfig.stopped;
-  const gaugeColor =
-    botCard.status === 'running'
-      ? 'oklch(0.60 0.20 250)'
-      : botCard.status === 'error'
-        ? 'oklch(0.65 0.22 25)'
-        : botCard.status === 'building'
-          ? 'oklch(0.60 0.20 250)'
-          : 'oklch(0.35 0.005 260)';
-
   const sparkColor =
     botCard.status === 'running'
       ? 'oklch(0.60 0.20 250)'
       : botCard.status === 'error'
         ? 'oklch(0.65 0.22 25)'
         : 'oklch(0.40 0.005 260)';
+
+  const gradientOverlay =
+    botCard.status === 'running'
+      ? 'from-emerald-500/8 via-transparent to-transparent'
+      : botCard.status === 'error'
+        ? 'from-red-500/8 via-transparent to-transparent'
+        : botCard.status === 'building'
+          ? 'from-sky-500/6 via-transparent to-transparent'
+          : 'from-zinc-500/4 via-transparent to-transparent';
+
+  const handleQuickAction = (e: React.MouseEvent, action: string) => {
+    e.stopPropagation();
+  };
 
   return (
     <motion.div
@@ -559,8 +577,24 @@ function BotHealthDashboardCard({
       className="cursor-pointer"
       onClick={onClick}
     >
-      <Card className="glass rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 group">
-        <CardContent className="p-4 space-y-3">
+      <Card className="glass rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 group relative">
+        {/* Gradient overlay based on status */}
+        <div className={`absolute inset-0 pointer-events-none bg-gradient-to-br ${gradientOverlay} rounded-xl`} />
+
+        {/* Pulsing border for running/error */}
+        {(botCard.status === 'running' || botCard.status === 'error') && (
+          <motion.div
+            className="absolute inset-0 rounded-xl pointer-events-none"
+            animate={{
+              boxShadow: botCard.status === 'running'
+                ? ['0 0 0px oklch(0.70 0.18 160 / 0%), 0 0 12px oklch(0.70 0.18 160 / 10%), 0 0 0px oklch(0.70 0.18 160 / 0%)']
+                : ['0 0 0px oklch(0.65 0.22 25 / 0%), 0 0 12px oklch(0.65 0.22 25 / 10%), 0 0 0px oklch(0.65 0.22 25 / 0%)'],
+            }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' as const }}
+          />
+        )}
+
+        <CardContent className="p-4 space-y-3 relative">
           {/* Header: bot name + status */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -617,6 +651,67 @@ function BotHealthDashboardCard({
               </div>
             </div>
           )}
+
+          {/* Quick Action Buttons */}
+          <div className="flex items-center gap-1.5 pt-1" onClick={(e) => e.stopPropagation()}>
+            {botCard.status === 'running' ? (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.94 }}
+                      onClick={(e) => handleQuickAction(e, 'restart')}
+                      className="flex items-center justify-center size-7 rounded-lg bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors"
+                    >
+                      <RotateCcw className="size-3.5" />
+                    </motion.button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top"><p>إعادة تشغيل</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.94 }}
+                      onClick={(e) => handleQuickAction(e, 'stop')}
+                      className="flex items-center justify-center size-7 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                    >
+                      <Square className="size-3" />
+                    </motion.button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top"><p>إيقاف</p></TooltipContent>
+                </Tooltip>
+              </>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.94 }}
+                    onClick={(e) => handleQuickAction(e, 'start')}
+                    className="flex items-center justify-center size-7 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                  >
+                    <Play className="size-3.5" />
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent side="top"><p>تشغيل</p></TooltipContent>
+              </Tooltip>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
+                  onClick={onClick}
+                  className="flex items-center justify-center size-7 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors mr-auto"
+                >
+                  <Activity className="size-3.5" />
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent side="top"><p>التفاصيل</p></TooltipContent>
+            </Tooltip>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
@@ -939,15 +1034,23 @@ export default function BotMonitoring() {
           </div>
           <div className="flex items-center gap-3">
             <AutoRefreshIndicator isRefreshing={isRefreshing} />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              className="gap-2 border-primary/30 text-primary hover:bg-primary/10"
-            >
-              <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              تحديث
-            </Button>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2 border-primary/30 text-primary hover:bg-primary/10 disabled:opacity-60"
+              >
+                <motion.div
+                  animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+                  transition={isRefreshing ? { duration: 0.8, repeat: Infinity, ease: 'linear' as const } : { duration: 0.3 }}
+                >
+                  <RefreshCw className="size-4" />
+                </motion.div>
+                {isRefreshing ? 'جاري التحديث...' : 'تحديث الآن'}
+              </Button>
+            </motion.div>
           </div>
         </motion.div>
 
@@ -1004,28 +1107,89 @@ export default function BotMonitoring() {
         ) : allBots.length === 0 ? (
           /* ─── Enhanced Empty State ─── */
           <motion.div
-            variants={emptyFloatVariants}
-            animate="animate"
-            className="glass rounded-xl overflow-hidden"
+            variants={fadeInVariants}
+            className="glass rounded-xl overflow-hidden relative"
           >
-            <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+            {/* Decorative background elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' as const }}
-                className="relative mb-6"
+                className="absolute -top-20 -left-20 size-40 rounded-full opacity-[0.03]"
+                style={{ background: 'radial-gradient(circle, oklch(0.60 0.20 250), transparent)' }}
+                animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.06, 0.03] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' as const }}
+              />
+              <motion.div
+                className="absolute -bottom-10 -right-10 size-32 rounded-full opacity-[0.04]"
+                style={{ background: 'radial-gradient(circle, oklch(0.65 0.20 160), transparent)' }}
+                animate={{ scale: [1, 1.15, 1], opacity: [0.04, 0.07, 0.04] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' as const, delay: 1 }}
+              />
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center relative">
+              <motion.div
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' as const }}
+                className="relative mb-8"
               >
+                {/* Glow ring behind logo */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl"
+                  style={{ background: 'radial-gradient(circle, oklch(0.60 0.20 250 / 20%), transparent 70%)' }}
+                  animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' as const }}
+                />
                 <img
                   src="https://f.top4top.io/p_37210bgwm1.jpg"
                   alt="شعار الذئب"
-                  className="w-24 h-24 rounded-2xl object-cover glow-effect"
+                  className="w-24 h-24 rounded-2xl object-cover glow-effect relative"
                 />
               </motion.div>
-              <h3 className="text-xl font-bold mb-2">لا توجد بوتات للمراقبة</h3>
-              <p className="text-muted-foreground text-sm mb-6 max-w-md leading-relaxed">
+
+              {/* Animated signal waves around the logo */}
+              <div className="absolute top-6 right-1/2 translate-x-[60px]">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute size-4 rounded-full border border-primary/20"
+                    animate={{
+                      scale: [1, 2 + i * 0.8],
+                      opacity: [0.3, 0],
+                    }}
+                    transition={{
+                      duration: 2.5,
+                      repeat: Infinity,
+                      delay: i * 0.6,
+                      ease: 'easeOut' as const,
+                    }}
+                  />
+                ))}
+              </div>
+
+              <motion.h3
+                className="text-xl font-bold mb-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                لا توجد بوتات للمراقبة
+              </motion.h3>
+              <motion.p
+                className="text-muted-foreground text-sm mb-8 max-w-md leading-relaxed"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+              >
                 لم يتم إنشاء أي بوت بعد. ابدأ بإنشاء بوتك الأول على منصة استضافة الذئب
                 للاستفادة من لوحة المراقبة المتقدمة وتتبع الأداء في الوقت الفعلي.
-              </p>
-              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+              </motion.p>
+              <motion.div
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
                 <Button
                   className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={() => setCurrentPage('bots')}
@@ -1135,15 +1299,23 @@ export default function BotMonitoring() {
           </span>
           <Separator orientation="vertical" className="h-4" />
           <AutoRefreshIndicator isRefreshing={isRefreshing} />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            className="gap-2 border-primary/30 text-primary hover:bg-primary/10"
-          >
-            <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            تحديث
-          </Button>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="gap-2 border-primary/30 text-primary hover:bg-primary/10 disabled:opacity-60"
+            >
+              <motion.div
+                animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+                transition={isRefreshing ? { duration: 0.8, repeat: Infinity, ease: 'linear' as const } : { duration: 0.3 }}
+              >
+                <RefreshCw className="size-4" />
+              </motion.div>
+              {isRefreshing ? 'جاري التحديث...' : 'تحديث الآن'}
+            </Button>
+          </motion.div>
         </div>
       </motion.div>
 

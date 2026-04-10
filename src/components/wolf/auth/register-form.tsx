@@ -11,6 +11,9 @@ import {
   Check,
   X,
   ShieldCheck,
+  AlertCircle,
+  AlertTriangle,
+  Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/app-store';
@@ -56,7 +59,7 @@ const inputGlowVariants: Variants = {
   idle: { boxShadow: '0 0 0 0px transparent' },
   focused: {
     boxShadow: '0 0 0 2px oklch(0.60 0.20 250 / 0.15), 0 0 20px -4px oklch(0.60 0.20 250 / 0.2)',
-    transition: { duration: 0.3, ease: 'easeOut' },
+    transition: { duration: 0.3, ease: 'easeOut' as const },
   },
 };
 
@@ -66,12 +69,11 @@ const eyeSwapVariants: Variants = {
 };
 
 const strongCheckVariants: Variants = {
-  hidden: { scale: 0, opacity: 0, pathLength: 0 },
+  hidden: { scale: 0, opacity: 0 },
   visible: {
     scale: 1,
     opacity: 1,
-    pathLength: 1,
-    transition: { duration: 0.5, ease: 'easeOut', type: 'spring', stiffness: 300, damping: 15 },
+    transition: { duration: 0.5, ease: 'easeOut' as const, type: 'spring' as const, stiffness: 300, damping: 15 },
   },
 };
 
@@ -79,7 +81,20 @@ const bounceCheckVariants: Variants = {
   unchecked: { scale: 1 },
   checked: {
     scale: [1, 1.3, 0.9, 1.1, 1],
-    transition: { duration: 0.4, ease: 'easeOut' },
+    transition: { duration: 0.4, ease: 'easeOut' as const },
+  },
+};
+
+const errorShakeVariants: Variants = {
+  hidden: { opacity: 0, y: -4, x: 0 },
+  visible: {
+    opacity: 1, y: 0, x: 0,
+    transition: { duration: 0.3 },
+  },
+  shake: {
+    opacity: 1, y: 0,
+    x: [0, -6, 6, -4, 4, 0],
+    transition: { duration: 0.4 },
   },
 };
 
@@ -107,53 +122,70 @@ function WolfSilhouetteParticle({ size = 16, className = '', style }: { size?: n
   );
 }
 
-/* ─── Password strength logic ─── */
+/* ─── Password strength logic (4 levels) ─── */
 function usePasswordStrength(password: string) {
   return useMemo(() => {
     const checks = {
-      minLength: password.length >= 6,
-      hasLetter: /[a-zA-Z\u0600-\u06FF]/.test(password),
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
       hasNumber: /[0-9]/.test(password),
       hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
     };
 
     const metCount = Object.values(checks).filter(Boolean).length;
 
-    let strength: 'none' | 'weak' | 'medium' | 'strong' = 'none';
-    let percent = 0;
+    let strength: 'none' | 'weak' | 'fair' | 'good' | 'strong' = 'none';
+    let segments = 0;
 
     if (password.length === 0) {
       strength = 'none';
-      percent = 0;
-    } else if (!checks.minLength) {
+      segments = 0;
+    } else if (metCount <= 1) {
       strength = 'weak';
-      percent = 25;
-    } else if (checks.minLength && checks.hasLetter && !checks.hasNumber && !checks.hasSpecial) {
-      strength = 'medium';
-      percent = 50;
-    } else if (checks.minLength && checks.hasLetter && checks.hasNumber && !checks.hasSpecial) {
-      strength = 'medium';
-      percent = 70;
-    } else if (metCount >= 4) {
-      strength = 'strong';
-      percent = 100;
+      segments = 1;
+    } else if (metCount === 2) {
+      strength = 'fair';
+      segments = 2;
+    } else if (metCount === 3) {
+      strength = 'good';
+      segments = 3;
     } else {
-      strength = 'medium';
-      percent = 50;
+      strength = 'strong';
+      segments = 4;
     }
 
     const labels: Record<string, string> = {
       none: '',
-      weak: 'ضعيفة',
-      medium: 'متوسطة',
-      strong: 'قوية',
+      weak: 'ضعيف',
+      fair: 'متوسط',
+      good: 'جيد',
+      strong: 'قوي',
+    };
+
+    const colors: Record<string, string> = {
+      none: 'bg-border',
+      weak: 'bg-red-500',
+      fair: 'bg-amber-500',
+      good: 'bg-blue-500',
+      strong: 'bg-emerald-500',
+    };
+
+    const textColors: Record<string, string> = {
+      none: 'text-muted-foreground',
+      weak: 'text-red-400',
+      fair: 'text-amber-400',
+      good: 'text-blue-400',
+      strong: 'text-emerald-400',
     };
 
     return {
       checks,
       strength,
-      percent,
+      segments,
       label: labels[strength],
+      barColor: colors[strength],
+      textColor: textColors[strength],
     };
   }, [password]);
 }
@@ -165,15 +197,15 @@ function RequirementItem({ met, text }: { met: boolean; text: string }) {
       <motion.div
         initial={false}
         animate={met ? { scale: 1, rotate: 0 } : { scale: 0.8, rotate: -10 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.3, ease: 'easeOut' as const }}
       >
         {met ? (
-          <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+          <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
         ) : (
           <X className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
         )}
       </motion.div>
-      <span className={met ? 'text-green-400/90' : 'text-muted-foreground/60'}>
+      <span className={met ? 'text-emerald-400/90' : 'text-muted-foreground/60'}>
         {text}
       </span>
     </div>
@@ -186,24 +218,41 @@ function StrongCheckmark({ show }: { show: boolean }) {
     <AnimatePresence>
       {show && (
         <motion.div
-          className="flex items-center gap-1.5 text-green-400"
+          className="flex items-center gap-1.5 text-emerald-400"
           variants={strongCheckVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
         >
           <motion.div
-            className="w-5 h-5 rounded-full bg-green-400/15 border border-green-400/30 flex items-center justify-center"
+            className="w-5 h-5 rounded-full bg-emerald-400/15 border border-emerald-400/30 flex items-center justify-center"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            transition={{ type: 'spring' as const, stiffness: 400, damping: 15 }}
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-green-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
           </motion.div>
           <span className="text-xs font-medium">كلمة مرور قوية!</span>
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+/* ─── Enhanced Validation Error ─── */
+function ValidationError({ message, icon: Icon }: { message: string; icon: React.ElementType }) {
+  return (
+    <motion.div
+      variants={errorShakeVariants}
+      initial="hidden"
+      animate="shake"
+      className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2.5"
+    >
+      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20 shrink-0">
+        <Icon className="w-3.5 h-3.5 text-red-400" />
+      </div>
+      <span className="text-xs text-red-400 font-medium">{message}</span>
+    </motion.div>
   );
 }
 
@@ -219,6 +268,7 @@ function GlowInput({
   dir,
   autoComplete,
   children,
+  error,
 }: {
   id: string;
   label: string;
@@ -230,8 +280,10 @@ function GlowInput({
   dir?: string;
   autoComplete: string;
   children?: React.ReactNode;
+  error?: string;
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  const hasError = !!error;
 
   return (
     <motion.div variants={itemVariants} className="space-y-2">
@@ -239,7 +291,7 @@ function GlowInput({
       <motion.div
         variants={inputGlowVariants}
         animate={isFocused ? 'focused' : 'idle'}
-        className="auth-input-wrapper relative rounded-lg"
+        className={`auth-input-wrapper relative rounded-lg ${hasError ? '[&>input]:border-red-500/50 [&>input]:focus:ring-red-500/20' : ''}`}
       >
         <Input
           id={id}
@@ -253,6 +305,7 @@ function GlowInput({
           dir={dir}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          aria-invalid={hasError}
         />
         {children && (
           <div className="absolute left-1 top-1/2 -translate-y-1/2">
@@ -262,14 +315,24 @@ function GlowInput({
       </motion.div>
       {/* Gradient underline effect */}
       <motion.div
-        className="h-0.5 rounded-full bg-gradient-to-l from-transparent via-primary/60 to-transparent"
+        className={`h-0.5 rounded-full ${hasError ? 'bg-gradient-to-l from-transparent via-red-500/60 to-transparent' : 'bg-gradient-to-l from-transparent via-primary/60 to-transparent'}`}
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{
           scaleX: isFocused ? 1 : 0,
           opacity: isFocused ? 1 : 0,
         }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.3, ease: 'easeOut' as const }}
       />
+      {hasError && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-1.5"
+        >
+          <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+          <span className="text-xs text-red-400">{error}</span>
+        </motion.div>
+      )}
     </motion.div>
   );
 }
@@ -282,7 +345,7 @@ function AuthBrandingPanel() {
       variants={brandingVariants}
       initial="hidden"
       animate="visible"
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: 'easeOut' as const }}
     >
       {/* Subtle background texture overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{
@@ -363,20 +426,55 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { setUser, setCurrentPage } = useAppStore();
 
-  const { checks, strength, percent, label } = usePasswordStrength(password);
+  const { checks, strength, segments, label, barColor, textColor } = usePasswordStrength(password);
+
+  const validateField = (field: string, value: string): string | null => {
+    switch (field) {
+      case 'name':
+        if (!value.trim()) return 'يرجى إدخال الاسم';
+        if (value.trim().length < 2) return 'الاسم يجب أن يكون حرفين على الأقل';
+        return null;
+      case 'email':
+        if (!value.trim()) return 'يرجى إدخال البريد الإلكتروني';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return 'صيغة البريد الإلكتروني غير صالحة';
+        return null;
+      case 'password':
+        if (!value) return 'يرجى إدخال كلمة المرور';
+        if (value.length < 8) return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+        return null;
+      case 'confirmPassword':
+        if (!value) return 'يرجى تأكيد كلمة المرور';
+        if (value !== password) return 'كلمتا المرور غير متطابقتين';
+        return null;
+      default:
+        return null;
+    }
+  };
 
   const validateForm = (): string | null => {
-    if (!name.trim()) return 'يرجى إدخال الاسم';
-    if (!email.trim()) return 'يرجى إدخال البريد الإلكتروني';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      return 'البريد الإلكتروني غير صالح';
-    }
-    if (password.length < 6) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-    if (password !== confirmPassword) return 'كلمتا المرور غير متطابقتين';
-    if (!agreedToTerms) return 'يجب الموافقة على شروط الاستخدام';
-    return null;
+    const errors: Record<string, string> = {};
+
+    const nameErr = validateField('name', name);
+    if (nameErr) errors.name = nameErr;
+
+    const emailErr = validateField('email', email);
+    if (emailErr) errors.email = emailErr;
+
+    const passwordErr = validateField('password', password);
+    if (passwordErr) errors.password = passwordErr;
+
+    const confirmErr = validateField('confirmPassword', confirmPassword);
+    if (confirmErr) errors.confirmPassword = confirmErr;
+
+    if (!agreedToTerms) errors.terms = 'يجب الموافقة على شروط الاستخدام';
+
+    setFormErrors(errors);
+
+    const firstError = Object.values(errors)[0];
+    return firstError || null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -389,6 +487,7 @@ export default function RegisterForm() {
     }
 
     setIsLoading(true);
+    setFormErrors({});
 
     try {
       const res = await fetch('/api/auth/register', {
@@ -406,6 +505,7 @@ export default function RegisterForm() {
       if (!res.ok) {
         toast.error('فشل التسجيل', {
           description: data.error || 'حدث خطأ أثناء التسجيل',
+          icon: <AlertTriangle className="w-4 h-4 text-red-400" />,
         });
         return;
       }
@@ -419,6 +519,7 @@ export default function RegisterForm() {
       if (result?.error) {
         toast.success('تم التسجيل بنجاح', {
           description: 'يرجى تسجيل الدخول باستخدام بياناتك',
+          icon: <Check className="w-4 h-4 text-emerald-400" />,
         });
         setCurrentPage('login');
         return;
@@ -441,30 +542,12 @@ export default function RegisterForm() {
     } catch {
       toast.error('خطأ غير متوقع', {
         description: 'حدث خطأ أثناء التسجيل، يرجى المحاولة مرة أخرى',
+        icon: <AlertCircle className="w-4 h-4 text-red-400" />,
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  const strengthColorClass =
-    strength === 'strong'
-      ? 'strength-strong'
-      : strength === 'medium'
-        ? 'strength-medium'
-        : strength === 'weak'
-          ? 'strength-weak'
-          : 'bg-border';
-
-  const strengthLabelColor =
-    strength === 'strong'
-      ? 'text-green-400'
-      : strength === 'medium'
-        ? 'text-blue-400'
-        : strength === 'weak'
-          ? 'text-red-400'
-          : 'text-muted-foreground';
-
 
   return (
     <div className="min-h-screen flex auth-grid-bg">
@@ -529,6 +612,20 @@ export default function RegisterForm() {
             </CardHeader>
 
             <CardContent>
+              {/* Global form error */}
+              <AnimatePresence>
+                {formErrors.terms && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-4 overflow-hidden"
+                  >
+                    <ValidationError message={formErrors.terms} icon={AlertCircle} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <motion.form
                 onSubmit={handleSubmit}
                 className="space-y-4"
@@ -543,9 +640,13 @@ export default function RegisterForm() {
                   type="text"
                   placeholder="اسم المستخدم"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (formErrors.name) setFormErrors((prev) => { const n = { ...prev }; delete n.name; return n; });
+                  }}
                   disabled={isLoading}
                   autoComplete="name"
+                  error={formErrors.name}
                 />
 
                 {/* Email */}
@@ -555,10 +656,14 @@ export default function RegisterForm() {
                   type="email"
                   placeholder="example@email.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (formErrors.email) setFormErrors((prev) => { const n = { ...prev }; delete n.email; return n; });
+                  }}
                   disabled={isLoading}
                   dir="ltr"
                   autoComplete="email"
+                  error={formErrors.email}
                 />
 
                 {/* Password */}
@@ -567,21 +672,22 @@ export default function RegisterForm() {
                   <motion.div
                     variants={inputGlowVariants}
                     animate="idle"
-                    className="auth-input-wrapper relative rounded-lg"
+                    className={`auth-input-wrapper relative rounded-lg ${formErrors.password ? '[&>input]:border-red-500/50' : ''}`}
                   >
                     <Input
                       id="register-password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (formErrors.password) setFormErrors((prev) => { const n = { ...prev }; delete n.password; return n; });
+                      }}
                       disabled={isLoading}
                       className="bg-background/50 h-11 pe-11 transition-all duration-200 focus:ring-0 focus:ring-offset-0"
                       autoComplete="new-password"
                       dir="ltr"
-                      onFocus={() => {
-                        // Focus glow handled via parent state
-                      }}
+                      aria-invalid={!!formErrors.password}
                     />
                     <div className="absolute left-1 top-1/2 -translate-y-1/2">
                       <AnimatePresence mode="wait">
@@ -590,7 +696,7 @@ export default function RegisterForm() {
                           initial="hide"
                           animate="show"
                           exit="hide"
-                          transition={{ duration: 0.2, ease: 'easeOut' }}
+                          transition={{ duration: 0.2, ease: 'easeOut' as const }}
                         >
                           <Button
                             type="button"
@@ -611,35 +717,61 @@ export default function RegisterForm() {
                     </div>
                   </motion.div>
 
-                  {/* Password strength bar */}
+                  {/* Password error */}
+                  {formErrors.password && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-1.5"
+                    >
+                      <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                      <span className="text-xs text-red-400">{formErrors.password}</span>
+                    </motion.div>
+                  )}
+
+                  {/* Password strength indicator (4 segments) */}
                   {password.length > 0 && (
-                    <div className="space-y-2">
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2.5"
+                    >
+                      {/* 4-segment strength bar */}
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
-                          <motion.div
-                            className={`h-full rounded-full ${strengthColorClass}`}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percent}%` }}
-                            transition={{ duration: 0.4, ease: 'easeOut' }}
-                          />
+                        <div className="flex-1 h-2 rounded-full bg-border overflow-hidden flex gap-1">
+                          {[0, 1, 2, 3].map((i) => (
+                            <motion.div
+                              key={i}
+                              className={`h-full flex-1 rounded-full transition-colors duration-300 ${
+                                i < segments ? barColor : 'bg-border'
+                              }`}
+                              initial={{ scaleY: 0 }}
+                              animate={{ scaleY: i < segments ? 1 : 0 }}
+                              transition={{ duration: 0.3, ease: 'easeOut' as const, delay: i * 0.08 }}
+                            />
+                          ))}
                         </div>
-                        <span className={`text-xs font-medium ${strengthLabelColor}`}>
+                        <motion.span
+                          className={`text-xs font-bold min-w-[36px] text-center ${textColor}`}
+                          key={strength}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2 }}
+                        >
                           {label}
-                        </span>
+                        </motion.span>
                       </div>
 
-                      {/* Animated strong checkmark */}
-                      <div className="flex items-center justify-between">
-                        {/* Requirements checklist */}
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                          <RequirementItem met={checks.minLength} text="6 أحرف على الأقل" />
-                          <RequirementItem met={checks.hasLetter} text="يحتوي على أحرف" />
-                          <RequirementItem met={checks.hasNumber} text="يحتوي على أرقام" />
-                          <RequirementItem met={checks.hasSpecial} text="يحتوي على رموز خاصة" />
-                        </div>
-                        <StrongCheckmark show={strength === 'strong'} />
+                      {/* Requirements checklist */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                        <RequirementItem met={checks.minLength} text="8 أحرف على الأقل" />
+                        <RequirementItem met={checks.hasUppercase} text="حرف كبير (A-Z)" />
+                        <RequirementItem met={checks.hasLowercase} text="حرف صغير (a-z)" />
+                        <RequirementItem met={checks.hasNumber} text="رقم واحد على الأقل" />
+                        <RequirementItem met={checks.hasSpecial} text="رمز خاص (!@#$)" />
                       </div>
-                    </div>
+                    </motion.div>
                   )}
                 </motion.div>
 
@@ -650,37 +782,30 @@ export default function RegisterForm() {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (formErrors.confirmPassword) setFormErrors((prev) => { const n = { ...prev }; delete n.confirmPassword; return n; });
+                  }}
                   disabled={isLoading}
                   dir="ltr"
                   autoComplete="new-password"
+                  error={formErrors.confirmPassword}
                 />
-                {confirmPassword.length > 0 && password !== confirmPassword && (
-                  <motion.p
-                    className="text-xs text-red-400"
+                {confirmPassword.length > 0 && password === confirmPassword && !formErrors.confirmPassword && (
+                  <motion.div
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    كلمتا المرور غير متطابقتين
-                  </motion.p>
-                )}
-                {confirmPassword.length > 0 && password === confirmPassword && (
-                  <motion.p
-                    className="text-xs text-green-400 flex items-center gap-1"
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-1.5"
                   >
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      transition={{ type: 'spring' as const, stiffness: 400, damping: 15 }}
                     >
-                      <Check className="w-3 h-3" />
+                      <Check className="w-3 h-3 text-emerald-400" />
                     </motion.span>
-                    كلمتا المرور متطابقتان
-                  </motion.p>
+                    <span className="text-xs text-emerald-400">كلمتا المرور متطابقتان</span>
+                  </motion.div>
                 )}
 
                 {/* Terms checkbox with bounce animation */}
@@ -692,7 +817,10 @@ export default function RegisterForm() {
                     <Checkbox
                       id="agree-terms"
                       checked={agreedToTerms}
-                      onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                      onCheckedChange={(checked) => {
+                        setAgreedToTerms(checked === true);
+                        if (checked) setFormErrors((prev) => { const n = { ...prev }; delete n.terms; return n; });
+                      }}
                       className="border-border mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                   </motion.div>
@@ -708,6 +836,7 @@ export default function RegisterForm() {
                         e.preventDefault();
                         toast.info('سيتم إضافة الشروط قريباً', {
                           description: 'صفحة شروط الاستخدام وسياسة الخصوصية قيد التطوير',
+                          icon: <Info className="w-4 h-4 text-blue-400" />,
                         });
                       }}
                     >
@@ -722,6 +851,7 @@ export default function RegisterForm() {
                         e.preventDefault();
                         toast.info('سيتم إضافة الشروط قريباً', {
                           description: 'صفحة شروط الاستخدام وسياسة الخصوصية قيد التطوير',
+                          icon: <Info className="w-4 h-4 text-blue-400" />,
                         });
                       }}
                     >
@@ -742,7 +872,8 @@ export default function RegisterForm() {
                         !name.trim() ||
                         !email.trim() ||
                         !password ||
-                        !confirmPassword
+                        !confirmPassword ||
+                        !agreedToTerms
                       }
                     >
                       {isLoading ? (
@@ -760,8 +891,6 @@ export default function RegisterForm() {
                   </motion.div>
                 </motion.div>
               </motion.form>
-
-
             </CardContent>
 
             <CardFooter className="justify-center">

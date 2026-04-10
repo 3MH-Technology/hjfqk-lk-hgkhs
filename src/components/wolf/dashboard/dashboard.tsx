@@ -30,6 +30,10 @@ import {
   MessageSquare,
   HardDrive,
   Wifi,
+  Globe,
+  Server,
+  ShieldCheck,
+  Database,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,7 +43,7 @@ import { useAppStore } from '@/store/app-store';
 import type { Page } from '@/store/app-store';
 import { CreateBotDialog } from '@/components/wolf/bots/create-bot-dialog';
 import { toast } from 'sonner';
-import { motion, type Variants } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 
 /* ─── Types ─── */
 
@@ -67,17 +71,6 @@ interface BotItem {
   _count: { files: number; logs: number };
 }
 
-interface TimelineEvent {
-  id: string;
-  type: 'success' | 'warning' | 'error' | 'info';
-  title: string;
-  description: string;
-  time: string;
-  icon: typeof CheckCircle;
-  color: string;
-  glowColor: string;
-}
-
 /* ─── Constants ─── */
 
 const WOLF_LOGO = 'https://f.top4top.io/p_37210bgwm1.jpg';
@@ -92,6 +85,7 @@ const statCards: {
   gradientTo: string;
   barColor: string;
   trend: 'up' | 'down';
+  navPage: Page;
 }[] = [
   {
     key: 'totalBots',
@@ -103,6 +97,7 @@ const statCards: {
     gradientTo: 'to-sky-500/5',
     barColor: 'bg-sky-400',
     trend: 'up',
+    navPage: 'bots',
   },
   {
     key: 'runningBots',
@@ -114,6 +109,7 @@ const statCards: {
     gradientTo: 'to-emerald-500/5',
     barColor: 'bg-emerald-400',
     trend: 'up',
+    navPage: 'bot-monitoring',
   },
   {
     key: 'stoppedBots',
@@ -125,6 +121,7 @@ const statCards: {
     gradientTo: 'to-zinc-500/5',
     barColor: 'bg-zinc-400',
     trend: 'down',
+    navPage: 'bots',
   },
   {
     key: 'errorBots',
@@ -136,6 +133,7 @@ const statCards: {
     gradientTo: 'to-red-500/5',
     barColor: 'bg-red-400',
     trend: 'down',
+    navPage: 'bot-monitoring',
   },
   {
     key: 'totalFiles',
@@ -147,6 +145,7 @@ const statCards: {
     gradientTo: 'to-sky-500/5',
     barColor: 'bg-sky-400',
     trend: 'up',
+    navPage: 'files',
   },
   {
     key: 'totalLogs',
@@ -158,6 +157,7 @@ const statCards: {
     gradientTo: 'to-sky-500/5',
     barColor: 'bg-sky-400',
     trend: 'up',
+    navPage: 'logs',
   },
 ];
 
@@ -270,58 +270,71 @@ const quickStartSteps: {
   },
 ];
 
-const timelineEvents: TimelineEvent[] = [
-  {
-    id: '1',
-    type: 'success',
-    title: 'تم تشغيل البوت بنجاح',
-    description: 'بوت المساعد الذكي يعمل الآن',
-    time: 'منذ 3 دقائق',
-    icon: CheckCircle,
-    color: 'text-emerald-400',
-    glowColor: 'shadow-emerald-400/40',
-  },
-  {
-    id: '2',
-    type: 'info',
-    title: 'تم تحديث ملفات البوت',
-    description: 'رفع 3 ملفات جديدة لبوت المتجر',
-    time: 'منذ 15 دقيقة',
-    icon: FileText,
-    color: 'text-sky-400',
-    glowColor: 'shadow-sky-400/40',
-  },
-  {
-    id: '3',
-    type: 'warning',
-    title: 'تحذير استخدام الموارد',
-    description: 'بوت الألعاب يستخدم 85% من الذاكرة',
-    time: 'منذ 30 دقيقة',
-    icon: AlertCircle,
-    color: 'text-amber-400',
-    glowColor: 'shadow-amber-400/40',
-  },
-  {
-    id: '4',
-    type: 'error',
-    title: 'فشل في نشر البوت',
-    description: 'خطأ في تهيئة بيئة البوت',
-    time: 'منذ ساعة',
-    icon: XCircle,
-    color: 'text-red-400',
-    glowColor: 'shadow-red-400/40',
-  },
-  {
-    id: '5',
-    type: 'success',
-    title: 'تم إنشاء بوت جديد',
-    description: 'بوت إشعارات المجموعات جاهز',
-    time: 'منذ ساعتين',
-    icon: CheckCircle,
-    color: 'text-emerald-400',
-    glowColor: 'shadow-emerald-400/40',
-  },
+/* ─── Live Activity Feed Data ─── */
+
+interface LiveActivityItem {
+  id: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+  description: string;
+  time: string;
+}
+
+const liveActivityPool: LiveActivityItem[] = [
+  { id: 'la-1', type: 'success', description: 'تم تشغيل بوت @mybot بنجاح', time: 'منذ 2 دقيقة' },
+  { id: 'la-2', type: 'info', description: 'تم إنشاء حساب جديد — user_2024', time: 'منذ 5 دقائق' },
+  { id: 'la-3', type: 'warning', description: 'تحديث إعدادات البوت — @storebot', time: 'منذ 8 دقائق' },
+  { id: 'la-4', type: 'error', description: 'فشل تشغيل بوت @gamebot — خطأ في المنفذ', time: 'منذ 12 دقيقة' },
+  { id: 'la-5', type: 'success', description: 'تم نشر تحديث جديد لبوت @assistbot', time: 'منذ 15 دقيقة' },
+  { id: 'la-6', type: 'info', description: 'تم رفع 5 ملفات جديدة لبوت @shopbot', time: 'منذ 20 دقيقة' },
+  { id: 'la-7', type: 'success', description: 'تم إعادة تشغيل بوت @notifybot', time: 'منذ 25 دقيقة' },
+  { id: 'la-8', type: 'warning', description: 'استخدام الذاكرة مرتفع — @gamebot 92%', time: 'منذ 30 دقيقة' },
+  { id: 'la-9', type: 'info', description: 'تم تغيير متغيرات البيئة لبوت @paybot', time: 'منذ 35 دقيقة' },
+  { id: 'la-10', type: 'success', description: 'تم إنشاء بوت جديد — @musicbot', time: 'منذ 40 دقيقة' },
 ];
+
+const newActivityPool: LiveActivityItem[] = [
+  { id: 'new-1', type: 'success', description: 'تم تشغيل بوت @cronbot بنجاح', time: 'الآن' },
+  { id: 'new-2', type: 'info', description: 'تحديث النظام إلى الإصدار 2.4.1', time: 'الآن' },
+  { id: 'new-3', type: 'warning', description: 'تنبيه: استخدام وحدة المعالجة مرتفع 78%', time: 'الآن' },
+  { id: 'new-4', type: 'error', description: 'انقطاع مؤقت في اتصال WebSocket', time: 'الآن' },
+  { id: 'new-5', type: 'success', description: 'تم النسخ الاحتياطي لقاعدة البيانات', time: 'الآن' },
+  { id: 'new-6', type: 'info', description: 'مستخدم جديد سجّل في المنصة', time: 'الآن' },
+  { id: 'new-7', type: 'success', description: 'تم ترقية خطة المستخدم user_pro', time: 'الآن' },
+  { id: 'new-8', type: 'warning', description: 'شهادة SSL ستنتهي خلال 7 أيام', time: 'الآن' },
+];
+
+const activityIconConfig: Record<string, { icon: typeof CheckCircle; color: string; bg: string }> = {
+  success: { icon: CheckCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/15' },
+  info: { icon: Wifi, color: 'text-sky-400', bg: 'bg-sky-500/15' },
+  warning: { icon: AlertCircle, color: 'text-amber-400', bg: 'bg-amber-500/15' },
+  error: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/15' },
+};
+
+/* ─── System Status Data ─── */
+
+interface SystemService {
+  name: string;
+  status: 'operational' | 'degraded' | 'down';
+  icon: typeof Server;
+}
+
+const systemServices: SystemService[] = [
+  { name: 'API Server', status: 'operational', icon: Server },
+  { name: 'Database', status: 'operational', icon: Database },
+  { name: 'Docker Engine', status: 'operational', icon: Cpu },
+  { name: 'WebSocket', status: 'operational', icon: MessageSquare },
+  { name: 'CDN', status: 'operational', icon: Globe },
+  { name: 'Redis Cache', status: 'operational', icon: Zap },
+];
+
+/* ─── SVG Color Map for Sparklines ─── */
+
+const sparklineColorMap: Record<string, string> = {
+  'bg-sky-400': '#38bdf8',
+  'bg-emerald-400': '#34d399',
+  'bg-zinc-400': '#a1a1aa',
+  'bg-red-400': '#f87171',
+};
 
 /* ─── Animated Counter Component ─── */
 
@@ -350,19 +363,35 @@ function AnimatedCounter({ target, duration = 1200 }: { target: number; duration
   return <>{count}</>;
 }
 
-/* ─── Sparkline Bar Component ─── */
-function MiniSparkline({ bars, color }: { bars: number[]; color: string }) {
-  const max = Math.max(...bars, 1);
+/* ─── SVG Sparkline Chart Component ─── */
+function SparklineChart({ data, barColorClass }: { data: number[]; barColorClass: string }) {
+  const color = sparklineColorMap[barColorClass] || '#38bdf8';
+  const width = 120;
+  const height = 32;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const points = data.map((val, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((val - min) / range) * (height - 6) - 3;
+    return { x, y };
+  });
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const areaD = `${pathD} L ${width},${height} L 0,${height} Z`;
+  const gradId = `spark-grad-${barColorClass.replace(/[^a-z0-9]/g, '')}`;
+
   return (
-    <div className="flex items-end gap-[3px] h-8 mt-2">
-      {bars.map((val, i) => (
-        <div
-          key={i}
-          className={`rounded-sm ${color} opacity-60 transition-opacity hover:opacity-100`}
-          style={{ height: `${(val / max) * 100}%`, minWidth: '4px', flex: 1 }}
-        />
-      ))}
-    </div>
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-8 mt-2" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#${gradId})`} />
+      <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" />
+      <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="2.5" fill={color} opacity="0.9" />
+    </svg>
   );
 }
 
@@ -469,36 +498,6 @@ function WolfEmptyState({
   );
 }
 
-/* ─── Small Empty State (for non-primary sections) ─── */
-function SmallEmptyState({
-  icon: Icon,
-  message,
-  subMessage,
-}: {
-  icon: typeof Clock;
-  message: string;
-  subMessage?: string;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-10 text-center">
-      <motion.div
-        className="relative mb-4"
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' as const }}
-      >
-        <div className="absolute inset-0 blur-xl bg-primary/10 rounded-full scale-150" />
-        <div className="relative bg-primary/10 rounded-2xl p-4">
-          <Icon className="size-10 text-primary/50" />
-        </div>
-      </motion.div>
-      <p className="text-muted-foreground font-medium text-sm">{message}</p>
-      {subMessage && (
-        <p className="text-muted-foreground/60 text-xs mt-1">{subMessage}</p>
-      )}
-    </div>
-  );
-}
-
 /* ─── Animation Variants ─── */
 
 const containerVariants: Variants = {
@@ -546,15 +545,6 @@ const botCardVariants: Variants = {
   }),
 };
 
-const timelineVariants: Variants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.4, ease: 'easeOut' },
-  },
-};
-
 /* ─── Section Divider Component ─── */
 
 function SectionDivider({ icon: Icon, label }: { icon: typeof Activity; label: string }) {
@@ -575,9 +565,11 @@ function SectionDivider({ icon: Icon, label }: { icon: typeof Activity; label: s
 function GlassStatCard({
   children,
   className = '',
+  onClick,
 }: {
   children: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 }) {
   return (
     <div className="relative rounded-xl p-[1px] overflow-hidden group">
@@ -589,8 +581,11 @@ function GlassStatCard({
           animation: 'cta-border-shift 4s linear infinite',
         }}
       />
+      {/* Gradient overlay on hover */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-primary/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
       <Card
-        className={`glass relative rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 cursor-default ${className}`}
+        className={`glass relative rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 ${onClick ? 'cursor-pointer' : 'cursor-default'} ${className}`}
+        onClick={onClick}
       >
         {children}
       </Card>
@@ -637,53 +632,46 @@ function QuickActionCard({
   );
 }
 
-/* ─── Activity Timeline Item ─── */
+/* ─── Live Activity Feed Item ─── */
 
-function TimelineItem({
-  event,
-  isLast,
-}: {
-  event: TimelineEvent;
-  isLast: boolean;
-}) {
-  const Icon = event.icon;
+const liveFeedItemVariants: Variants = {
+  initial: { opacity: 0, x: -30, height: 0 },
+  animate: {
+    opacity: 1,
+    x: 0,
+    height: 'auto',
+    transition: { duration: 0.4, ease: 'easeOut' as const },
+  },
+  exit: {
+    opacity: 0,
+    x: 30,
+    height: 0,
+    transition: { duration: 0.3, ease: 'easeIn' as const },
+  },
+};
+
+function LiveActivityFeedItem({ item }: { item: LiveActivityItem }) {
+  const config = activityIconConfig[item.type];
+  const Icon = config.icon;
   return (
     <motion.div
-      variants={timelineVariants}
-      className="relative flex gap-4 group"
+      variants={liveFeedItemVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      layout
+      className="flex items-start gap-3 group"
     >
-      {/* Connecting line + glowing dot */}
-      <div className="flex flex-col items-center shrink-0">
-        <motion.div
-          className="relative z-10 flex items-center justify-center size-8 rounded-full bg-background/80 border border-border/50 group-hover:border-primary/30 transition-colors"
-          whileHover={{ scale: 1.15 }}
-          transition={{ duration: 0.2 }}
-        >
-          {/* Glow ring */}
-          <div
-            className={`absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-60 transition-opacity duration-300 ${event.glowColor}`}
-            style={{
-              boxShadow: `0 0 12px var(--tw-shadow-color)`,
-            }}
-          />
-          <Icon className={`size-4 relative z-10 ${event.color}`} />
-        </motion.div>
-        {!isLast && (
-          <div className="w-px flex-1 min-h-[40px] bg-gradient-to-b from-border/50 via-border/30 to-transparent group-hover:from-primary/20 group-hover:via-primary/10 transition-colors duration-300" />
-        )}
+      <div className={`flex items-center justify-center size-8 rounded-lg ${config.bg} shrink-0 mt-0.5 group-hover:scale-110 transition-transform duration-200`}>
+        <Icon className={`size-4 ${config.color}`} />
       </div>
-
-      {/* Content */}
-      <div className="flex-1 pb-6 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
-            {event.title}
-          </p>
-        </div>
-        <p className="text-xs text-muted-foreground truncate">{event.description}</p>
-        <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-foreground leading-relaxed group-hover:text-primary transition-colors truncate">
+          {item.description}
+        </p>
+        <p className="text-[10px] text-muted-foreground/50 mt-0.5 flex items-center gap-1">
           <Clock className="size-2.5" />
-          {event.time}
+          {item.time}
         </p>
       </div>
     </motion.div>
@@ -700,6 +688,8 @@ export function Dashboard() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [liveActivities, setLiveActivities] = useState<LiveActivityItem[]>(liveActivityPool.slice(0, 8));
+  const [systemLastChecked, setSystemLastChecked] = useState(new Date());
 
   /* ─── Generate deterministic random bars from a seed ─── */
   const generateBars = useCallback((seed: number, count: number = 7) => {
@@ -760,6 +750,34 @@ export function Dashboard() {
     fetchStats();
     fetchBots();
   }, [fetchStats, fetchBots]);
+
+  /* ─── Auto-refresh Live Activity Feed (every 8-12s) ─── */
+  const newActivityIdx = useRef(0);
+  useEffect(() => {
+    const addNewActivity = () => {
+      const newItem = newActivityPool[newActivityIdx.current % newActivityPool.length];
+      newActivityIdx.current += 1;
+      const uniqueItem = { ...newItem, id: `${newItem.id}-${Date.now()}` };
+      setLiveActivities((prev) => [uniqueItem, ...prev.slice(0, 9)]);
+    };
+    const scheduleNext = () => {
+      const delay = 8000 + Math.random() * 4000;
+      return setTimeout(() => {
+        addNewActivity();
+        scheduleNext();
+      }, delay);
+    };
+    const timeout = scheduleNext();
+    return () => clearTimeout(timeout);
+  }, []);
+
+  /* ─── Auto-refresh System Status timestamp (every 30s) ─── */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSystemLastChecked(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const recentBots = bots.slice(0, 8);
 
@@ -1029,8 +1047,8 @@ export function Dashboard() {
                   const isUp = card.trend === 'up';
                   return (
                     <motion.div key={card.key} variants={statCardVariants}>
-                      <GlassStatCard>
-                        <CardContent className="p-4">
+                      <GlassStatCard onClick={() => setCurrentPage(card.navPage)}>
+                        <CardContent className="p-4 relative z-20">
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
                               <motion.div
@@ -1059,10 +1077,10 @@ export function Dashboard() {
                               ) : (
                                 <TrendingDown className="size-3" />
                               )}
-                              {trendVal}%
+                              {isUp ? '↑' : '↓'} {trendVal}%
                             </div>
                           </div>
-                          <MiniSparkline bars={bars} color={card.barColor} />
+                          <SparklineChart data={bars} barColorClass={card.barColor} />
                         </CardContent>
                       </GlassStatCard>
                     </motion.div>
@@ -1309,47 +1327,135 @@ export function Dashboard() {
             )}
           </motion.div>
 
-          {/* ─── Activity Timeline Divider ─── */}
-          <SectionDivider icon={MessageSquare} label="النشاط الأخير" />
+          {/* ─── Activity Feed + System Status Divider ─── */}
+          <SectionDivider icon={MessageSquare} label="النشاط والنظام" />
 
-          {/* ─── Activity Timeline ─── */}
+          {/* ─── Live Activity Feed + System Status Grid ─── */}
           <motion.div variants={itemVariants}>
-            <Card className="glass rounded-xl">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold flex items-center gap-2">
-                    <Wifi className="size-4 text-primary" />
-                    سجل النشاط المباشر
-                  </h3>
-                  <motion.div
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20"
-                    animate={{ opacity: [0.7, 1, 0.7] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' as const }}
-                  >
-                    <span className="relative flex size-1.5">
-                      <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
-                      <span className="relative rounded-full size-1.5 bg-emerald-400" />
-                    </span>
-                    <span className="text-[10px] font-medium text-emerald-400">مباشر</span>
-                  </motion.div>
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              {/* Live Activity Feed (wider) */}
+              <Card className="glass rounded-xl lg:col-span-3">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Activity className="size-4 text-primary" />
+                      آخر الأنشطة
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <motion.div
+                        className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' as const }}
+                      >
+                        <span className="relative flex size-1.5">
+                          <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                          <span className="relative rounded-full size-1.5 bg-emerald-400" />
+                        </span>
+                        <span className="text-[10px] font-medium text-emerald-400">مباشر</span>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setCurrentPage('activity-center')}
+                          className="text-primary hover:text-primary/80 text-xs h-7"
+                        >
+                          عرض الكل
+                          <ChevronLeft className="size-3.5 mr-0.5" />
+                        </Button>
+                      </motion.div>
+                    </div>
+                  </div>
 
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="pr-1"
-                >
-                  {timelineEvents.map((event, idx) => (
-                    <TimelineItem
-                      key={event.id}
-                      event={event}
-                      isLast={idx === timelineEvents.length - 1}
-                    />
-                  ))}
-                </motion.div>
-              </CardContent>
-            </Card>
+                  <div className="max-h-[340px] overflow-y-auto custom-scrollbar space-y-0">
+                    <AnimatePresence mode="popLayout">
+                      {liveActivities.map((item, idx) => (
+                        <div key={item.id}>
+                          <LiveActivityFeedItem item={item} />
+                          {idx < liveActivities.length - 1 && (
+                            <div className="h-px bg-border/30 my-2 mr-11" />
+                          )}
+                        </div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Status Widget (narrower) */}
+              <Card className="glass rounded-xl lg:col-span-2">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <ShieldCheck className="size-4 text-primary" />
+                      حالة النظام
+                    </h3>
+                    <motion.div
+                      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' as const }}
+                    >
+                      <span className="relative flex size-1.5">
+                        <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                        <span className="relative rounded-full size-1.5 bg-emerald-400" />
+                      </span>
+                      <span className="text-[10px] font-medium text-emerald-400">يعمل</span>
+                    </motion.div>
+                  </div>
+
+                  {/* Overall Status */}
+                  <div className="flex items-center gap-2 mb-4 p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15">
+                    <span className="relative flex size-2.5">
+                      <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                      <span className="relative rounded-full size-2.5 bg-emerald-400" />
+                    </span>
+                    <span className="text-xs font-medium text-emerald-400">جميع الأنظمة تعمل</span>
+                  </div>
+
+                  {/* Services Grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {systemServices.map((service) => {
+                      const SvcIcon = service.icon;
+                      const statusColor = service.status === 'operational' ? 'bg-emerald-400' : service.status === 'degraded' ? 'bg-amber-400' : 'bg-red-400';
+                      const statusText = service.status === 'operational' ? 'يعمل' : service.status === 'degraded' ? 'بطيء' : 'متوقف';
+                      const statusTextColor = service.status === 'operational' ? 'text-emerald-400' : service.status === 'degraded' ? 'text-amber-400' : 'text-red-400';
+                      return (
+                        <div
+                          key={service.name}
+                          className="flex items-center gap-2 p-2 rounded-lg bg-background/40 border border-border/40 hover:border-primary/20 transition-colors"
+                        >
+                          <div className="flex items-center justify-center size-7 rounded-md bg-primary/10 shrink-0">
+                            <SvcIcon className="size-3.5 text-primary/70" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-medium truncate">{service.name}</p>
+                            <div className="flex items-center gap-1">
+                              <span className={`size-1.5 rounded-full ${statusColor} shrink-0`} />
+                              <span className={`text-[9px] ${statusTextColor}`}>{statusText}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Uptime + Last Checked */}
+                  <div className="mt-4 pt-3 border-t border-border/40 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground">وقت التشغيل</span>
+                      <span className="text-xs font-bold text-emerald-400 tabular-nums">99.9%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground">آخر فحص</span>
+                      <span className="text-[10px] text-muted-foreground/60 tabular-nums flex items-center gap-1">
+                        <Clock className="size-2.5" />
+                        {systemLastChecked.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </motion.div>
 
           {/* ─── Additional Info Cards (when bots exist) ─── */}
