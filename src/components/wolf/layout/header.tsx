@@ -29,6 +29,7 @@ const pageTitles: Record<Page, string> = {
   'api-keys': 'مفاتيح API',
   webhooks: 'وخدمات الويب',
   'deployment-history': 'سجل النشر',
+  team: 'إدارة الفريق',
   '404': 'الصفحة غير موجودة',
 };
 

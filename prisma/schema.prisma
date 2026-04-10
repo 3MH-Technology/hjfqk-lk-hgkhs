@@ -86,3 +86,28 @@ model Notification {
 
   @@index([userId, createdAt])
 }
+
+model Team {
+  id        String       @id @default(cuid())
+  name      String       @default("فريقي")
+  ownerId   String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  members   TeamMember[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  name      String?
+  role      String   @default("viewer")
+  invitedBy String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId    String
+
+  @@index([teamId])
+}

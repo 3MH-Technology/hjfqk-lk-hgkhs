@@ -180,7 +180,7 @@ const statusConfig: Record<
     glowClass:
       'before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-br before:from-blue-500/[0.08] before:via-transparent before:to-transparent',
     borderPulse:
-      'animate-[border-pulse-amber_2s_ease-in-out_infinite] shadow-[0_0_12px_rgba(245,158,11,0.12)]',
+      'animate-[border-pulse-blue_2s_ease-in-out_infinite] shadow-[0_0_12px_rgba(59,130,246,0.12)]',
   },
   error: {
     label: 'خطأ',

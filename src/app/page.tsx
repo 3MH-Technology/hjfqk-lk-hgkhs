@@ -13,8 +13,12 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center space-y-4">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl pulse-dot">
-          🐺
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden pulse-dot">
+          <img
+            src="https://f.top4top.io/p_37210bgwm1.jpg"
+            alt="استضافة الذئب"
+            className="w-10 h-10 rounded-lg object-cover"
+          />
         </div>
         <Skeleton className="h-6 w-32 mx-auto" />
         <Skeleton className="h-4 w-48 mx-auto" />

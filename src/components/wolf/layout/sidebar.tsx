@@ -24,6 +24,7 @@ import {
   History,
   Key,
   Webhook as WebhookIcon,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -100,6 +101,12 @@ const navItems: NavItem[] = [
     id: 'webhooks',
     label: 'وخدمات الويب',
     icon: <WebhookIcon className="size-5" />,
+  },
+  {
+    id: 'team',
+    label: 'إدارة الفريق',
+    icon: <Users className="size-5" />,
+    separator: true,
   },
   {
     id: 'activity',

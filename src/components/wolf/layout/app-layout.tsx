@@ -129,6 +129,11 @@ const WebhooksPage = dynamic(
   { loading: () => loadingFallback }
 );
 
+const TeamManagementPage = dynamic(
+  () => import('@/components/wolf/settings/team-management'),
+  { loading: () => loadingFallback }
+);
+
 const HelpCenter = dynamic(
   () => import('@/components/wolf/help-center'),
   { loading: () => loadingFallback }
@@ -177,6 +182,8 @@ function PageContent() {
       return <ApiKeysPage />;
     case 'webhooks':
       return <WebhooksPage />;
+    case 'team':
+      return <TeamManagementPage />;
     default:
       return <Dashboard />;
   }

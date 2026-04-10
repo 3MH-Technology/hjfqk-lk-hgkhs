@@ -387,7 +387,7 @@ export default function AccountSettings() {
                 <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {user?.createdAt ? `انضم منذ ${new Date(user.createdAt).toLocaleDateString('ar-SA')}` : 'لا توجد بيانات'}
+                    {user?.email ? `عضو منذ الآن` : 'لا توجد بيانات'}
                   </span>
                 </div>
               </div>

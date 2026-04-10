@@ -24,6 +24,7 @@ export type Page =
   | "api-keys"
   | "webhooks"
   | "deployment-history"
+  | "team"
   | "404";
 
 export type Theme = 'dark' | 'light';
