@@ -72,6 +72,11 @@ const LogViewer = dynamic(
   { loading: () => loadingFallback }
 );
 
+const RealtimeLogs = dynamic(
+  () => import('@/components/wolf/logs/realtime-logs').then((m) => m.RealtimeLogs),
+  { loading: () => loadingFallback }
+);
+
 const ActivityCenter = dynamic(
   () =>
     import('@/components/wolf/notifications/activity-center'),
@@ -167,6 +172,8 @@ function PageContent() {
       return <FileManager />;
     case 'logs':
       return <LogViewer />;
+    case 'realtime-logs':
+      return <RealtimeLogs />;
     case 'activity':
       return <ActivityCenter />;
     case 'settings':

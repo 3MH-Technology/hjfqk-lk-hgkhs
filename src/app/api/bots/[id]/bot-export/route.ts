@@ -20,8 +20,8 @@ export async function GET(
     const bot = await db.bot.findFirst({
       where: isAdmin ? { id } : { id, userId },
       include: {
-        files: { select: { id: true, path: true, size: true, createdAt: true, updatedAt: true } },
-        envVars: { select: { key: true, value: true, createdAt: true } },
+        files: { select: { path: true, content: true, size: true } },
+        envVars: { select: { key: true } },
         _count: { select: { files: true, logs: true } },
       },
     });
@@ -30,50 +30,39 @@ export async function GET(
       return NextResponse.json({ error: "البوت غير موجود" }, { status: 404 });
     }
 
-    // Mask secret values in env vars
-    const maskedEnvVars = bot.envVars.map((env) => ({
-      key: env.key,
-      value: env.value.length > 4
-        ? env.value.slice(0, 2) + "*".repeat(env.value.length - 2)
-        : "****",
-      createdAt: env.createdAt,
-    }));
-
     const exportData = {
       exportDate: new Date().toISOString(),
       exportVersion: "1.0",
+      platform: "استضافة الذئب",
       bot: {
-        id: bot.id,
         name: bot.name,
         description: bot.description || null,
         language: bot.language,
-        status: bot.status,
-        containerId: bot.containerId || null,
-        port: bot.port || null,
         cpuLimit: bot.cpuLimit,
         ramLimit: bot.ramLimit,
         autoRestart: bot.autoRestart,
-        githubUrl: bot.githubUrl || null,
-        createdAt: bot.createdAt,
-        updatedAt: bot.updatedAt,
       },
-      statistics: {
-        totalFiles: bot._count.files,
-        totalLogs: bot._count.logs,
-      },
-      envVars: maskedEnvVars,
+      envVarKeys: bot.envVars.map((env) => env.key),
       files: bot.files.map((f) => ({
-        id: f.id,
         path: f.path,
+        content: f.content,
         size: f.size,
-        createdAt: f.createdAt,
-        updatedAt: f.updatedAt,
       })),
     };
 
-    return NextResponse.json(exportData);
-  } catch (error) {
+    const filename = `${bot.name.replace(/[^a-zA-Z0-9\u0600-\u06FF-_]/g, "_")}-export.json`;
+    const jsonStr = JSON.stringify(exportData, null, 2);
+
+    return new NextResponse(jsonStr, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      },
+    });
+  } catch (error: unknown) {
     console.error("Export bot error:", error);
-    return NextResponse.json({ error: "حدث خطأ" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "حدث خطأ";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

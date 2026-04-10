@@ -16,6 +16,8 @@ import {
   ArrowRight,
   Loader2,
   X,
+  Eye,
+  PackageOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +47,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useAppStore } from '@/store/app-store';
 import { toast } from 'sonner';
+import { FileViewer } from './file-viewer';
 
 interface BotFile {
   id: string;
@@ -112,6 +115,9 @@ export default function FileManager() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerFile, setViewerFile] = useState<{ path: string; content: string } | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const fetchFiles = useCallback(async () => {
     if (!selectedBotId) return;
@@ -231,6 +237,38 @@ export default function FileManager() {
     }
   };
 
+  const handleViewFile = (file: BotFile) => {
+    setViewerFile({ path: file.path, content: file.content });
+    setViewerOpen(true);
+  };
+
+  const handleExportBot = async () => {
+    if (!selectedBotId) return;
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/bots/${selectedBotId}/bot-export`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('فشل في تصدير البوت');
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bot-export.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('تم تصدير البوت بنجاح');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ أثناء التصدير';
+      toast.error(message);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const openDialog = (mode: 'create' | 'upload') => {
     setDialogMode(mode);
     setNewFileName('');
@@ -266,6 +304,20 @@ export default function FileManager() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold gradient-text">الملفات</h2>
             <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleExportBot}
+                disabled={exporting}
+                className="text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
+              >
+                {exporting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <PackageOpen className="h-3.5 w-3.5" />
+                )}
+                تصدير
+              </Button>
               <Button
                 size="sm"
                 variant="outline"
@@ -327,6 +379,16 @@ export default function FileManager() {
                         <span>{formatDate(file.updatedAt)}</span>
                       </div>
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewFile(file);
+                      }}
+                      className="p-1.5 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors shrink-0"
+                      title="عرض الملف"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
                   </button>
                 ))}
               </div>
@@ -465,6 +527,16 @@ export default function FileManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* File Viewer Dialog */}
+      {viewerFile && (
+        <FileViewer
+          open={viewerOpen}
+          onOpenChange={setViewerOpen}
+          filePath={viewerFile.path}
+          content={viewerFile.content}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

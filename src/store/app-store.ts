@@ -11,6 +11,7 @@ export type Page =
   | "bot-monitoring"
   | "files"
   | "logs"
+  | "realtime-logs"
   | "activity"
   | "settings"
   | "help"

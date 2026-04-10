@@ -226,7 +226,7 @@ export function BotDetail() {
 
   const handleExport = async () => {
     try {
-      const res = await fetch(`/api/bots/${bot!.id}/export`, { credentials: 'include' });
+      const res = await fetch(`/api/bots/${bot!.id}/bot-export`, { credentials: 'include' });
       if (!res.ok) {
         toast.error('فشل في تصدير بيانات البوت');
         return;

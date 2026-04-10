@@ -19,13 +19,18 @@ import {
   ArrowUpRight,
   BookOpen,
   LifeBuoy,
-  Inbox,
   Sparkles,
   Zap,
   Terminal,
   RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  MessageSquare,
+  HardDrive,
+  Wifi,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -59,6 +64,17 @@ interface BotItem {
   createdAt: string;
   updatedAt: string;
   _count: { files: number; logs: number };
+}
+
+interface TimelineEvent {
+  id: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+  title: string;
+  description: string;
+  time: string;
+  icon: typeof CheckCircle;
+  color: string;
+  glowColor: string;
 }
 
 /* ─── Constants ─── */
@@ -124,11 +140,11 @@ const statCards: {
     key: 'totalFiles',
     label: 'إجمالي الملفات',
     icon: FileText,
-    iconBg: 'bg-blue-500/15',
-    iconColor: 'text-blue-400',
-    gradientFrom: 'from-blue-500/20',
-    gradientTo: 'to-blue-500/5',
-    barColor: 'bg-blue-400',
+    iconBg: 'bg-sky-500/15',
+    iconColor: 'text-sky-400',
+    gradientFrom: 'from-sky-500/20',
+    gradientTo: 'to-sky-500/5',
+    barColor: 'bg-sky-400',
     trend: 'up',
   },
   {
@@ -157,8 +173,8 @@ const statusConfig: Record<string, { label: string; className: string; dotClass:
   },
   building: {
     label: 'جاري البناء',
-    className: 'bg-blue-500/15 text-blue-400 border-blue-500/25',
-    dotClass: 'bg-blue-400 pulse-dot',
+    className: 'bg-sky-500/15 text-sky-400 border-sky-500/25',
+    dotClass: 'bg-sky-400 pulse-dot',
   },
   error: {
     label: 'خطأ',
@@ -206,9 +222,9 @@ const quickActions: {
     description: 'تواصل مع فريق الدعم',
     icon: LifeBuoy,
     page: 'help',
-    gradientFrom: 'from-blue-500/20',
-    gradientTo: 'to-blue-500/5',
-    iconColor: 'text-blue-400',
+    gradientFrom: 'from-sky-500/20',
+    gradientTo: 'to-sky-500/5',
+    iconColor: 'text-sky-400',
   },
   {
     label: 'إدارة الملفات',
@@ -218,6 +234,59 @@ const quickActions: {
     gradientFrom: 'from-sky-500/20',
     gradientTo: 'to-sky-500/5',
     iconColor: 'text-sky-400',
+  },
+];
+
+const timelineEvents: TimelineEvent[] = [
+  {
+    id: '1',
+    type: 'success',
+    title: 'تم تشغيل البوت بنجاح',
+    description: 'بوت المساعد الذكي يعمل الآن',
+    time: 'منذ 3 دقائق',
+    icon: CheckCircle,
+    color: 'text-emerald-400',
+    glowColor: 'shadow-emerald-400/40',
+  },
+  {
+    id: '2',
+    type: 'info',
+    title: 'تم تحديث ملفات البوت',
+    description: 'رفع 3 ملفات جديدة لبوت المتجر',
+    time: 'منذ 15 دقيقة',
+    icon: FileText,
+    color: 'text-sky-400',
+    glowColor: 'shadow-sky-400/40',
+  },
+  {
+    id: '3',
+    type: 'warning',
+    title: 'تحذير استخدام الموارد',
+    description: 'بوت الألعاب يستخدم 85% من الذاكرة',
+    time: 'منذ 30 دقيقة',
+    icon: AlertCircle,
+    color: 'text-amber-400',
+    glowColor: 'shadow-amber-400/40',
+  },
+  {
+    id: '4',
+    type: 'error',
+    title: 'فشل في نشر البوت',
+    description: 'خطأ في تهيئة بيئة البوت',
+    time: 'منذ ساعة',
+    icon: XCircle,
+    color: 'text-red-400',
+    glowColor: 'shadow-red-400/40',
+  },
+  {
+    id: '5',
+    type: 'success',
+    title: 'تم إنشاء بوت جديد',
+    description: 'بوت إشعارات المجموعات جاهز',
+    time: 'منذ ساعتين',
+    icon: CheckCircle,
+    color: 'text-emerald-400',
+    glowColor: 'shadow-emerald-400/40',
   },
 ];
 
@@ -264,6 +333,38 @@ function MiniSparkline({ bars, color }: { bars: number[]; color: string }) {
   );
 }
 
+/* ─── Resource Progress Bar Component ─── */
+function ResourceProgressBar({
+  label,
+  value,
+  max,
+  color,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  color: string;
+  icon: typeof Cpu;
+}) {
+  const percentage = Math.min(Math.round((value / max) * 100), 100);
+  return (
+    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+      <Icon className="size-3 shrink-0" />
+      <span className="w-6 shrink-0">{label}</span>
+      <div className="flex-1 h-1.5 rounded-full bg-secondary/50 overflow-hidden">
+        <motion.div
+          className={`h-full rounded-full ${color}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' as const }}
+        />
+      </div>
+      <span className="w-7 text-left tabular-nums">{percentage}%</span>
+    </div>
+  );
+}
+
 /* ─── Wolf Logo Empty State ─── */
 
 function WolfEmptyState({
@@ -282,7 +383,7 @@ function WolfEmptyState({
       <motion.div
         className="relative mb-6"
         animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' as const }}
       >
         {/* Outer glow */}
         <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full scale-[2]" />
@@ -301,7 +402,7 @@ function WolfEmptyState({
         className="text-foreground font-semibold text-lg"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4, ease: 'easeOut' }}
+        transition={{ delay: 0.2, duration: 0.4, ease: 'easeOut' as const }}
       >
         {message}
       </motion.p>
@@ -310,7 +411,7 @@ function WolfEmptyState({
           className="text-muted-foreground text-sm mt-2 max-w-xs"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.4, ease: 'easeOut' }}
+          transition={{ delay: 0.35, duration: 0.4, ease: 'easeOut' as const }}
         >
           {subMessage}
         </motion.p>
@@ -319,7 +420,7 @@ function WolfEmptyState({
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.4, ease: 'easeOut' }}
+          transition={{ delay: 0.5, duration: 0.4, ease: 'easeOut' as const }}
         >
           <Button
             size="sm"
@@ -350,7 +451,7 @@ function SmallEmptyState({
       <motion.div
         className="relative mb-4"
         animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' as const }}
       >
         <div className="absolute inset-0 blur-xl bg-primary/10 rounded-full scale-150" />
         <div className="relative bg-primary/10 rounded-2xl p-4">
@@ -412,17 +513,146 @@ const botCardVariants: Variants = {
   }),
 };
 
+const timelineVariants: Variants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.4, ease: 'easeOut' },
+  },
+};
+
 /* ─── Section Divider Component ─── */
 
 function SectionDivider({ icon: Icon, label }: { icon: typeof Activity; label: string }) {
   return (
     <motion.div variants={itemVariants} className="relative flex items-center gap-3 -my-1">
-      <div className="flex-1 h-px bg-gradient-to-l from-primary/15 via-primary/8 to-transparent" />
-      <div className="flex items-center gap-1.5 px-2">
-        <Icon className="size-3.5 text-primary/50" />
-        <span className="text-[10px] text-primary/40 font-medium">{label}</span>
+      <div className="flex-1 h-px bg-gradient-to-l from-primary/25 via-primary/10 to-transparent" />
+      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/5 border border-primary/10">
+        <Icon className="size-3.5 text-primary/60" />
+        <span className="text-[10px] text-primary/50 font-medium tracking-wide">{label}</span>
       </div>
-      <div className="flex-1 h-px bg-gradient-to-r from-primary/15 via-primary/8 to-transparent" />
+      <div className="flex-1 h-px bg-gradient-to-r from-primary/25 via-primary/10 to-transparent" />
+    </motion.div>
+  );
+}
+
+/* ─── Glassmorphism Stat Card with Animated Gradient Border ─── */
+
+function GlassStatCard({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className="relative rounded-xl p-[1px] overflow-hidden group">
+      {/* Animated gradient border */}
+      <div
+        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: 'conic-gradient(from 0deg, oklch(0.60 0.20 250 / 60%), oklch(0.55 0.22 245 / 20%), oklch(0.70 0.12 240 / 40%), oklch(0.60 0.20 250 / 60%))',
+          animation: 'cta-border-shift 4s linear infinite',
+        }}
+      />
+      <Card
+        className={`glass relative rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 cursor-default ${className}`}
+      >
+        {children}
+      </Card>
+    </div>
+  );
+}
+
+/* ─── Quick Action Card with Motion Hover ─── */
+
+function QuickActionCard({
+  action,
+  onClick,
+}: {
+  action: (typeof quickActions)[number];
+  onClick: () => void;
+}) {
+  const Icon = action.icon;
+  return (
+    <motion.div
+      whileHover={{ scale: 1.03, y: -4 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.25, ease: 'easeOut' as const }}
+    >
+      <Card
+        className={`group backdrop-blur-sm bg-card/60 bg-gradient-to-bl ${action.gradientFrom} ${action.gradientTo} border border-border rounded-xl hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 cursor-pointer`}
+        onClick={onClick}
+      >
+        <CardContent className="p-4 flex items-center gap-3">
+          <div className="flex items-center justify-center size-10 rounded-xl bg-background/60 group-hover:bg-background/80 group-hover:scale-110 transition-all duration-300">
+            <Icon className={`size-5 ${action.iconColor}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm group-hover:text-primary transition-colors">
+              {action.label}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {action.description}
+            </p>
+          </div>
+          <ArrowUpRight className="size-4 text-muted-foreground/50 group-hover:text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+/* ─── Activity Timeline Item ─── */
+
+function TimelineItem({
+  event,
+  isLast,
+}: {
+  event: TimelineEvent;
+  isLast: boolean;
+}) {
+  const Icon = event.icon;
+  return (
+    <motion.div
+      variants={timelineVariants}
+      className="relative flex gap-4 group"
+    >
+      {/* Connecting line + glowing dot */}
+      <div className="flex flex-col items-center shrink-0">
+        <motion.div
+          className="relative z-10 flex items-center justify-center size-8 rounded-full bg-background/80 border border-border/50 group-hover:border-primary/30 transition-colors"
+          whileHover={{ scale: 1.15 }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* Glow ring */}
+          <div
+            className={`absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-60 transition-opacity duration-300 ${event.glowColor}`}
+            style={{
+              boxShadow: `0 0 12px var(--tw-shadow-color)`,
+            }}
+          />
+          <Icon className={`size-4 relative z-10 ${event.color}`} />
+        </motion.div>
+        {!isLast && (
+          <div className="w-px flex-1 min-h-[40px] bg-gradient-to-b from-border/50 via-border/30 to-transparent group-hover:from-primary/20 group-hover:via-primary/10 transition-colors duration-300" />
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 pb-6 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+            {event.title}
+          </p>
+        </div>
+        <p className="text-xs text-muted-foreground truncate">{event.description}</p>
+        <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1">
+          <Clock className="size-2.5" />
+          {event.time}
+        </p>
+      </div>
     </motion.div>
   );
 }
@@ -517,6 +747,14 @@ export function Dashboard() {
     setCurrentPage('bot-detail');
   };
 
+  const handleQuickAction = (action: (typeof quickActions)[number]) => {
+    if (action.page === 'bots') {
+      setCreateDialogOpen(true);
+    } else {
+      setCurrentPage(action.page);
+    }
+  };
+
   const formatRelativeTime = (dateStr: string) => {
     const now = new Date();
     const date = new Date(dateStr);
@@ -535,6 +773,16 @@ export function Dashboard() {
     const seed = statsVal[key] * 3 + key.length;
     return seed % 5;
   };
+
+  const getSimulatedResource = useCallback((botId: string, type: 'cpu' | 'ram') => {
+    let hash = 0;
+    for (let i = 0; i < botId.length; i++) {
+      hash = ((hash << 5) - hash + botId.charCodeAt(i)) | 0;
+    }
+    const base = type === 'cpu' ? 15 : 25;
+    const range = type === 'cpu' ? 55 : 50;
+    return Math.abs(hash % range) + base;
+  }, []);
 
   const userName = user?.name || user?.email?.split('@')[0] || 'المستخدم';
 
@@ -557,7 +805,7 @@ export function Dashboard() {
       {/* ─── Welcome Header ─── */}
       <motion.div
         variants={welcomeVariants}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-bl from-primary/10 via-card to-card border border-primary/20 p-6 sm:p-8"
+        className="relative overflow-hidden rounded-2xl glass border border-primary/20 p-6 sm:p-8"
       >
         {/* Decorative background circles */}
         <div className="absolute top-0 left-0 w-48 h-48 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -575,10 +823,25 @@ export function Dashboard() {
               />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold gradient-text">
-                مرحباً بك، {userName}!
-              </h1>
-              <p className="text-muted-foreground mt-2 text-sm sm:text-base">
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-2xl sm:text-3xl font-bold gradient-text">
+                  مرحباً بك، {userName}!
+                </h1>
+                {/* Real-time status indicator */}
+                <motion.div
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6, duration: 0.4, ease: 'easeOut' as const }}
+                >
+                  <span className="relative flex size-2">
+                    <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                    <span className="relative rounded-full size-2 bg-emerald-400" />
+                  </span>
+                  <span className="text-[10px] font-medium text-emerald-400">متصل</span>
+                </motion.div>
+              </div>
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                 إليك ملخص نشاطك اليوم — نظرة سريعة على بوتاتك وإحصائياتك
               </p>
               <p className="text-muted-foreground/60 mt-1 text-xs flex items-center gap-1.5">
@@ -588,33 +851,39 @@ export function Dashboard() {
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="gap-2"
-            >
-              <RefreshCw className={`size-4 ${refreshing ? 'animate-spin' : ''}`} />
-              تحديث
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage('logs')}
-              className="gap-2"
-            >
-              <ScrollText className="size-4" />
-              عرض السجلات
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setCreateDialogOpen(true)}
-              className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              <Plus className="size-4" />
-              إنشاء بوت
-            </Button>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="gap-2 hover:border-primary/30 hover:text-primary transition-colors"
+              >
+                <RefreshCw className={`size-4 ${refreshing ? 'animate-spin' : ''}`} />
+                تحديث
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage('logs')}
+                className="gap-2 hover:border-primary/30 hover:text-primary transition-colors"
+              >
+                <ScrollText className="size-4" />
+                عرض السجلات
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Button
+                size="sm"
+                onClick={() => setCreateDialogOpen(true)}
+                className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+              >
+                <Plus className="size-4" />
+                إنشاء بوت
+              </Button>
+            </motion.div>
           </div>
         </div>
       </motion.div>
@@ -622,7 +891,7 @@ export function Dashboard() {
       {/* ─── Full Empty State ─── */}
       {hasNoData ? (
         <motion.div variants={itemVariants}>
-          <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-2xl overflow-hidden">
+          <Card className="glass rounded-2xl overflow-hidden">
             <CardContent className="p-2">
               <WolfEmptyState
                 message="مرحباً بك في استضافة الذئب!"
@@ -637,37 +906,13 @@ export function Dashboard() {
           <motion.div variants={itemVariants} className="mt-6">
             <SectionDivider icon={Sparkles} label="ابدأ الآن" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-              {quickActions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <Card
-                    key={action.label}
-                    className={`group backdrop-blur-sm bg-card/60 bg-gradient-to-bl ${action.gradientFrom} ${action.gradientTo} border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:border-primary/30 hover:shadow-primary/10 transition-all duration-300 cursor-pointer`}
-                    onClick={() => {
-                      if (action.page === 'bots') {
-                        setCreateDialogOpen(true);
-                      } else {
-                        setCurrentPage(action.page);
-                      }
-                    }}
-                  >
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="flex items-center justify-center size-10 rounded-xl bg-background/60 group-hover:bg-background/80 transition-colors">
-                        <Icon className={`size-5 ${action.iconColor}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm group-hover:text-primary transition-colors">
-                          {action.label}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {action.description}
-                        </p>
-                      </div>
-                      <ArrowUpRight className="size-4 text-muted-foreground/50 group-hover:text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              {quickActions.map((action) => (
+                <QuickActionCard
+                  key={action.label}
+                  action={action}
+                  onClick={() => handleQuickAction(action)}
+                />
+              ))}
             </div>
           </motion.div>
         </motion.div>
@@ -675,18 +920,18 @@ export function Dashboard() {
         <>
           {/* ─── Gradient Section Divider ─── */}
           <motion.div variants={itemVariants} className="relative flex items-center gap-3 -my-1">
-            <div className="flex-1 h-px bg-gradient-to-l from-primary/20 via-primary/10 to-transparent" />
-            <div className="flex-1 h-px bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+            <div className="flex-1 h-px bg-gradient-to-l from-primary/25 via-primary/10 to-transparent" />
+            <div className="flex-1 h-px bg-gradient-to-r from-primary/25 via-primary/10 to-transparent" />
           </motion.div>
 
-          {/* ─── Stats Grid ─── */}
+          {/* ─── Stats Grid (Glassmorphism with Animated Gradient Borders) ─── */}
           <motion.div
             variants={containerVariants}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           >
             {statsLoading
               ? Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-36 rounded-xl" />
+                  <Skeleton key={i} className="h-40 rounded-xl" />
                 ))
               : stats &&
                 statCards.map((card) => {
@@ -696,17 +941,17 @@ export function Dashboard() {
                   const isUp = card.trend === 'up';
                   return (
                     <motion.div key={card.key} variants={statCardVariants}>
-                      <Card
-                        className={`group backdrop-blur-sm bg-card/60 bg-gradient-to-bl ${card.gradientFrom} ${card.gradientTo} border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 cursor-default`}
-                      >
+                      <GlassStatCard>
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
-                              <div
-                                className={`flex items-center justify-center size-11 rounded-xl ${card.iconBg} transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg`}
+                              <motion.div
+                                className={`flex items-center justify-center size-11 rounded-xl ${card.iconBg}`}
+                                whileHover={{ scale: 1.15, rotate: 5 }}
+                                transition={{ duration: 0.25, ease: 'easeOut' as const }}
                               >
                                 <Icon className={`size-5 ${card.iconColor}`} />
-                              </div>
+                              </motion.div>
                               <div>
                                 <p className="text-2xl font-bold tabular-nums">
                                   <AnimatedCounter target={stats[card.key]} />
@@ -731,7 +976,7 @@ export function Dashboard() {
                           </div>
                           <MiniSparkline bars={bars} color={card.barColor} />
                         </CardContent>
-                      </Card>
+                      </GlassStatCard>
                     </motion.div>
                   );
                 })}
@@ -743,37 +988,13 @@ export function Dashboard() {
           {/* ─── Quick Actions Grid ─── */}
           <motion.div variants={itemVariants}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickActions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <Card
-                    key={action.label}
-                    className={`group backdrop-blur-sm bg-card/60 bg-gradient-to-bl ${action.gradientFrom} ${action.gradientTo} border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:border-primary/30 hover:shadow-primary/10 transition-all duration-300 cursor-pointer`}
-                    onClick={() => {
-                      if (action.page === 'bots') {
-                        setCreateDialogOpen(true);
-                      } else {
-                        setCurrentPage(action.page);
-                      }
-                    }}
-                  >
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="flex items-center justify-center size-10 rounded-xl bg-background/60 group-hover:bg-background/80 transition-colors">
-                        <Icon className={`size-5 ${action.iconColor}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm group-hover:text-primary transition-colors">
-                          {action.label}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {action.description}
-                        </p>
-                      </div>
-                      <ArrowUpRight className="size-4 text-muted-foreground/50 group-hover:text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              {quickActions.map((action) => (
+                <QuickActionCard
+                  key={action.label}
+                  action={action}
+                  onClick={() => handleQuickAction(action)}
+                />
+              ))}
             </div>
           </motion.div>
 
@@ -783,7 +1004,7 @@ export function Dashboard() {
               <SectionDivider icon={Zap} label="ملخص الحالة" />
 
               <motion.div variants={itemVariants}>
-                <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl">
+                <Card className="glass rounded-xl">
                   <CardContent className="p-5">
                     <div className="flex items-center gap-6 flex-wrap">
                       {/* Status distribution */}
@@ -801,7 +1022,7 @@ export function Dashboard() {
                               animate={{
                                 width: `${(stats.runningBots / stats.totalBots) * 100}%`,
                               }}
-                              transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
+                              transition={{ duration: 1, delay: 0.3, ease: 'easeOut' as const }}
                             />
                           )}
                           {stats.stoppedBots > 0 && (
@@ -811,7 +1032,7 @@ export function Dashboard() {
                               animate={{
                                 width: `${(stats.stoppedBots / stats.totalBots) * 100}%`,
                               }}
-                              transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+                              transition={{ duration: 1, delay: 0.5, ease: 'easeOut' as const }}
                             />
                           )}
                           {stats.errorBots > 0 && (
@@ -821,7 +1042,7 @@ export function Dashboard() {
                               animate={{
                                 width: `${(stats.errorBots / stats.totalBots) * 100}%`,
                               }}
-                              transition={{ duration: 1, delay: 0.7, ease: 'easeOut' }}
+                              transition={{ duration: 1, delay: 0.7, ease: 'easeOut' as const }}
                             />
                           )}
                         </div>
@@ -846,13 +1067,13 @@ export function Dashboard() {
 
                       {/* Quick stats */}
                       <div className="grid grid-cols-2 gap-3 min-w-[180px]">
-                        <div className="bg-background/60 rounded-lg p-3 text-center border border-border/50">
+                        <div className="bg-background/60 rounded-lg p-3 text-center border border-border/50 hover:border-primary/20 transition-colors">
                           <p className="text-xl font-bold text-emerald-400">
                             <AnimatedCounter target={stats.runningBots} />
                           </p>
                           <p className="text-[10px] text-muted-foreground mt-0.5">يعمل الآن</p>
                         </div>
-                        <div className="bg-background/60 rounded-lg p-3 text-center border border-border/50">
+                        <div className="bg-background/60 rounded-lg p-3 text-center border border-border/50 hover:border-primary/20 transition-colors">
                           <p className="text-xl font-bold text-sky-400">
                             <AnimatedCounter target={stats.totalFiles} />
                           </p>
@@ -869,7 +1090,7 @@ export function Dashboard() {
           {/* ─── Bots Divider ─── */}
           <SectionDivider icon={Bot} label="البوتات الأخيرة" />
 
-          {/* ─── Recent Bots ─── */}
+          {/* ─── Recent Bots (with Resource Usage Bars) ─── */}
           <motion.div variants={itemVariants}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -879,26 +1100,28 @@ export function Dashboard() {
                 البوتات الأخيرة
               </h2>
               {bots.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCurrentPage('bots')}
-                  className="text-primary hover:text-primary/80"
-                >
-                  عرض الكل
-                  <ChevronLeft className="size-4 mr-1" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCurrentPage('bots')}
+                    className="text-primary hover:text-primary/80"
+                  >
+                    عرض الكل
+                    <ChevronLeft className="size-4 mr-1" />
+                  </Button>
+                </motion.div>
               )}
             </div>
 
             {loading ? (
               <div className="flex gap-4 overflow-x-auto pb-2">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-40 w-72 shrink-0 rounded-xl" />
+                  <Skeleton key={i} className="h-52 w-72 shrink-0 rounded-xl" />
                 ))}
               </div>
             ) : recentBots.length === 0 ? (
-              <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl">
+              <Card className="glass rounded-xl">
                 <CardContent className="p-2">
                   <WolfEmptyState
                     message="لا توجد بوتات بعد"
@@ -912,6 +1135,8 @@ export function Dashboard() {
               <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory custom-scrollbar">
                 {recentBots.map((bot, idx) => {
                   const status = statusConfig[bot.status] || statusConfig.stopped;
+                  const cpuUsage = getSimulatedResource(bot.id, 'cpu');
+                  const ramUsage = getSimulatedResource(bot.id, 'ram');
                   return (
                     <motion.div
                       key={bot.id}
@@ -919,9 +1144,11 @@ export function Dashboard() {
                       variants={botCardVariants}
                       initial="hidden"
                       animate="visible"
+                      whileHover={{ y: -4 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' as const }}
                     >
                       <Card
-                        className="shrink-0 w-72 backdrop-blur-sm bg-card/60 border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 hover:shadow-primary/10 transition-all duration-300 cursor-pointer snap-start"
+                        className="shrink-0 w-72 backdrop-blur-sm bg-card/60 border border-border rounded-xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 cursor-pointer snap-start"
                         onClick={() => handleBotClick(bot.id)}
                       >
                         <CardContent className="p-4 flex flex-col gap-3">
@@ -960,6 +1187,26 @@ export function Dashboard() {
                             </div>
                           </div>
 
+                          {/* Resource usage mini progress bars */}
+                          {bot.status === 'running' && (
+                            <div className="space-y-1.5 pt-1">
+                              <ResourceProgressBar
+                                label="CPU"
+                                value={cpuUsage}
+                                max={100}
+                                color="bg-emerald-400"
+                                icon={Cpu}
+                              />
+                              <ResourceProgressBar
+                                label="RAM"
+                                value={ramUsage}
+                                max={100}
+                                color="bg-sky-400"
+                                icon={HardDrive}
+                              />
+                            </div>
+                          )}
+
                           {/* Last updated */}
                           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 pt-1 border-t border-border/50">
                             <Clock className="size-3" />
@@ -974,6 +1221,49 @@ export function Dashboard() {
             )}
           </motion.div>
 
+          {/* ─── Activity Timeline Divider ─── */}
+          <SectionDivider icon={MessageSquare} label="النشاط الأخير" />
+
+          {/* ─── Activity Timeline ─── */}
+          <motion.div variants={itemVariants}>
+            <Card className="glass rounded-xl">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <Wifi className="size-4 text-primary" />
+                    سجل النشاط المباشر
+                  </h3>
+                  <motion.div
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                    animate={{ opacity: [0.7, 1, 0.7] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' as const }}
+                  >
+                    <span className="relative flex size-1.5">
+                      <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                      <span className="relative rounded-full size-1.5 bg-emerald-400" />
+                    </span>
+                    <span className="text-[10px] font-medium text-emerald-400">مباشر</span>
+                  </motion.div>
+                </div>
+
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="pr-1"
+                >
+                  {timelineEvents.map((event, idx) => (
+                    <TimelineItem
+                      key={event.id}
+                      event={event}
+                      isLast={idx === timelineEvents.length - 1}
+                    />
+                  ))}
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
           {/* ─── Additional Info Cards (when bots exist) ─── */}
           {!loading && bots.length > 0 && (
             <>
@@ -985,63 +1275,142 @@ export function Dashboard() {
               >
                 {/* Total Logs Card */}
                 <motion.div variants={statCardVariants}>
-                  <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="flex items-center justify-center size-11 rounded-xl bg-sky-500/15">
-                        <ScrollText className="size-5 text-sky-400" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold tabular-nums">
-                          <AnimatedCounter target={stats?.totalLogs ?? 0} />
-                        </p>
-                        <p className="text-xs text-muted-foreground">إجمالي سجلات النشاط</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <motion.div
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' as const }}
+                  >
+                    <Card className="glass rounded-xl hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300">
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="flex items-center justify-center size-11 rounded-xl bg-sky-500/15">
+                          <ScrollText className="size-5 text-sky-400" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold tabular-nums">
+                            <AnimatedCounter target={stats?.totalLogs ?? 0} />
+                          </p>
+                          <p className="text-xs text-muted-foreground">إجمالي سجلات النشاط</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 </motion.div>
 
                 {/* Most Recent Bot */}
                 <motion.div variants={statCardVariants}>
-                  <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 cursor-pointer"
-                    onClick={() => handleBotClick(bots[0].id)}
+                  <motion.div
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' as const }}
                   >
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="flex items-center justify-center size-11 rounded-xl bg-primary/15">
-                        <Sparkles className="size-5 text-primary" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold truncate">{bots[0].name}</p>
-                        <p className="text-xs text-muted-foreground">أحدث بوت — {formatRelativeTime(bots[0].createdAt)}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <Card
+                      className="glass rounded-xl hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 cursor-pointer"
+                      onClick={() => handleBotClick(bots[0].id)}
+                    >
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="flex items-center justify-center size-11 rounded-xl bg-primary/15">
+                          <Sparkles className="size-5 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold truncate">{bots[0].name}</p>
+                          <p className="text-xs text-muted-foreground">أحدث بوت — {formatRelativeTime(bots[0].createdAt)}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 </motion.div>
 
                 {/* Navigate to Console */}
                 <motion.div variants={statCardVariants}>
-                  <Card className="backdrop-blur-sm bg-card/60 border border-border rounded-xl hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 cursor-pointer"
-                    onClick={() => {
-                      if (bots.length > 0) {
-                        setSelectedBotId(bots[0].id);
-                        setCurrentPage('bot-console');
-                      }
-                    }}
+                  <motion.div
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' as const }}
                   >
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="flex items-center justify-center size-11 rounded-xl bg-emerald-500/15">
-                        <Terminal className="size-5 text-emerald-400" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold">وحدة التحكم</p>
-                        <p className="text-xs text-muted-foreground">فتح وحدة تحكم البوت</p>
-                      </div>
-                      <ArrowUpRight className="size-4 text-muted-foreground/50" />
-                    </CardContent>
-                  </Card>
+                    <Card
+                      className="glass rounded-xl hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 transition-all duration-300 cursor-pointer"
+                      onClick={() => {
+                        if (bots.length > 0) {
+                          setSelectedBotId(bots[0].id);
+                          setCurrentPage('bot-console');
+                        }
+                      }}
+                    >
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="flex items-center justify-center size-11 rounded-xl bg-emerald-500/15">
+                          <Terminal className="size-5 text-emerald-400" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold">وحدة التحكم</p>
+                          <p className="text-xs text-muted-foreground">فتح وحدة تحكم البوت</p>
+                        </div>
+                        <ArrowUpRight className="size-4 text-muted-foreground/50" />
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 </motion.div>
               </motion.div>
             </>
           )}
+
+          {/* ─── Quick Action Cards at Bottom ─── */}
+          <SectionDivider icon={Zap} label="وصول سريع" />
+          <motion.div variants={itemVariants}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <motion.div whileHover={{ scale: 1.03, y: -4 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.25, ease: 'easeOut' as const }}>
+                <Card
+                  className="group relative overflow-hidden rounded-xl border border-border cursor-pointer hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300"
+                  onClick={() => setCreateDialogOpen(true)}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-bl from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <CardContent className="relative p-5 flex flex-col items-center text-center gap-3">
+                    <div className="size-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all duration-300">
+                      <Bot className="size-7 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm group-hover:text-emerald-400 transition-colors">إنشاء بوت جديد</p>
+                      <p className="text-xs text-muted-foreground mt-1">أنشئ بوت تيليجرامك الأول مجاناً</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div whileHover={{ scale: 1.03, y: -4 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.25, ease: 'easeOut' as const }}>
+                <Card
+                  className="group relative overflow-hidden rounded-xl border border-border cursor-pointer hover:border-sky-500/30 hover:shadow-lg hover:shadow-sky-500/10 transition-all duration-300"
+                  onClick={() => setCurrentPage('help')}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-bl from-sky-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <CardContent className="relative p-5 flex flex-col items-center text-center gap-3">
+                    <div className="size-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-sky-500/20 transition-all duration-300">
+                      <BookOpen className="size-7 text-sky-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm group-hover:text-sky-400 transition-colors">عرض التوثيق</p>
+                      <p className="text-xs text-muted-foreground mt-1">دليل شامل لاستخدام المنصة</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div whileHover={{ scale: 1.03, y: -4 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.25, ease: 'easeOut' as const }}>
+                <Card
+                  className="group relative overflow-hidden rounded-xl border border-border cursor-pointer hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
+                  onClick={() => setCurrentPage('help')}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-bl from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <CardContent className="relative p-5 flex flex-col items-center text-center gap-3">
+                    <div className="size-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
+                      <LifeBuoy className="size-7 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm group-hover:text-primary transition-colors">تواصل مع الدعم</p>
+                      <p className="text-xs text-muted-foreground mt-1">فريق الدعم متاح على مدار الساعة</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+          </motion.div>
         </>
       )}
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   History,
   Rocket,
@@ -17,6 +18,7 @@ import {
   Zap,
   GitBranch,
   Terminal,
+  Filter,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,9 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { useAppStore } from '@/store/app-store';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart,
   Bar,
@@ -42,17 +41,19 @@ import {
   Cell,
 } from 'recharts';
 
-/* ─── Animation Variants ─── */
+/* ═══════════════════════════════════════════════════════
+   Animation Variants — all ease/type strings use `as const`
+   ═══════════════════════════════════════════════════════ */
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.06 },
+    transition: { staggerChildren: 0.07 },
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -61,12 +62,40 @@ const itemVariants = {
   },
 };
 
-const timelineItemVariants = {
-  hidden: { opacity: 0, x: 20 },
+const timelineItemVariants: Variants = {
+  hidden: { opacity: 0, x: 30 },
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.35, ease: 'easeOut' as const },
+    transition: { duration: 0.4, ease: 'easeOut' as const },
+  },
+};
+
+const statsCardVariants: Variants = {
+  hidden: { opacity: 0, y: 16, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, ease: 'easeOut' as const },
+  },
+};
+
+const filterPillVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.25, ease: 'easeOut' as const },
+  },
+};
+
+const emptyStateVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, ease: 'easeOut' as const },
   },
 };
 
@@ -83,30 +112,100 @@ interface DeploymentEvent {
   status: DeploymentStatus;
   eventType: EventType;
   timestamp: Date;
-  duration: number; // seconds
+  duration: number;
   trigger: TriggerType;
   version: string;
   logs: string[];
 }
 
-// Bot names loaded from API
-const botNames: string[] = [];
+/* ─── Mock Data ─── */
 
-// Event types and configurations
-
-// Deployment events loaded from API
-const allDeployments: DeploymentEvent[] = [];
-
-// Chart data loaded from API
-const chartData = [
-  { day: 'السبت', success: 0, failed: 0 },
-  { day: 'الأحد', success: 0, failed: 0 },
-  { day: 'الاثنين', success: 0, failed: 0 },
-  { day: 'الثلاثاء', success: 0, failed: 0 },
-  { day: 'الأربعاء', success: 0, failed: 0 },
-  { day: 'الخميس', success: 0, failed: 0 },
-  { day: 'الجمعة', success: 0, failed: 0 },
+const mockBotNames = [
+  'بوت المساعد الذكي',
+  'بوت إدارة المجموعات',
+  'بوت الترجمة',
+  'بوت التسوق',
+  'بوت الدعم الفني',
+  'بوت الإشعارات',
 ];
+
+const generateMockDeployments = (): DeploymentEvent[] => {
+  const statuses: DeploymentStatus[] = ['success', 'success', 'success', 'success', 'failed', 'in_progress', 'rolled_back'];
+  const eventTypes: EventType[] = ['deploy', 'redeploy', 'deploy', 'rollback', 'stop', 'deploy', 'redeploy'];
+  const triggers: TriggerType[] = ['manual', 'auto', 'manual', 'auto', 'manual'];
+  const versions = ['v2.1.3', 'v2.1.4', 'v2.2.0', 'v2.2.1', 'v3.0.0-beta', 'v3.0.0', 'v2.1.2'];
+
+  const successLogs = [
+    '[INFO] بدء عملية النشر...',
+    '[INFO] جاري سحب الكود من المستودع',
+    '[SUCCESS] تم بناء الصورة بنجاح (2.4s)',
+    '[INFO] جاري تشغيل الحاوية...',
+    '[SUCCESS] الحاوية تعمل بنجاح',
+    '[INFO] التحقق من صحة الخدمة...',
+    '[SUCCESS] جميع الفحوصات نجحت ✓',
+  ];
+  const failedLogs = [
+    '[INFO] بدء عملية النشر...',
+    '[INFO] جاري سحب الكود من المستودع',
+    '[ERROR] فشل في تثبيت الحزم',
+    '[ERROR] ModuleNotFoundError: No module named "telegram"',
+    '[WARN] إعادة المحاولة (1/3)...',
+    '[ERROR] فشلت إعادة المحاولة',
+    '[ERROR] تم إلغاء النشر',
+  ];
+  const inProgressLogs = [
+    '[INFO] بدء عملية النشر...',
+    '[INFO] جاري سحب الكود من المستودع',
+    '[INFO] جاري تثبيت الحزم...',
+    '[INFO] تثبيت: python-telegram-bot==20.0',
+    '[INFO] جاري بناء الصورة Docker...',
+  ];
+
+  const deployments: DeploymentEvent[] = [];
+  const now = new Date();
+
+  for (let i = 0; i < 30; i++) {
+    const hoursAgo = i * 2 + Math.random() * 4;
+    const timestamp = new Date(now.getTime() - hoursAgo * 60 * 60 * 1000);
+    const status = statuses[i % statuses.length];
+    const logs = status === 'success' ? successLogs
+      : status === 'failed' ? failedLogs
+      : status === 'in_progress' ? inProgressLogs
+      : [
+          '[INFO] بدء عملية التراجع...',
+          '[WARN] التراجع إلى النسخة السابقة',
+          '[INFO] جاري استعادة v2.1.2...',
+          '[SUCCESS] تم التراجع بنجاح',
+        ];
+
+    deployments.push({
+      id: `deploy-${i + 1}`,
+      botName: mockBotNames[i % mockBotNames.length],
+      status,
+      eventType: eventTypes[i % eventTypes.length],
+      timestamp,
+      duration: status === 'in_progress' ? 0 : Math.floor(10 + Math.random() * 120),
+      trigger: triggers[i % triggers.length],
+      version: versions[i % versions.length],
+      logs,
+    });
+  }
+
+  return deployments.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+};
+
+const allDeployments = generateMockDeployments();
+
+const generateChartData = () => {
+  const days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+  return days.map((day) => ({
+    day,
+    success: Math.floor(Math.random() * 6) + 1,
+    failed: Math.floor(Math.random() * 2),
+  }));
+};
+
+const chartData = generateChartData();
 
 /* ─── Status Config ─── */
 
@@ -116,7 +215,8 @@ const statusConfig: Record<DeploymentStatus, {
   borderClass: string;
   dotClass: string;
   textClass: string;
-  timelineColor: string;
+  dotStyle: string;
+  glowClass: string;
 }> = {
   success: {
     label: 'ناجح',
@@ -124,7 +224,8 @@ const statusConfig: Record<DeploymentStatus, {
     borderClass: 'border-emerald-500/30',
     dotClass: 'bg-emerald-400',
     textClass: 'text-emerald-400',
-    timelineColor: 'bg-emerald-400',
+    dotStyle: 'background: oklch(0.70 0.20 160)',
+    glowClass: 'shadow-[0_0_8px_oklch(0.70_0.20_160/40%)]',
   },
   failed: {
     label: 'فشل',
@@ -132,23 +233,26 @@ const statusConfig: Record<DeploymentStatus, {
     borderClass: 'border-red-500/30',
     dotClass: 'bg-red-400',
     textClass: 'text-red-400',
-    timelineColor: 'bg-red-400',
+    dotStyle: 'background: oklch(0.70 0.22 25)',
+    glowClass: 'shadow-[0_0_8px_oklch(0.70_0.22_25/40%)]',
   },
   in_progress: {
     label: 'قيد التنفيذ',
-    bgClass: 'bg-blue-500/15',
-    borderClass: 'border-blue-500/30',
-    dotClass: 'bg-blue-400',
-    textClass: 'text-blue-400',
-    timelineColor: 'bg-blue-400',
-  },
-  rolled_back: {
-    label: 'تم التراجع',
     bgClass: 'bg-sky-500/15',
     borderClass: 'border-sky-500/30',
     dotClass: 'bg-sky-400',
     textClass: 'text-sky-400',
-    timelineColor: 'bg-sky-400',
+    dotStyle: 'background: oklch(0.70 0.15 230)',
+    glowClass: 'shadow-[0_0_8px_oklch(0.70_0.15_230/40%)]',
+  },
+  rolled_back: {
+    label: 'تم التراجع',
+    bgClass: 'bg-violet-500/15',
+    borderClass: 'border-violet-500/30',
+    dotClass: 'bg-violet-400',
+    textClass: 'text-violet-400',
+    dotStyle: 'background: oklch(0.65 0.20 290)',
+    glowClass: 'shadow-[0_0_8px_oklch(0.65_0.20_290/40%)]',
   },
 };
 
@@ -165,12 +269,12 @@ const eventTypeConfig: Record<EventType, {
   redeploy: {
     label: 'إعادة نشر',
     icon: RotateCcw,
-    badgeClass: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+    badgeClass: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
   },
   rollback: {
     label: 'تراجع',
     icon: RotateCcw,
-    badgeClass: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+    badgeClass: 'bg-violet-500/15 text-violet-400 border-violet-500/30',
   },
   stop: {
     label: 'إيقاف',
@@ -179,7 +283,15 @@ const eventTypeConfig: Record<EventType, {
   },
 };
 
-/* ─── Relative Time Helper ─── */
+const filterStatuses: { value: string; label: string }[] = [
+  { value: 'all', label: 'الكل' },
+  { value: 'success', label: 'ناجح' },
+  { value: 'failed', label: 'فشل' },
+  { value: 'in_progress', label: 'قيد التنفيذ' },
+  { value: 'rolled_back', label: 'تم التراجع' },
+];
+
+/* ─── Helpers ─── */
 
 function getRelativeTime(date: Date): string {
   const now = new Date();
@@ -193,6 +305,35 @@ function getRelativeTime(date: Date): string {
   if (diffMin < 60) return `منذ ${diffMin} دقيقة`;
   if (diffHour < 24) return `منذ ${diffHour} ساعة`;
   return `منذ ${diffDay} يوم`;
+}
+
+/* ─── Animated Number Counter Hook ─── */
+
+function useAnimatedCounter(target: number, duration: number = 1200): number {
+  const [count, setCount] = useState(() => target);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (target === 0) return;
+    const startTime = performance.now();
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [target, duration]);
+
+  return count;
 }
 
 /* ─── Custom Chart Tooltip ─── */
@@ -219,12 +360,12 @@ function ChartTooltip({ active, payload, label }: {
   );
 }
 
-/* ─── Stats Card Component ─── */
+/* ─── Animated Stats Card Component ─── */
 
 function StatsCard({
   title,
-  value,
-  unit,
+  targetValue,
+  suffix,
   change,
   changeDirection,
   icon: Icon,
@@ -232,10 +373,11 @@ function StatsCard({
   iconColorClass,
   badgeText,
   badgeClass,
+  delay,
 }: {
   title: string;
-  value: string | number;
-  unit?: string;
+  targetValue: number;
+  suffix?: string;
   change: string;
   changeDirection: 'up' | 'down';
   icon: typeof Rocket;
@@ -243,9 +385,16 @@ function StatsCard({
   iconColorClass: string;
   badgeText?: string;
   badgeClass?: string;
+  delay: number;
 }) {
+  const animatedValue = useAnimatedCounter(targetValue, 1400);
+
   return (
-    <Card className="bg-card border-border rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+    <motion.div
+      variants={statsCardVariants}
+      custom={delay}
+      className="deploy-stats-card bg-card border-border rounded-xl"
+    >
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -254,9 +403,11 @@ function StatsCard({
             </div>
             <div>
               <p className="text-xs text-muted-foreground">{title}</p>
-              <p className="text-xl font-bold tabular-nums mt-0.5">
-                {typeof value === 'number' ? value.toLocaleString('ar-EG') : value}
-                {unit && <span className="text-sm font-normal text-muted-foreground mr-1">{unit}</span>}
+              <p className="text-xl font-bold tabular-nums mt-0.5 counter-animated">
+                {targetValue % 1 !== 0
+                  ? animatedValue.toFixed(1)
+                  : animatedValue.toLocaleString('ar-EG')}
+                {suffix && <span className="text-sm font-normal text-muted-foreground mr-1">{suffix}</span>}
               </p>
             </div>
           </div>
@@ -282,7 +433,7 @@ function StatsCard({
           <span className="text-[10px] text-muted-foreground/60">مقارنة بالأسبوع الماضي</span>
         </div>
       </CardContent>
-    </Card>
+    </motion.div>
   );
 }
 
@@ -291,14 +442,32 @@ function StatsCard({
 function TimelineEntry({
   event,
   index,
+  isLast,
 }: {
   event: DeploymentEvent;
   index: number;
+  isLast: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const config = statusConfig[event.status];
   const eventConfig = eventTypeConfig[event.eventType];
   const EventIcon = eventConfig.icon;
+
+  const getLogLineClass = useCallback((log: string) => {
+    if (log.includes('[ERROR]')) return 'log-line-error';
+    if (log.includes('[WARN]')) return 'log-line-warn';
+    if (log.includes('[SUCCESS]')) return 'log-line-success';
+    if (log.includes('[INFO]')) return 'log-line-info';
+    return 'log-line-debug';
+  }, []);
+
+  const getLogIcon = useCallback((log: string) => {
+    if (log.includes('[ERROR]')) return '✕';
+    if (log.includes('[WARN]')) return '⚠';
+    if (log.includes('[SUCCESS]')) return '✓';
+    if (log.includes('[INFO]')) return '●';
+    return '◦';
+  }, []);
 
   return (
     <motion.div
@@ -307,15 +476,20 @@ function TimelineEntry({
     >
       {/* Timeline Line & Dot */}
       <div className="flex flex-col items-center shrink-0">
-        <div className={`size-3 rounded-full ${config.timelineColor} ring-4 ring-background z-10 shrink-0`} />
-        {index < allDeployments.length - 1 && (
-          <div className="w-px flex-1 bg-border/50 mt-1" />
+        <div
+          className={`size-3.5 rounded-full z-10 shrink-0 ${config.glowClass} ${
+            event.status === 'in_progress' ? 'deploy-dot-active' : ''
+          }`}
+          style={{ ...{ background: config.dotStyle.split('background: ')[1] } }}
+        />
+        {!isLast && (
+          <div className="w-0.5 flex-1 mt-1 timeline-line-glow" />
         )}
       </div>
 
       {/* Content Card */}
       <div className="flex-1 min-w-0">
-        <Card className="bg-card border-border rounded-xl hover:border-primary/20 transition-all duration-200 overflow-hidden">
+        <Card className="timeline-entry-hover bg-card/80 border-border/60 rounded-xl overflow-hidden backdrop-blur-sm">
           <CardContent className="p-4">
             {/* Top Row: Time + Status */}
             <div className="flex items-center justify-between mb-3">
@@ -356,7 +530,7 @@ function TimelineEntry({
             {/* Meta Row: Duration + Trigger */}
             <div className="flex items-center gap-4 flex-wrap">
               {event.status === 'in_progress' ? (
-                <span className="flex items-center gap-1.5 text-xs text-blue-400">
+                <span className="flex items-center gap-1.5 text-xs text-sky-400">
                   <Loader2 className="size-3 animate-spin" />
                   جاري النشر...
                 </span>
@@ -390,12 +564,12 @@ function TimelineEntry({
               {expanded ? (
                 <>
                   <ChevronUp className="size-3" />
-                  إخفاء السجلات
+                  إخفاء السجلات ({event.logs.length} سطر)
                 </>
               ) : (
                 <>
                   <ChevronDown className="size-3" />
-                  عرض السجلات
+                  عرض السجلات ({event.logs.length} سطر)
                 </>
               )}
             </Button>
@@ -410,18 +584,12 @@ function TimelineEntry({
                   transition={{ duration: 0.3, ease: 'easeOut' as const }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-2 rounded-lg bg-muted/50 border border-border/50 p-3 font-mono text-[11px] leading-relaxed max-h-48 overflow-y-auto space-y-0.5" dir="ltr">
+                  <div className="mt-2 rounded-lg bg-muted/30 border border-border/40 p-3 font-mono text-[11px] leading-relaxed max-h-48 overflow-y-auto space-y-0.5" dir="ltr">
                     {event.logs.map((log, logIndex) => (
-                      <p
-                        key={logIndex}
-                        className={
-                          log.includes('[ERROR]') ? 'text-red-400' :
-                          log.includes('[WARN]') ? 'text-blue-400' :
-                          log.includes('[SUCCESS]') ? 'text-emerald-400' :
-                          'text-muted-foreground'
-                        }
-                      >
-                        {log}
+                      <p key={logIndex} className={getLogLineClass(log)}>
+                        <span className="inline-block w-4 opacity-60">{getLogIcon(log)}</span>
+                        {' '}
+                        {log.replace(/\[(INFO|WARN|ERROR|SUCCESS|DEBUG)\]/, '').trim()}
                       </p>
                     ))}
                   </div>
@@ -431,6 +599,38 @@ function TimelineEntry({
           </CardContent>
         </Card>
       </div>
+    </motion.div>
+  );
+}
+
+/* ─── Enhanced Empty State Component ─── */
+
+function EmptyState({ hasFilters }: { hasFilters: boolean }) {
+  return (
+    <motion.div
+      variants={emptyStateVariants}
+      className="text-center py-16"
+    >
+      <div className="empty-wolf-float inline-block mb-6">
+        <img
+          src="https://f.top4top.io/p_37210bgwm1.jpg"
+          alt="استضافة الذئب"
+          className="w-24 h-24 mx-auto rounded-full opacity-40"
+        />
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-2">
+        {hasFilters ? 'لا توجد نتائج' : 'لا توجد عمليات نشر'}
+      </h3>
+      <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-4">
+        {hasFilters
+          ? 'لا توجد عمليات نشر تطابق الفلاتر المحددة. جرب تغيير الفلاتر أو مسحها.'
+          : 'لم يتم تسجيل أي عمليات نشر بعد. ستظهر هنا جميع أحداث النشر تلقائياً.'}
+      </p>
+      {hasFilters && (
+        <p className="text-xs text-primary/70">
+          جرب تعديل فلاتر البحث
+        </p>
+      )}
     </motion.div>
   );
 }
@@ -447,7 +647,6 @@ export function DeploymentHistory() {
   const filteredDeployments = useMemo(() => {
     let filtered = [...allDeployments];
 
-    // Date range filter
     const now = new Date();
     let cutoffDate: Date;
     switch (dateRange) {
@@ -463,12 +662,10 @@ export function DeploymentHistory() {
     }
     filtered = filtered.filter((d) => d.timestamp >= cutoffDate);
 
-    // Bot filter
     if (selectedBot !== 'all') {
       filtered = filtered.filter((d) => d.botName === selectedBot);
     }
 
-    // Status filter
     if (selectedStatus !== 'all') {
       filtered = filtered.filter((d) => d.status === selectedStatus);
     }
@@ -481,14 +678,15 @@ export function DeploymentHistory() {
     const total = filteredDeployments.length;
     const successCount = filteredDeployments.filter((d) => d.status === 'success').length;
     const failedCount = filteredDeployments.filter((d) => d.status === 'failed').length;
-    const successRate = total > 0 ? ((successCount / total) * 100).toFixed(1) : '0.0';
-    const avgDeployTime = filteredDeployments
-      .filter((d) => d.duration > 0)
-      .reduce((sum, d) => sum + d.duration, 0) / Math.max(filteredDeployments.filter((d) => d.duration > 0).length, 1);
+    const successRate = total > 0 ? ((successCount / total) * 100) : 0;
+    const completedDeployments = filteredDeployments.filter((d) => d.duration > 0);
+    const avgDeployTime = completedDeployments.length > 0
+      ? completedDeployments.reduce((sum, d) => sum + d.duration, 0) / completedDeployments.length
+      : 0;
 
     return {
       total,
-      successRate,
+      successRate: Number(successRate.toFixed(1)),
       avgDeployTime: Math.round(avgDeployTime),
       failedCount,
     };
@@ -497,6 +695,7 @@ export function DeploymentHistory() {
   // Visible deployments
   const visibleDeployments = filteredDeployments.slice(0, visibleCount);
   const hasMore = visibleCount < filteredDeployments.length;
+  const hasActiveFilters = selectedBot !== 'all' || selectedStatus !== 'all';
 
   const dateRangeLabels: Record<DateRange, string> = {
     '7days': 'آخر 7 أيام',
@@ -532,110 +731,122 @@ export function DeploymentHistory() {
         </div>
       </motion.div>
 
-      {/* ─── Filter Bar ─── */}
-      <motion.div variants={itemVariants}>
-        <Card className="bg-card border-border rounded-xl">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              {/* Bot Selector */}
-              <div className="flex-1">
-                <label className="text-[11px] text-muted-foreground mb-1.5 block">البوت</label>
-                <Select value={selectedBot} onValueChange={setSelectedBot}>
-                  <SelectTrigger className="w-full bg-muted/30 border-border text-sm">
-                    <SelectValue placeholder="جميع البوتات" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع البوتات</SelectItem>
-                    {botNames.map((name) => (
-                      <SelectItem key={name} value={name}>{name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* ─── Filter Pills (Glassmorphism) ─── */}
+      <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2">
+        <Filter className="size-4 text-muted-foreground shrink-0" />
+        {filterStatuses.map((status) => (
+          <motion.button
+            key={status.value}
+            variants={filterPillVariants}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setSelectedStatus(status.value)}
+            className={`filter-pill-glass rounded-full px-3.5 py-1.5 text-xs font-medium cursor-pointer ${
+              selectedStatus === status.value ? 'active' : ''
+            }`}
+          >
+            {status.value === 'success' && (
+              <span className="inline-block size-1.5 rounded-full bg-emerald-400 ml-1.5" />
+            )}
+            {status.value === 'failed' && (
+              <span className="inline-block size-1.5 rounded-full bg-red-400 ml-1.5" />
+            )}
+            {status.value === 'in_progress' && (
+              <span className="inline-block size-1.5 rounded-full bg-sky-400 ml-1.5 animate-pulse" />
+            )}
+            {status.value === 'rolled_back' && (
+              <span className="inline-block size-1.5 rounded-full bg-violet-400 ml-1.5" />
+            )}
+            {status.label}
+            {status.value !== 'all' && (
+              <span className="text-muted-foreground mr-1">
+                ({status.value === 'all'
+                  ? filteredDeployments.length
+                  : filteredDeployments.filter((d) => status.value === 'all' || d.status === status.value).length})
+              </span>
+            )}
+          </motion.button>
+        ))}
 
-              {/* Status Filter */}
-              <div className="sm:w-44">
-                <label className="text-[11px] text-muted-foreground mb-1.5 block">الحالة</label>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="w-full bg-muted/30 border-border text-sm">
-                    <SelectValue placeholder="جميع الحالات" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع الحالات</SelectItem>
-                    <SelectItem value="success">ناجح</SelectItem>
-                    <SelectItem value="failed">فشل</SelectItem>
-                    <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-                    <SelectItem value="rolled_back">تم التراجع</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        {/* Bot Selector (compact) */}
+        <div className="mr-auto sm:mr-0">
+          <Select value={selectedBot} onValueChange={setSelectedBot}>
+            <SelectTrigger className="w-auto min-w-[140px] h-8 text-xs bg-muted/30 border-border filter-pill-glass">
+              <SelectValue placeholder="جميع البوتات" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع البوتات</SelectItem>
+              {mockBotNames.map((name) => (
+                <SelectItem key={name} value={name}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-              {/* Date Range */}
-              <div className="sm:w-44">
-                <label className="text-[11px] text-muted-foreground mb-1.5 block">الفترة الزمنية</label>
-                <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
-                  <SelectTrigger className="w-full bg-muted/30 border-border text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7days">آخر 7 أيام</SelectItem>
-                    <SelectItem value="30days">آخر 30 يوم</SelectItem>
-                    <SelectItem value="90days">آخر 90 يوم</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Date Range (compact) */}
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
+          <SelectTrigger className="w-auto min-w-[130px] h-8 text-xs bg-muted/30 border-border filter-pill-glass">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="7days">آخر 7 أيام</SelectItem>
+            <SelectItem value="30days">آخر 30 يوم</SelectItem>
+            <SelectItem value="90days">آخر 90 يوم</SelectItem>
+          </SelectContent>
+        </Select>
       </motion.div>
 
-      {/* ─── Stats Cards ─── */}
+      {/* ─── Stats Cards with Animated Counters ─── */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="إجمالي عمليات النشر"
-          value={stats.total}
+          targetValue={stats.total}
           change="14.2%"
           changeDirection="up"
           icon={Rocket}
           iconBgClass="bg-primary/15"
           iconColorClass="text-primary"
+          delay={0}
         />
         <StatsCard
           title="معدل النجاح"
-          value={stats.successRate}
-          unit="%"
+          targetValue={stats.successRate}
+          suffix="%"
           change="2.1%"
           changeDirection="up"
           icon={CheckCircle2}
           iconBgClass="bg-emerald-500/15"
           iconColorClass="text-emerald-400"
-          badgeText={Number(stats.successRate) >= 90 ? 'ممتاز' : Number(stats.successRate) >= 75 ? 'جيد' : 'يحتاج تحسين'}
+          badgeText={stats.successRate >= 90 ? 'ممتاز' : stats.successRate >= 75 ? 'جيد' : 'يحتاج تحسين'}
           badgeClass={
-            Number(stats.successRate) >= 90
+            stats.successRate >= 90
               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-              : Number(stats.successRate) >= 75
-                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+              : stats.successRate >= 75
+                ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
                 : 'bg-red-500/10 text-red-400 border-red-500/20'
           }
+          delay={1}
         />
         <StatsCard
           title="متوسط وقت النشر"
-          value={stats.avgDeployTime}
-          unit="ثانية"
+          targetValue={stats.avgDeployTime}
+          suffix="ثانية"
           change="8.5%"
           changeDirection="down"
           icon={Clock}
-          iconBgClass="bg-blue-500/15"
-          iconColorClass="text-blue-400"
+          iconBgClass="bg-sky-500/15"
+          iconColorClass="text-sky-400"
+          delay={2}
         />
         <StatsCard
           title="عمليات النشر الفاشلة"
-          value={stats.failedCount}
+          targetValue={stats.failedCount}
           change="5.3%"
           changeDirection="down"
           icon={XCircle}
           iconBgClass="bg-red-500/15"
           iconColorClass="text-red-400"
+          delay={3}
         />
       </motion.div>
 
@@ -650,11 +861,11 @@ export function DeploymentHistory() {
               </CardTitle>
               <div className="flex items-center gap-3 text-[10px]">
                 <span className="flex items-center gap-1.5">
-                  <span className="size-2.5 rounded-sm bg-emerald-400" />
+                  <span className="size-2.5 rounded-sm" style={{ background: 'oklch(0.70 0.20 160)' }} />
                   <span className="text-muted-foreground">ناجح</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="size-2.5 rounded-sm bg-red-400" />
+                  <span className="size-2.5 rounded-sm" style={{ background: 'oklch(0.70 0.22 25)' }} />
                   <span className="text-muted-foreground">فاشل</span>
                 </span>
               </div>
@@ -679,12 +890,12 @@ export function DeploymentHistory() {
                   <Tooltip content={<ChartTooltip />} />
                   <Bar dataKey="success" name="ناجح" stackId="a" radius={[0, 0, 4, 4]} maxBarSize={40}>
                     {chartData.map((_entry, index) => (
-                      <Cell key={`success-${index}`} fill="#34d399" />
+                      <Cell key={`success-${index}`} fill="oklch(0.70 0.20 160)" />
                     ))}
                   </Bar>
                   <Bar dataKey="failed" name="فاشل" stackId="a" radius={[4, 4, 0, 0]} maxBarSize={40}>
                     {chartData.map((_entry, index) => (
-                      <Cell key={`failed-${index}`} fill="#ef4444" />
+                      <Cell key={`failed-${index}`} fill="oklch(0.70 0.22 25)" />
                     ))}
                   </Bar>
                 </BarChart>
@@ -715,19 +926,19 @@ export function DeploymentHistory() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
+                key={`${selectedBot}-${selectedStatus}-${dateRange}`}
               >
                 {visibleDeployments.length > 0 ? (
                   visibleDeployments.map((event, index) => (
-                    <TimelineEntry key={event.id} event={event} index={index} />
+                    <TimelineEntry
+                      key={event.id}
+                      event={event}
+                      index={index}
+                      isLast={index === visibleDeployments.length - 1}
+                    />
                   ))
                 ) : (
-                  <motion.div
-                    variants={itemVariants}
-                    className="text-center py-12"
-                  >
-                    <History className="size-10 text-muted-foreground/30 mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">لا توجد عمليات نشر مطابقة للفلاتر المحددة</p>
-                  </motion.div>
+                  <EmptyState hasFilters={hasActiveFilters} />
                 )}
               </motion.div>
             </div>

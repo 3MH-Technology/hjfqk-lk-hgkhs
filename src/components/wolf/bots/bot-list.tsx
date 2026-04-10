@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Play,
   Square,
@@ -21,6 +21,8 @@ import {
   Copy,
   Check,
   Eye,
+  Download,
+  Upload,
 } from 'lucide-react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { useAppStore } from '@/store/app-store';
@@ -441,6 +443,8 @@ export function BotList() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -533,6 +537,52 @@ export function BotList() {
     }
   };
 
+  const handleExportBot = async (botId: string, botName: string) => {
+    try {
+      const res = await fetch(`/api/bots/${botId}/bot-export`, { credentials: 'include' });
+      if (!res.ok) throw new Error('فشل في التصدير');
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${botName.replace(/[^a-zA-Z0-9\u0600-\u06FF-_]/g, '_')}-export.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('تم تصدير البوت بنجاح');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ أثناء التصدير';
+      toast.error(message);
+    }
+  };
+
+  const handleImportBot = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/bots/bot-import', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'فشل في الاستيراد');
+      toast.success('تم استيراد البوت بنجاح');
+      fetchBots();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ أثناء الاستيراد';
+      toast.error(message);
+    } finally {
+      setImportLoading(false);
+      if (importInputRef.current) importInputRef.current.value = '';
+    }
+  };
+
   const handleViewBot = (botId: string) => {
     setSelectedBotId(botId);
     setCurrentPage('bot-detail');
@@ -581,6 +631,23 @@ export function BotList() {
             <Plus className="h-4 w-4" />
             إنشاء بوت جديد
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => importInputRef.current?.click()}
+            disabled={importLoading}
+            className="gap-2"
+          >
+            {importLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            <span className="hidden sm:inline">استيراد بوت</span>
+          </Button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportBot}
+            className="hidden"
+          />
         </div>
       </motion.div>
 
@@ -904,6 +971,14 @@ export function BotList() {
                               setSelectedBotId(bot.id);
                               setCurrentPage('logs');
                             }}
+                          />
+
+                          <ActionButton
+                            icon={<Download className="h-3.5 w-3.5" />}
+                            label="تصدير"
+                            tooltip="تصدير البوت"
+                            colorClass="text-blue-400 border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-300"
+                            onClick={() => handleExportBot(bot.id, bot.name)}
                           />
 
                           <Tooltip>

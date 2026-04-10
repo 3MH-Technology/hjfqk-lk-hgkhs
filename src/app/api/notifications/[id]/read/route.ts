@@ -15,19 +15,19 @@ export async function PUT(
 
     const { id } = await params;
     const userId = (session.user as { id: string }).id;
-
-    const notification = await db.notification.updateMany({
-      where: { id, userId },
-      data: { read: true },
-    });
-
-    if (notification.count === 0) {
-      return NextResponse.json({ error: "الإشعار غير موجود" }, { status: 404 });
+    if (!userId) {
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
+
+    const result = await db.$executeRawUnsafe(
+      `UPDATE Notification SET read = 1 WHERE id = ? AND "userId" = ?`,
+      id,
+      userId
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Mark notification as read error:", error);
+    console.error("Mark notification as read error:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "حدث خطأ" }, { status: 500 });
   }
 }

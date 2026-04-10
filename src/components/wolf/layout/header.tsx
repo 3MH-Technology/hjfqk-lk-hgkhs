@@ -18,6 +18,7 @@ const pageTitles: Record<Page, string> = {
   'bot-monitoring': 'مراقبة الأداء',
   files: 'مدير الملفات',
   logs: 'السجلات',
+  'realtime-logs': 'السجلات المباشرة',
   activity: 'مركز النشاط',
   settings: 'الإعدادات',
   help: 'إصلاح مشاكل',

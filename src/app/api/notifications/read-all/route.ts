@@ -11,15 +11,18 @@ export async function PUT() {
     }
 
     const userId = (session.user as { id: string }).id;
+    if (!userId) {
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+    }
 
-    await db.notification.updateMany({
-      where: { userId, read: false },
-      data: { read: true },
-    });
+    await db.$executeRawUnsafe(
+      `UPDATE Notification SET read = 1 WHERE "userId" = ? AND read = 0`,
+      userId
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Mark all notifications as read error:", error);
+    console.error("Mark all notifications as read error:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "حدث خطأ" }, { status: 500 });
   }
 }

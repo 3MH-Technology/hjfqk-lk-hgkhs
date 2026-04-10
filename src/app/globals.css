@@ -1342,3 +1342,152 @@ html {
 .light *:focus-visible {
   outline: 2px solid oklch(0.55 0.22 250 / 50%);
 }
+
+/* ═══════════════════════════════════════════════════════
+   DEPLOYMENT HISTORY — Enhanced Visual Effects
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Glowing Timeline Connector ─── */
+@keyframes timeline-glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+.timeline-line-glow {
+  background: linear-gradient(
+    to bottom,
+    oklch(0.60 0.20 250 / 10%),
+    oklch(0.60 0.20 250 / 40%),
+    oklch(0.60 0.20 250 / 60%),
+    oklch(0.60 0.20 250 / 40%),
+    oklch(0.60 0.20 250 / 10%)
+  );
+  animation: timeline-glow 4s ease-in-out infinite;
+}
+
+/* ─── Active Deployment Pulse Ring ─── */
+@keyframes deploy-pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.deploy-dot-active {
+  position: relative;
+}
+
+.deploy-dot-active::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: deploy-pulse-ring 1.5s ease-out infinite;
+}
+
+/* ─── Glassmorphism Filter Pill ─── */
+.filter-pill-glass {
+  background: oklch(0.11 0.008 260 / 50%);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid oklch(0.20 0.01 260 / 30%);
+  transition: all 0.25s ease;
+}
+
+.filter-pill-glass:hover {
+  background: oklch(0.15 0.01 260 / 60%);
+  border-color: oklch(0.60 0.20 250 / 30%);
+}
+
+.filter-pill-glass.active {
+  background: oklch(0.60 0.20 250 / 15%);
+  border-color: oklch(0.60 0.20 250 / 50%);
+  box-shadow: 0 0 16px oklch(0.60 0.20 250 / 15%);
+}
+
+/* ─── Timeline Entry Hover Glow ─── */
+@keyframes timeline-entry-glow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 20px oklch(0.60 0.20 250 / 8%); }
+}
+
+.timeline-entry-hover {
+  transition: all 0.3s ease;
+}
+
+.timeline-entry-hover:hover {
+  border-color: oklch(0.60 0.20 250 / 30%);
+  transform: scale(1.005);
+  box-shadow: 0 4px 24px oklch(0 0 0 / 20%), 0 0 0 1px oklch(0.60 0.20 250 / 15%);
+}
+
+/* ─── Animated Counter ─── */
+@keyframes counter-fade-in {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.counter-animated {
+  animation: counter-fade-in 0.6s ease-out forwards;
+}
+
+/* ─── Log Syntax Highlighting ─── */
+.log-line-info { color: oklch(0.75 0.15 200); }
+.log-line-warn { color: oklch(0.80 0.18 70); }
+.log-line-error { color: oklch(0.70 0.22 25); }
+.log-line-success { color: oklch(0.70 0.20 160); }
+.log-line-debug { color: oklch(0.55 0.01 260); }
+
+/* ─── Deployment Stats Card Gradient Border ─── */
+@keyframes stats-card-border-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.deploy-stats-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.deploy-stats-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    oklch(0.60 0.20 250 / 0%),
+    oklch(0.60 0.20 250 / 20%),
+    oklch(0.70 0.12 240 / 10%),
+    oklch(0.60 0.20 250 / 0%)
+  );
+  background-size: 300% 300%;
+  animation: stats-card-border-flow 6s ease-in-out infinite;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+.deploy-stats-card:hover::before {
+  background: linear-gradient(
+    135deg,
+    oklch(0.60 0.20 250 / 30%),
+    oklch(0.70 0.12 240 / 40%),
+    oklch(0.55 0.22 245 / 30%),
+    oklch(0.60 0.20 250 / 30%)
+  );
+  background-size: 300% 300%;
+  animation: stats-card-border-flow 3s ease-in-out infinite;
+}
+
+/* ─── Empty State Wolf Float ─── */
+@keyframes empty-wolf-float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-10px) scale(1.03); }
+}
+
+.empty-wolf-float {
+  animation: empty-wolf-float 4s ease-in-out infinite;
+}

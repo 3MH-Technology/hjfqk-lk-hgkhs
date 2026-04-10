@@ -8,6 +8,7 @@ import {
   Bot,
   FolderOpen,
   ScrollText,
+  Radio,
   Settings,
   Shield,
   LogOut,
@@ -86,6 +87,11 @@ const navItems: NavItem[] = [
     id: 'logs',
     label: 'السجلات',
     icon: <ScrollText className="size-5" />,
+  },
+  {
+    id: 'realtime-logs',
+    label: 'السجلات المباشرة',
+    icon: <Radio className="size-5" />,
   },
   {
     id: 'api-keys',

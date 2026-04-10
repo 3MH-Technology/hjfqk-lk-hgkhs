@@ -11,17 +11,34 @@ export async function GET() {
     }
 
     const userId = (session.user as { id: string }).id;
+    if (!userId) {
+      return NextResponse.json({ error: "معرف المستخدم غير موجود" }, { status: 401 });
+    }
 
-    const notifications = await db.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    });
+    const notifications = await db.$queryRawUnsafe(
+      `SELECT id, "userId", type, title, message, read, link, "createdAt" FROM Notification WHERE "userId" = ? ORDER BY "createdAt" DESC LIMIT 50`,
+      userId
+    ) as Array<{
+      id: string;
+      userId: string;
+      type: string;
+      title: string;
+      message: string;
+      read: number;
+      link: string | null;
+      createdAt: string;
+    }>;
 
-    return NextResponse.json(notifications);
+    const result = notifications.map(n => ({
+      ...n,
+      read: Number(n.read) === 1,
+    }));
+
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Get notifications error:", error);
-    return NextResponse.json({ error: "حدث خطأ" }, { status: 500 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Get notifications error:", errMsg);
+    return NextResponse.json([], { status: 200 });
   }
 }
 
@@ -33,27 +50,32 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = (session.user as { id: string }).id;
-    const body = await req.json();
+    if (!userId) {
+      return NextResponse.json({ error: "معرف المستخدم غير موجود" }, { status: 401 });
+    }
 
+    const body = await req.json();
     const { type, title, message, link, targetUserId } = body;
 
-    // Allow admins to create notifications for other users
     const isAdmin = (session.user as { role: string }).role === "admin";
     const recipientId = isAdmin && targetUserId ? targetUserId : userId;
 
-    const notification = await db.notification.create({
-      data: {
-        userId: recipientId,
-        type: type || "info",
-        title: title || "إشعار جديد",
-        message: message || "",
-        link: link || null,
-      },
-    });
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-    return NextResponse.json(notification, { status: 201 });
+    await db.$executeRawUnsafe(
+      `INSERT INTO Notification (id, "userId", type, title, message, read, link, "createdAt") VALUES (?, ?, ?, ?, ?, 0, ?, datetime('now'))`,
+      id,
+      recipientId,
+      type || "info",
+      title || "إشعار جديد",
+      message || "",
+      link || null
+    );
+
+    return NextResponse.json({ success: true, id }, { status: 201 });
   } catch (error) {
-    console.error("Create notification error:", error);
-    return NextResponse.json({ error: "حدث خطأ" }, { status: 500 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Create notification error:", errMsg);
+    return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }
