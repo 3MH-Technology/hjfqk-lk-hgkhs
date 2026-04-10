@@ -95,11 +95,11 @@ const typeConfig: Record<
   },
   warning: {
     label: 'تحذير',
-    iconBg: 'bg-amber-500/15',
-    iconColor: 'text-amber-400',
-    barColor: 'bg-amber-400',
-    badgeClass: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
-    glowColor: 'shadow-amber-500/10',
+    iconBg: 'bg-blue-500/15',
+    iconColor: 'text-blue-400',
+    barColor: 'bg-blue-400',
+    badgeClass: 'bg-blue-500/15 text-blue-400 border-blue-500/25',
+    glowColor: 'shadow-blue-500/10',
   },
   error: {
     label: 'خطأ',
@@ -121,179 +121,9 @@ const filterTabs: { value: FilterTab; label: string; icon: typeof Bell }[] = [
   { value: 'error', label: 'خطأ', icon: XCircle },
 ];
 
-/* ─── Mock Data ─── */
+// Activity items loaded from API
 
-const now = new Date();
-
-function minutesAgo(m: number): Date {
-  return new Date(now.getTime() - m * 60 * 1000);
-}
-
-function hoursAgo(h: number): Date {
-  return new Date(now.getTime() - h * 60 * 60 * 1000);
-}
-
-function daysAgo(d: number): Date {
-  return new Date(now.getTime() - d * 24 * 60 * 60 * 1000);
-}
-
-const initialActivities: ActivityItem[] = [
-  {
-    id: 'act-001',
-    type: 'success',
-    icon: CheckCircle2,
-    title: 'تم إنشاء البوت بنجاح',
-    description: 'تم إنشاء بوت "مساعد الذئب" بنجاح باستخدام لغة بايثون. البوت جاهز لرفع الملفات والبدء.',
-    timestamp: minutesAgo(3),
-    read: false,
-    botName: 'مساعد الذئب',
-  },
-  {
-    id: 'act-002',
-    type: 'success',
-    icon: Play,
-    title: 'بدأ تشغيل البوت',
-    description: 'تم بدء تشغيل بوت "حارس المجموعة" بنجاح على المنفذ 8080. البوت يعمل بشكل طبيعي.',
-    timestamp: minutesAgo(12),
-    read: false,
-    botName: 'حارس المجموعة',
-  },
-  {
-    id: 'act-003',
-    type: 'error',
-    icon: XCircle,
-    title: 'خطأ في تشغيل البوت',
-    description: 'فشل تشغيل بوت "بوت الدفع" بسبب خطأ في ملف التكوين. تحقق من متغيرات البيئة.',
-    timestamp: minutesAgo(25),
-    read: false,
-    botName: 'بوت الدفع',
-  },
-  {
-    id: 'act-004',
-    type: 'warning',
-    icon: AlertTriangle,
-    title: 'استخدام عالي للذاكرة',
-    description: 'بوت "محول الصوت" يستخدم 92% من الذاكرة المخصصة. يُنصح بزيادة حد الذاكرة أو تحسين الكود.',
-    timestamp: minutesAgo(38),
-    read: false,
-    botName: 'محول الصوت',
-  },
-  {
-    id: 'act-005',
-    type: 'success',
-    icon: Upload,
-    title: 'تم رفع ملف جديد',
-    description: 'تم رفع ملف "main.py" إلى بوت "مساعد الذئب". حجم الملف: 24.5 كيلوبايت.',
-    timestamp: hoursAgo(1),
-    read: false,
-    botName: 'مساعد الذئب',
-  },
-  {
-    id: 'act-006',
-    type: 'info',
-    icon: RotateCcw,
-    title: 'تم إعادة تشغيل البوت',
-    description: 'تم إعادة تشغيل بوت "بوت الأوامر" تلقائياً بعد تحديث الملفات.',
-    timestamp: hoursAgo(1.5),
-    read: true,
-    botName: 'بوت الأوامر',
-  },
-  {
-    id: 'act-007',
-    type: 'error',
-    icon: WifiOff,
-    title: 'انقطاع الاتصال',
-    description: 'فقدان الاتصال بخادم تليغرام مؤقتاً. جارٍ محاولة إعادة الاتصال تلقائياً.',
-    timestamp: hoursAgo(2),
-    read: true,
-    botName: 'حارس المجموعة',
-  },
-  {
-    id: 'act-008',
-    type: 'warning',
-    icon: Shield,
-    title: 'تحذير أمني',
-    description: 'تم اكتشاف محاولات وصول متكررة من عنوان IP غير معروف. تم حظره تلقائياً.',
-    timestamp: hoursAgo(3),
-    read: true,
-  },
-  {
-    id: 'act-009',
-    type: 'success',
-    icon: FileText,
-    title: 'تم تحديث متغيرات البيئة',
-    description: 'تم تحديث 5 متغيرات بيئة في بوت "بوت الدفع". التغييرات ستنطبق بعد إعادة التشغيل.',
-    timestamp: hoursAgo(4),
-    read: true,
-    botName: 'بوت الدفع',
-  },
-  {
-    id: 'act-010',
-    type: 'info',
-    icon: Cpu,
-    title: 'تحديث النظام',
-    description: 'تم تحديث المنصة إلى الإصدار 2.4.1. يتضمن التحديث تحسينات في الأداء وإصلاحات أمنية.',
-    timestamp: hoursAgo(6),
-    read: true,
-  },
-  {
-    id: 'act-011',
-    type: 'error',
-    icon: Trash2,
-    title: 'تم حذف البوت',
-    description: 'تم حذف بوت "بوت تجريبي قديم" وجميع ملفاته وسجلاته نهائياً.',
-    timestamp: daysAgo(1),
-    read: true,
-    botName: 'بوت تجريبي قديم',
-  },
-  {
-    id: 'act-012',
-    type: 'success',
-    icon: Square,
-    title: 'تم إيقاف البوت بنجاح',
-    description: 'تم إيقاف بوت "بوت الإشعارات" يدوياً. يمكنك تشغيله في أي وقت.',
-    timestamp: daysAgo(1),
-    read: true,
-    botName: 'بوت الإشعارات',
-  },
-  {
-    id: 'act-013',
-    type: 'info',
-    icon: UserPlus,
-    title: 'تم تسجيل مستخدم جديد',
-    description: 'انضم مستخدم جديد إلى المنصة. إجمالي المستخدمين النشطين: 47.',
-    timestamp: daysAgo(1.5),
-    read: true,
-  },
-  {
-    id: 'act-014',
-    type: 'warning',
-    icon: Clock,
-    title: 'تنبيه صلاحية الشهادة',
-    description: 'شهادة SSL ستنتهي خلال 7 أيام. يُنصح بتجديدها لتجنب انقطاع الخدمة.',
-    timestamp: daysAgo(2),
-    read: true,
-  },
-  {
-    id: 'act-015',
-    type: 'info',
-    icon: Settings,
-    title: 'تغيير إعدادات الحساب',
-    description: 'تم تحديث إعدادات الحساب بنجاح. تم تفعيل المصادقة الثنائية.',
-    timestamp: daysAgo(2.5),
-    read: true,
-  },
-  {
-    id: 'act-016',
-    type: 'error',
-    icon: Zap,
-    title: 'تجاوز حد الموارد',
-    description: 'بوت "محلل البيانات" تجاوز حد المعالج المخصص. تم تقييده مؤقتاً لحماية النظام.',
-    timestamp: daysAgo(3),
-    read: true,
-    botName: 'محلل البيانات',
-  },
-];
+const initialActivities: ActivityItem[] = [];
 
 /* ─── Animation Variants ─── */
 
@@ -331,7 +161,8 @@ const headerVariants = {
 /* ─── Relative Time Formatter ─── */
 
 function formatRelativeTime(date: Date): string {
-  const diffMs = now.getTime() - date.getTime();
+  if (!date) return "";
+  const diffMs = Date.now() - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
   const diffHours = Math.floor(diffMin / 60);
@@ -786,7 +617,7 @@ export default function ActivityCenter() {
                 نجاح
               </span>
               <span className="flex items-center gap-1 text-muted-foreground/50">
-                <div className="size-2 rounded-full bg-amber-400" />
+                <div className="size-2 rounded-full bg-blue-400" />
                 تحذير
               </span>
               <span className="flex items-center gap-1 text-muted-foreground/50">

@@ -98,10 +98,10 @@ const healthStatusConfig: Record<HealthStatus, {
   },
   warning: {
     label: 'تحذير',
-    color: 'text-amber-400',
-    bgClass: 'bg-amber-500/15',
-    borderClass: 'border-amber-500/30',
-    dotClass: 'bg-amber-400 pulse-dot',
+    color: 'text-blue-400',
+    bgClass: 'bg-blue-500/15',
+    borderClass: 'border-blue-500/30',
+    dotClass: 'bg-blue-400 pulse-dot',
     icon: AlertTriangle,
   },
   critical: {
@@ -156,126 +156,36 @@ const eventConfig: Record<string, {
   },
   warning: {
     icon: AlertTriangle,
-    color: 'text-amber-400',
-    bgClass: 'bg-amber-500/15',
+    color: 'text-blue-400',
+    bgClass: 'bg-blue-500/15',
     label: 'تحذير',
   },
 };
 
-/* ─── Deterministic Pseudo-Random Generator ─── */
+/* ─── Default Metrics (no data available) ─── */
 
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
-}
-
-function seededRandom(seed: number, index: number): number {
-  let s = seed + index * 7919;
-  s = ((s >> 16) ^ s) * 0x45d9f3b;
-  s = ((s >> 16) ^ s) * 0x45d9f3b;
-  s = (s >> 16) ^ s;
-  return (Math.abs(s) % 10000) / 10000; // 0.0 to 1.0
-}
-
-/* ─── Generate Simulated Metrics ─── */
-
-function generateMetrics(botId: string, botStatus: string): HealthMetrics {
-  const hash = hashString(botId);
-  const baseCpu = Math.floor(seededRandom(hash, 1) * 60) + 8;
-  const baseMemory = Math.floor(seededRandom(hash, 2) * 55) + 15;
-  const uptime = Math.floor(seededRandom(hash, 3) * 30) + 70;
-  const requestCount = Math.floor(seededRandom(hash, 4) * 50000) + 1200;
-  const responseTime = Math.floor(seededRandom(hash, 5) * 450) + 50;
-  const errorRate = Math.floor(seededRandom(hash, 6) * 8) * 10;
-
-  let healthStatus: HealthStatus = 'healthy';
-  if (botStatus === 'stopped' || botStatus === 'error') {
-    healthStatus = 'critical';
-  } else if (baseCpu > 75 || baseMemory > 80 || errorRate > 50) {
-    healthStatus = 'critical';
-  } else if (baseCpu > 50 || baseMemory > 60 || errorRate > 20) {
-    healthStatus = 'warning';
-  }
-
+function getDefaultMetrics(status: string): HealthMetrics {
   return {
-    cpu: botStatus === 'running' ? baseCpu : 0,
-    memory: botStatus === 'running' ? baseMemory : 0,
-    uptime: botStatus === 'running' ? uptime : 0,
-    requestCount,
-    responseTime: botStatus === 'running' ? responseTime : 0,
-    errorRate: botStatus === 'running' ? errorRate : 100,
-    healthStatus,
+    cpu: 0,
+    memory: 0,
+    uptime: 0,
+    requestCount: 0,
+    responseTime: 0,
+    errorRate: 0,
+    healthStatus: status === 'running' ? 'unknown' : status === 'stopped' ? 'critical' : 'unknown',
   };
 }
 
-/* ─── Generate Simulated Events ─── */
-
-function generateEvents(botId: string, botName: string): BotEvent[] {
-  const hash = hashString(botId);
-  const eventTemplates = [
-    { type: 'info' as const, message: `تم تشغيل البوت "${botName}" بنجاح` },
-    { type: 'deploy' as const, message: 'تم نشر إصدار جديد من الكود' },
-    { type: 'info' as const, message: 'التحقق من صحة الاتصال — ناجح' },
-    { type: 'warning' as const, message: 'استخدام الذاكرة يقترب من الحد الأقصى' },
-    { type: 'info' as const, message: 'تم معالجة 1,250 طلباً بنجاح' },
-    { type: 'restart' as const, message: 'إعادة تشغيل تلقائية بسبب تحديث' },
-    { type: 'error' as const, message: 'انتهت مهلة الاتصال بقاعدة البيانات' },
-    { type: 'info' as const, message: 'تم تحديث متغيرات البيئة' },
-    { type: 'warning' as const, message: 'ارتفاع مؤقت في وقت الاستجابة' },
-    { type: 'deploy' as const, message: 'تم استعادة النسخة الاحتياطية السابقة' },
-    { type: 'error' as const, message: 'فشل في إرسال إشعار تيليجرام' },
-    { type: 'info' as const, message: 'بدء جمع البيانات والإحصائيات' },
-  ];
-
-  const now = Date.now();
-  const count = 8 + (hash % 4);
-  const selectedIndices: number[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const idx = Math.floor(seededRandom(hash, 100 + i) * eventTemplates.length);
-    selectedIndices.push(idx);
-  }
-
-  return selectedIndices.map((idx, i) => {
-    const minutesAgo = i === 0 ? Math.floor(seededRandom(hash, 200) * 10) + 2 : Math.floor(seededRandom(hash, 200 + i) * 360) + 5;
-    return {
-      id: `event-${botId}-${i}`,
-      type: eventTemplates[idx].type,
-      message: eventTemplates[idx].message,
-      timestamp: new Date(now - minutesAgo * 60 * 1000),
-    };
-  });
-}
-
-/* ─── Generate Simulated Environment Info ─── */
-
-function generateEnvironment(botId: string): EnvironmentInfo {
-  const hash = hashString(botId);
-  const nodeVersions = ['20.11.0', '20.10.0', '18.19.0', '22.1.0'];
-  const nodeIdx = hash % nodeVersions.length;
-  const totalMemMB = 4096 + (hash % 4096);
-  const usedMemMB = Math.floor(totalMemMB * (seededRandom(hash, 300) * 0.4 + 0.3));
-  const cores = [2, 4, 6, 8][hash % 4];
-  const platforms = ['linux/x86_64', 'linux/arm64'];
-  const platIdx = hash % platforms.length;
-  const uptimeHours = Math.floor(seededRandom(hash, 400) * 720) + 24;
-  const days = Math.floor(uptimeHours / 24);
-  const hours = uptimeHours % 24;
-
+function getDefaultEnvironment(): EnvironmentInfo {
   return {
-    nodeVersion: nodeVersions[nodeIdx],
-    dockerStatus: seededRandom(hash, 301) > 0.1 ? 'نشط' : 'متوقف',
-    totalMemory: `${(totalMemMB / 1024).toFixed(1)} GB`,
-    usedMemory: `${(usedMemMB / 1024).toFixed(1)} GB`,
-    cpuCores: cores,
-    platform: platforms[platIdx],
-    uptime: `${days} يوم ${hours} ساعة`,
-    containerRuntime: 'Docker 24.0.7',
+    nodeVersion: '--',
+    dockerStatus: '--',
+    totalMemory: '--',
+    usedMemory: '--',
+    cpuCores: 0,
+    platform: '--',
+    uptime: '--',
+    containerRuntime: '--',
   };
 }
 
@@ -297,20 +207,20 @@ function ResourceBarChart({ bars, maxValue, label }: { bars: { label: string; va
             <div key={i} className="group">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-medium text-foreground/80">{bar.label}</span>
-                <span className={`text-xs font-mono tabular-nums ${isCritical ? 'text-red-400' : isHigh ? 'text-amber-400' : 'text-emerald-400'}`}>
+                <span className={`text-xs font-mono tabular-nums ${isCritical ? 'text-red-400' : isHigh ? 'text-blue-400' : 'text-emerald-400'}`}>
                   {bar.value}%
                 </span>
               </div>
               <div className="h-2.5 rounded-full bg-muted/60 overflow-hidden relative">
                 <motion.div
-                  className={`h-full rounded-full ${isCritical ? 'bg-gradient-to-l from-red-500 to-red-400' : isHigh ? 'bg-gradient-to-l from-amber-500 to-amber-400' : 'bg-gradient-to-l from-emerald-500 to-emerald-400'}`}
+                  className={`h-full rounded-full ${isCritical ? 'bg-gradient-to-l from-red-500 to-red-400' : isHigh ? 'bg-gradient-to-l from-blue-500 to-blue-400' : 'bg-gradient-to-l from-emerald-500 to-emerald-400'}`}
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
                   transition={{ duration: 0.8, delay: i * 0.15, ease: 'easeOut' }}
                 />
                 {/* Threshold marker */}
                 <div
-                  className="absolute top-0 bottom-0 w-px bg-amber-400/50"
+                  className="absolute top-0 bottom-0 w-px bg-blue-400/50"
                   style={{ right: `${75}%` }}
                 />
               </div>
@@ -369,8 +279,8 @@ const itemVariants = {
 function UptimeDisplay({ uptime }: { uptime: number }) {
   const isGood = uptime >= 95;
   const isWarning = uptime >= 85 && uptime < 95;
-  const colorClass = isGood ? 'text-emerald-400' : isWarning ? 'text-amber-400' : 'text-red-400';
-  const barColorClass = isGood ? '[&>div]:bg-emerald-500' : isWarning ? '[&>div]:bg-amber-500' : '[&>div]:bg-red-500';
+  const colorClass = isGood ? 'text-emerald-400' : isWarning ? 'text-blue-400' : 'text-red-400';
+  const barColorClass = isGood ? '[&>div]:bg-emerald-500' : isWarning ? '[&>div]:bg-blue-500' : '[&>div]:bg-red-500';
 
   return (
     <div className="space-y-2">
@@ -509,9 +419,9 @@ export default function BotMonitoring() {
       if (res.ok) {
         const data = await res.json();
         setBot(data);
-        setMetrics(generateMetrics(data.id, data.status));
-        setEvents(generateEvents(data.id, data.name));
-        setEnvironment(generateEnvironment(data.id));
+        setMetrics(getDefaultMetrics(data.status));
+        setEvents([]);
+        setEnvironment(getDefaultEnvironment());
       }
     } catch {
       // silent fail for monitoring
@@ -524,51 +434,18 @@ export default function BotMonitoring() {
     fetchBotData();
   }, [fetchBotData, refreshKey]);
 
-  // Simulated live update interval
-  useEffect(() => {
-    if (!bot || bot.status !== 'running') return;
-    const interval = setInterval(() => {
-      setMetrics((prev) => {
-        if (!prev) return prev;
-        const cpuDelta = (Math.random() - 0.5) * 6;
-        const memDelta = (Math.random() - 0.5) * 4;
-        const newCpu = Math.max(2, Math.min(98, prev.cpu + cpuDelta));
-        const newMem = Math.max(5, Math.min(97, prev.memory + memDelta));
-        const rtDelta = (Math.random() - 0.5) * 30;
-        const newRt = Math.max(20, Math.min(900, prev.responseTime + rtDelta));
+  // No live update interval — real-time data will come from WebSocket when implemented
 
-        let newHealth: HealthStatus = 'healthy';
-        if (newCpu > 75 || newMem > 80) newHealth = 'critical';
-        else if (newCpu > 50 || newMem > 60) newHealth = 'warning';
-
-        return {
-          ...prev,
-          cpu: Math.round(newCpu),
-          memory: Math.round(newMem),
-          responseTime: Math.round(newRt),
-          healthStatus: newHealth,
-        };
-      });
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [bot]);
-
-  // Generate CPU history bars
+  // CPU and memory history (empty when no real data)
   const cpuHistory = useMemo(() => {
-    if (!metrics) return [];
-    const hash = bot ? hashString(bot.id) : 42;
-    return Array.from({ length: 20 }, (_, i) =>
-      Math.max(5, Math.floor(metrics.cpu + (seededRandom(hash, 500 + i) - 0.5) * 30))
-    );
-  }, [metrics, bot]);
+    if (!metrics || metrics.cpu === 0) return new Array(20).fill(0);
+    return new Array(20).fill(metrics.cpu);
+  }, [metrics]);
 
   const memoryHistory = useMemo(() => {
-    if (!metrics) return [];
-    const hash = bot ? hashString(bot.id) : 42;
-    return Array.from({ length: 20 }, (_, i) =>
-      Math.max(5, Math.floor(metrics.memory + (seededRandom(hash, 600 + i) - 0.5) * 25))
-    );
-  }, [metrics, bot]);
+    if (!metrics || metrics.memory === 0) return new Array(20).fill(0);
+    return new Array(20).fill(metrics.memory);
+  }, [metrics]);
 
   const handleRefresh = () => {
     setRefreshKey((k) => k + 1);
@@ -716,9 +593,9 @@ export default function BotMonitoring() {
               {/* Quick Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-auto">
                 {[
-                  { icon: Clock, label: 'وقت التشغيل', value: `${metrics.uptime.toFixed(1)}%`, color: metrics.uptime >= 95 ? 'text-emerald-400' : 'text-amber-400' },
-                  { icon: Zap, label: 'وقت الاستجابة', value: `${metrics.responseTime}ms`, color: metrics.responseTime < 200 ? 'text-emerald-400' : metrics.responseTime < 400 ? 'text-amber-400' : 'text-red-400' },
-                  { icon: Wifi, label: 'معدل الخطأ', value: `${metrics.errorRate}%`, color: metrics.errorRate < 10 ? 'text-emerald-400' : metrics.errorRate < 30 ? 'text-amber-400' : 'text-red-400' },
+                  { icon: Clock, label: 'وقت التشغيل', value: `${metrics.uptime.toFixed(1)}%`, color: metrics.uptime >= 95 ? 'text-emerald-400' : 'text-blue-400' },
+                  { icon: Zap, label: 'وقت الاستجابة', value: `${metrics.responseTime}ms`, color: metrics.responseTime < 200 ? 'text-emerald-400' : metrics.responseTime < 400 ? 'text-blue-400' : 'text-red-400' },
+                  { icon: Wifi, label: 'معدل الخطأ', value: `${metrics.errorRate}%`, color: metrics.errorRate < 10 ? 'text-emerald-400' : metrics.errorRate < 30 ? 'text-blue-400' : 'text-red-400' },
                   { icon: Shield, label: 'الطلبات', value: metrics.requestCount.toLocaleString('ar-EG'), color: 'text-primary' },
                 ].map((stat) => {
                   const StatIcon = stat.icon;
@@ -764,8 +641,8 @@ export default function BotMonitoring() {
           value={metrics.responseTime}
           unit="ms"
           subValue={metrics.responseTime < 200 ? 'أداء ممتاز' : metrics.responseTime < 400 ? 'أداء جيد' : 'يحتاج تحسين'}
-          iconBgClass="bg-amber-500/15"
-          iconColorClass="text-amber-400"
+          iconBgClass="bg-blue-500/15"
+          iconColorClass="text-blue-400"
           trend={metrics.responseTime < 200 ? 'stable' : metrics.responseTime < 400 ? 'up' : 'up'}
         />
         <MetricCard
@@ -856,26 +733,26 @@ export default function BotMonitoring() {
                     {/* Response Time Details */}
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <Timer className="size-3.5 text-amber-400" />
+                        <Timer className="size-3.5 text-blue-400" />
                         <span className="text-xs font-medium text-muted-foreground">تفاصيل الاستجابة</span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-3">
                         <div className="bg-muted/30 rounded-lg p-3 text-center">
                           <p className="text-lg font-bold text-emerald-400 tabular-nums">
-                            {Math.max(20, metrics.responseTime - Math.floor(Math.random() * 100 + 50))}ms
+                            {metrics.responseTime > 0 ? `${metrics.responseTime}ms` : '--'}
                           </p>
                           <p className="text-[10px] text-muted-foreground">P50</p>
                         </div>
                         <div className="bg-muted/30 rounded-lg p-3 text-center">
-                          <p className="text-lg font-bold text-amber-400 tabular-nums">
-                            {metrics.responseTime}ms
+                          <p className="text-lg font-bold text-blue-400 tabular-nums">
+                            {metrics.responseTime > 0 ? `${metrics.responseTime}ms` : '--'}
                           </p>
                           <p className="text-[10px] text-muted-foreground">P95</p>
                         </div>
                         <div className="bg-muted/30 rounded-lg p-3 text-center">
                           <p className="text-lg font-bold text-red-400 tabular-nums">
-                            {metrics.responseTime + Math.floor(Math.random() * 200 + 100)}ms
+                            {metrics.responseTime > 0 ? `${metrics.responseTime}ms` : '--'}
                           </p>
                           <p className="text-[10px] text-muted-foreground">P99</p>
                         </div>
@@ -895,7 +772,7 @@ export default function BotMonitoring() {
                   <CardContent>
                     <div className="flex items-center gap-4 mb-4">
                       <div className={`text-3xl font-bold tabular-nums ${
-                        metrics.errorRate < 10 ? 'text-emerald-400' : metrics.errorRate < 30 ? 'text-amber-400' : 'text-red-400'
+                        metrics.errorRate < 10 ? 'text-emerald-400' : metrics.errorRate < 30 ? 'text-blue-400' : 'text-red-400'
                       }`}>
                         {metrics.errorRate}%
                       </div>
@@ -903,7 +780,7 @@ export default function BotMonitoring() {
                         <div className="h-3 rounded-full bg-muted/60 overflow-hidden">
                           <motion.div
                             className={`h-full rounded-full transition-colors ${
-                              metrics.errorRate < 10 ? 'bg-emerald-500' : metrics.errorRate < 30 ? 'bg-amber-500' : 'bg-red-500'
+                              metrics.errorRate < 10 ? 'bg-emerald-500' : metrics.errorRate < 30 ? 'bg-blue-500' : 'bg-red-500'
                             }`}
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min(metrics.errorRate, 100)}%` }}
@@ -917,7 +794,7 @@ export default function BotMonitoring() {
                     <div className="space-y-2">
                       {[
                         { label: 'أخطاء الشبكة', value: Math.floor(metrics.errorRate * 0.4), color: 'bg-red-400' },
-                        { label: 'أخطاء التطبيق', value: Math.floor(metrics.errorRate * 0.35), color: 'bg-amber-400' },
+                        { label: 'أخطاء التطبيق', value: Math.floor(metrics.errorRate * 0.35), color: 'bg-blue-400' },
                         { label: 'أخطاء المهلة', value: Math.max(0, metrics.errorRate - Math.floor(metrics.errorRate * 0.4) - Math.floor(metrics.errorRate * 0.35)), color: 'bg-orange-400' },
                       ].map((err) => (
                         <div key={err.label} className="flex items-center justify-between text-xs">
@@ -981,7 +858,7 @@ export default function BotMonitoring() {
                     {[
                       { icon: Thermometer, label: 'إصدار Node.js', value: environment.nodeVersion, color: 'text-emerald-400', bg: 'bg-emerald-500/15' },
                       { icon: Server, label: 'منصة Docker', value: environment.dockerStatus, color: environment.dockerStatus === 'نشط' ? 'text-emerald-400' : 'text-red-400', bg: environment.dockerStatus === 'نشط' ? 'bg-emerald-500/15' : 'bg-red-500/15' },
-                      { icon: Cpu, label: 'أنوية المعالج', value: `${environment.cpuCores} نواة`, color: 'text-amber-400', bg: 'bg-amber-500/15' },
+                      { icon: Cpu, label: 'أنوية المعالج', value: `${environment.cpuCores} نواة`, color: 'text-blue-400', bg: 'bg-blue-500/15' },
                       { icon: HardDrive, label: 'الذاكرة الكلية', value: environment.totalMemory, color: 'text-sky-400', bg: 'bg-sky-500/15' },
                       { icon: HardDrive, label: 'الذاكرة المستخدمة', value: environment.usedMemory, color: 'text-violet-400', bg: 'bg-violet-500/15' },
                       { icon: Clock, label: 'وقت تشغيل الخادم', value: environment.uptime, color: 'text-primary', bg: 'bg-primary/15' },
@@ -1050,7 +927,7 @@ export default function BotMonitoring() {
                             cy="60"
                             r="52"
                             fill="none"
-                            stroke={metrics.memory > 80 ? 'oklch(0.65 0.22 25)' : metrics.memory > 60 ? 'oklch(0.78 0.15 75)' : 'oklch(0.65 0.20 160)'}
+                            stroke={metrics.memory > 80 ? 'oklch(0.65 0.22 25)' : metrics.memory > 60 ? 'oklch(0.60 0.20 250)' : 'oklch(0.65 0.20 160)'}
                             strokeWidth="10"
                             strokeLinecap="round"
                             strokeDasharray={`${2 * Math.PI * 52}`}
@@ -1060,7 +937,7 @@ export default function BotMonitoring() {
                           />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className={`text-2xl font-bold tabular-nums ${metrics.memory > 80 ? 'text-red-400' : metrics.memory > 60 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          <span className={`text-2xl font-bold tabular-nums ${metrics.memory > 80 ? 'text-red-400' : metrics.memory > 60 ? 'text-blue-400' : 'text-emerald-400'}`}>
                             {metrics.memory}%
                           </span>
                           <span className="text-[10px] text-muted-foreground">مستخدم</span>

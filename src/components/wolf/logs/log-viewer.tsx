@@ -44,14 +44,14 @@ type LogLevelFilter = (typeof LOG_LEVELS)[number];
 
 const levelColors: Record<string, string> = {
   info: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-  warn: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  warn: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
   error: 'bg-red-500/15 text-red-400 border-red-500/30',
   debug: 'bg-muted text-muted-foreground border-border',
 };
 
 const logTextColors: Record<string, string> = {
   info: 'text-cyan-300',
-  warn: 'text-amber-300',
+  warn: 'text-blue-300',
   error: 'text-red-400',
   debug: 'text-muted-foreground',
 };
@@ -268,7 +268,7 @@ export default function LogViewer() {
               <Separator orientation="vertical" className="h-5 hidden sm:block" />
               {[
                 { level: 'info', label: 'معلومات', color: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30', icon: Info },
-                { level: 'warn', label: 'تحذير', color: 'bg-amber-500/15 text-amber-400 border-amber-500/30', icon: AlertTriangle },
+                { level: 'warn', label: 'تحذير', color: 'bg-blue-500/15 text-blue-400 border-blue-500/30', icon: AlertTriangle },
                 { level: 'error', label: 'خطأ', color: 'bg-red-500/15 text-red-400 border-red-500/30', icon: AlertCircle },
                 { level: 'debug', label: 'تصحيح', color: 'bg-muted text-muted-foreground border-border', icon: Bug },
               ].map((stat) => (
@@ -354,7 +354,7 @@ export default function LogViewer() {
                     size="sm"
                     variant="outline"
                     onClick={() => setIsPaused(!isPaused)}
-                    className={`text-xs ${isPaused ? 'text-amber-400 border-amber-500/30 bg-amber-500/5' : ''}`}
+                    className={`text-xs ${isPaused ? 'text-blue-400 border-blue-500/30 bg-blue-500/5' : ''}`}
                     title={isPaused ? 'استئناف التحديث' : 'إيقاف التحديث'}
                   >
                     {isPaused ? (

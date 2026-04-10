@@ -103,52 +103,9 @@ interface Webhook {
   deliveries: DeliveryRecord[];
 }
 
-const MOCK_DELIVERIES: DeliveryRecord[] = [
-  { id: 'd1', webhookId: 'w1', url: 'https://api.example.com/webhooks/bot', event: 'bot.started', statusCode: 200, duration: '245ms', timestamp: 'منذ 5 دقائق', success: true },
-  { id: 'd2', webhookId: 'w1', url: 'https://api.example.com/webhooks/bot', event: 'bot.error', statusCode: 200, duration: '312ms', timestamp: 'منذ ساعة', success: true },
-  { id: 'd3', webhookId: 'w2', url: 'https://discord.com/api/webhooks/123', event: 'bot.deployed', statusCode: 500, duration: '5023ms', timestamp: 'منذ 3 ساعات', success: false },
-  { id: 'd4', webhookId: 'w1', url: 'https://api.example.com/webhooks/bot', event: 'bot.stopped', statusCode: 200, duration: '189ms', timestamp: 'منذ 5 ساعات', success: true },
-  { id: 'd5', webhookId: 'w3', url: 'https://slack.com/webhooks/bot-events', event: 'bot.created', statusCode: 404, duration: '1203ms', timestamp: 'منذ يوم', success: false },
-  { id: 'd6', webhookId: 'w2', url: 'https://discord.com/api/webhooks/123', event: 'bot.restarted', statusCode: 204, duration: '98ms', timestamp: 'منذ يومين', success: true },
-  { id: 'd7', webhookId: 'w1', url: 'https://api.example.com/webhooks/bot', event: 'bot.created', statusCode: 200, duration: '267ms', timestamp: 'منذ 3 أيام', success: true },
-  { id: 'd8', webhookId: 'w3', url: 'https://slack.com/webhooks/bot-events', event: 'bot.error', statusCode: 429, duration: '56ms', timestamp: 'منذ 4 أيام', success: false },
-];
+// Delivery records loaded from API
 
-const MOCK_WEBHOOKS: Webhook[] = [
-  {
-    id: 'w1',
-    url: 'https://api.example.com/webhooks/bot-events',
-    secret: 'whsec_abc123...',
-    events: ['bot.created', 'bot.started', 'bot.stopped', 'bot.error', 'bot.restarted', 'bot.deployed'],
-    contentType: 'application/json',
-    active: true,
-    createdAt: '2025-01-10',
-    lastDelivery: { statusCode: 200, time: 'منذ 5 دقائق' },
-    deliveries: MOCK_DELIVERIES.filter((d) => d.webhookId === 'w1'),
-  },
-  {
-    id: 'w2',
-    url: 'https://discord.com/api/webhooks/1234567890/abc',
-    secret: 'whsec_def456...',
-    events: ['bot.error', 'bot.deployed', 'bot.restarted'],
-    contentType: 'application/json',
-    active: true,
-    createdAt: '2025-02-05',
-    lastDelivery: { statusCode: 500, time: 'منذ 3 ساعات' },
-    deliveries: MOCK_DELIVERIES.filter((d) => d.webhookId === 'w2'),
-  },
-  {
-    id: 'w3',
-    url: 'https://slack.com/webhooks/bot-events/T0/B0/token',
-    secret: 'whsec_ghi789...',
-    events: ['bot.created', 'bot.error'],
-    contentType: 'application/x-www-form-urlencoded',
-    active: false,
-    createdAt: '2024-12-20',
-    lastDelivery: { statusCode: null, time: 'معطل' },
-    deliveries: MOCK_DELIVERIES.filter((d) => d.webhookId === 'w3'),
-  },
-];
+// Webhooks loaded from API
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -200,8 +157,8 @@ function truncateUrl(url: string, maxLen: number = 40): string {
 
 export default function WebhooksPage() {
   const { user } = useAppStore();
-  const [webhooks, setWebhooks] = useState<Webhook[]>(MOCK_WEBHOOKS);
-  const [allDeliveries] = useState<DeliveryRecord[]>(MOCK_DELIVERIES);
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+  const [allDeliveries] = useState<DeliveryRecord[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [testingId, setTestingId] = useState<string | null>(null);

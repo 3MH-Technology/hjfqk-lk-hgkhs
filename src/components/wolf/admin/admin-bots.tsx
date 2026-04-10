@@ -245,7 +245,7 @@ export default function AdminBots() {
         return (
           <Badge
             variant="secondary"
-            className="text-[10px] text-yellow-400"
+            className="text-[10px] text-blue-400"
           >
             <Code className="h-2.5 w-2.5 ml-0.5" />
             Python
@@ -447,7 +447,7 @@ export default function AdminBots() {
                               size="sm"
                               variant="ghost"
                               onClick={() => setStopTarget(bot)}
-                              className="h-7 text-xs text-amber-400 hover:text-amber-300"
+                              className="h-7 text-xs text-blue-400 hover:text-blue-300"
                               title="إيقاف البوت"
                             >
                               <Square className="h-3.5 w-3.5" />
@@ -497,7 +497,7 @@ export default function AdminBots() {
             <AlertDialogAction
               onClick={() => stopTarget && handleStopBot(stopTarget)}
               disabled={stopping}
-              className="bg-amber-600 text-white hover:bg-amber-700"
+              className="bg-blue-600 text-white hover:bg-blue-700"
             >
               {stopping && (
                 <Loader2 className="h-4 w-4 ml-2 animate-spin" />

@@ -68,7 +68,7 @@ function getPasswordStrength(password: string): {
   const strengths = [
     { label: 'ضعيف جداً', color: 'bg-red-500' },
     { label: 'ضعيف', color: 'bg-orange-500' },
-    { label: 'متوسط', color: 'bg-amber-500' },
+    { label: 'متوسط', color: 'bg-blue-500' },
     { label: 'قوي', color: 'bg-emerald-500' },
     { label: 'قوي جداً', color: 'bg-emerald-400' },
   ];
@@ -106,19 +106,11 @@ const itemVariants: Variants = {
   },
 };
 
-// Mock notification preferences
-const mockNotifications = [
-  { id: '1', label: 'إشعارات البريد الإلكتروني', description: 'تلقي إشعارات عبر البريد عند أحداث البوت', defaultChecked: true },
-  { id: '2', label: 'إشعارات الأخطاء', description: 'تنبيه عند حدوث خطأ في أي بوت', defaultChecked: true },
-  { id: '3', label: 'تحديثات النظام', description: 'إشعارات حول التحديثات والصيانة', defaultChecked: false },
-  { id: '4', label: 'النشاط التسويقي', description: 'عروض وأخبار المنصة', defaultChecked: false },
-];
+// Notification preferences - loaded from API
+const defaultNotificationPrefs = [];
 
-// Mock connected accounts
-const mockConnectedAccounts = [
-  { id: 'telegram', name: 'Telegram', description: 'مرتبط منذ 15 يوماً', icon: Send, color: 'text-sky-400', bgColor: 'bg-sky-500/10', borderColor: 'border-sky-500/30', connected: true },
-  { id: 'github', name: 'GitHub', description: 'غير مرتبط', icon: Crown, color: 'text-muted-foreground', bgColor: 'bg-muted/50', borderColor: 'border-border/50', connected: false },
-];
+// Connected accounts - loaded from API
+const connectedAccounts: { id: string; name: string; description: string; icon: typeof Send; color: string; bgColor: string; borderColor: string; connected: boolean }[] = [];
 
 export default function AccountSettings() {
   const { user, setUser } = useAppStore();
@@ -145,7 +137,7 @@ export default function AccountSettings() {
 
   // Notification toggles
   const [notifications, setNotifications] = useState(
-    () => mockNotifications.map((n) => ({ ...n, enabled: n.defaultChecked }))
+    () => defaultNotificationPrefs
   );
 
   const fetchStats = useCallback(async () => {
@@ -288,7 +280,7 @@ export default function AccountSettings() {
         <Card className="border-border/50 overflow-hidden">
           <div className="relative bg-gradient-to-l from-primary/15 via-primary/5 to-transparent p-6">
             <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl translate-x-1/4 translate-y-1/4" />
+            <div className="absolute bottom-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl translate-x-1/4 translate-y-1/4" />
             <div className="relative flex items-center gap-4">
               <div className="relative">
                 <Avatar className="h-16 w-16 border-2 border-primary/30">
@@ -302,7 +294,7 @@ export default function AccountSettings() {
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-bold">{user?.name || 'مستخدم'}</h2>
                   {user?.role === 'admin' && (
-                    <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 gap-1">
+                    <Badge className="bg-blue-500/15 text-blue-400 border-blue-500/30 gap-1">
                       <Crown className="h-3 w-3" />
                       مدير
                     </Badge>
@@ -315,7 +307,7 @@ export default function AccountSettings() {
                 <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    انضم منذ 15 يوماً
+                    {user?.createdAt ? `انضم منذ ${new Date(user.createdAt).toLocaleDateString('ar-SA')}` : 'لا توجد بيانات'}
                   </span>
                 </div>
               </div>
@@ -325,21 +317,21 @@ export default function AccountSettings() {
           <CardContent className="p-4 pt-3">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
               <span>اكتمال الملف الشخصي</span>
-              <span className="font-medium text-primary">75%</span>
+              <span className="font-medium text-primary">{user?.name && user?.email ? '50' : '25'}%</span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-l from-primary to-amber-500"
+                className="h-full rounded-full bg-gradient-to-l from-primary to-blue-500"
                 initial={{ width: 0 }}
-                animate={{ width: '75%' }}
+                animate={{ width: user?.name && user?.email ? '50%' : '25%' }}
                 transition={{ delay: 0.5, duration: 1, type: 'tween' as const, ease: 'easeOut' as const }}
               />
             </div>
             <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1 text-emerald-400"><Check className="h-3 w-3" /> البريد الإلكتروني</span>
               <span className="flex items-center gap-1 text-emerald-400"><Check className="h-3 w-3" /> الاسم</span>
-              <span className="flex items-center gap-1 text-amber-400"><X className="h-3 w-3" /> الصورة الشخصية</span>
-              <span className="flex items-center gap-1 text-amber-400"><X className="h-3 w-3" /> الهاتف</span>
+              <span className="flex items-center gap-1 text-blue-400"><X className="h-3 w-3" /> الصورة الشخصية</span>
+              <span className="flex items-center gap-1 text-blue-400"><X className="h-3 w-3" /> الهاتف</span>
             </div>
           </CardContent>
         </Card>
@@ -382,7 +374,7 @@ export default function AccountSettings() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="أدخل اسمك"
-                  className="focus-within:ring-amber-500/30"
+                  className="focus-within:ring-blue-500/30"
                 />
                 <Button
                   onClick={handleSaveName}
@@ -418,8 +410,8 @@ export default function AccountSettings() {
         <Card className="border-border/50">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <Bell className="h-4 w-4 text-amber-400" />
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Bell className="h-4 w-4 text-blue-400" />
               </div>
               <div>
                 <CardTitle className="text-base">تفضيلات الإشعارات</CardTitle>
@@ -480,7 +472,7 @@ export default function AccountSettings() {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {mockConnectedAccounts.map((account, i) => (
+            {connectedAccounts.map((account, i) => (
               <motion.div
                 key={account.id}
                 className={`flex items-center justify-between p-3 rounded-xl border ${account.borderColor} ${account.bgColor} hover:scale-[1.01] transition-transform`}
@@ -606,7 +598,7 @@ export default function AccountSettings() {
                           : passwordStrength.score <= 2
                           ? 'text-orange-400'
                           : passwordStrength.score <= 3
-                          ? 'text-amber-400'
+                          ? 'text-blue-400'
                           : 'text-emerald-400'
                       }`}
                     >

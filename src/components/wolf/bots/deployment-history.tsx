@@ -89,102 +89,23 @@ interface DeploymentEvent {
   logs: string[];
 }
 
-/* ─── Mock Data ─── */
+// Bot names loaded from API
+const botNames: string[] = [];
 
-const botNames = [
-  'بوت الدعم الفني',
-  'بوت الإشعارات',
-  'بوت المبيعات',
-  'بوت الإدارة',
-  'بوت التحليلات',
-  'بوت المحادثة',
-];
+// Event types and configurations
 
-const eventTypes: EventType[] = ['deploy', 'redeploy', 'rollback', 'stop'];
-const statusOptions: DeploymentStatus[] = ['success', 'success', 'success', 'success', 'success', 'success', 'failed', 'in_progress', 'rolled_back'];
-const triggers: TriggerType[] = ['manual', 'auto'];
-const versions = ['v2.3.1', 'v2.3.2', 'v2.4.0', 'v2.4.1', 'abc1234', 'def5678', 'v3.0.0-beta', 'v2.2.9'];
+// Deployment events loaded from API
+const allDeployments: DeploymentEvent[] = [];
 
-function generateMockLogs(status: DeploymentStatus): string[] {
-  const baseLogs = [
-    '[INFO] بدء عملية النشر...',
-    '[INFO] سحب الكود من المستودع...',
-    '[INFO] تثبيت التبعيات...',
-    '[INFO] بناء التطبيق...',
-    '[INFO] إنشاء صورة Docker...',
-    '[INFO] بدء الحاوية...',
-  ];
-  const successLogs = [
-    '[INFO] التحقق من صحة التطبيق...',
-    '[INFO] اختبار الاتصال بقاعدة البيانات...',
-    '[INFO] اختبار الاتصال بـ Redis...',
-    '[SUCCESS] النشر تم بنجاح! ✓',
-  ];
-  const failedLogs = [
-    '[ERROR] فشل في إنشاء الحاوية...',
-    '[ERROR] خطأ: ETIMEDOUT - انتهاء مهلة الاتصال',
-    '[ERROR] تم إلغاء عملية النشر ✗',
-  ];
-  const rollbackLogs = [
-    '[WARN] اكتشاف مشكلة بعد النشر...',
-    '[INFO] البدء في عملية التراجع...',
-    '[INFO] التراجع إلى الإصدار السابق...',
-    '[SUCCESS] تم التراجع بنجاح ✓',
-  ];
-
-  switch (status) {
-    case 'success':
-      return [...baseLogs, ...successLogs];
-    case 'failed':
-      return [...baseLogs, ...failedLogs];
-    case 'rolled_back':
-      return [...baseLogs, ...successLogs, ...rollbackLogs];
-    case 'in_progress':
-      return baseLogs;
-    default:
-      return baseLogs;
-  }
-}
-
-function generateDeploymentEvents(): DeploymentEvent[] {
-  const events: DeploymentEvent[] = [];
-  const now = new Date();
-
-  for (let i = 0; i < 30; i++) {
-    const randomMinutes = Math.floor(Math.random() * 10000) + 5;
-    const timestamp = new Date(now.getTime() - randomMinutes * 60 * 1000);
-
-    events.push({
-      id: `deploy-${i + 1}`,
-      botName: botNames[Math.floor(Math.random() * botNames.length)],
-      status: statusOptions[Math.floor(Math.random() * statusOptions.length)],
-      eventType: eventTypes[Math.floor(Math.random() * eventTypes.length)],
-      timestamp,
-      duration: statusOptions[Math.floor(Math.random() * statusOptions.length)] === 'in_progress'
-        ? 0
-        : Math.floor(Math.random() * 180) + 5,
-      trigger: triggers[Math.floor(Math.random() * triggers.length)],
-      version: versions[Math.floor(Math.random() * versions.length)],
-      logs: generateMockLogs(statusOptions[Math.floor(Math.random() * statusOptions.length)]),
-    });
-  }
-
-  // Sort by timestamp descending (newest first)
-  events.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  return events;
-}
-
-const allDeployments = generateDeploymentEvents();
-
-// Chart data: deployments per day over last 7 days
+// Chart data loaded from API
 const chartData = [
-  { day: 'السبت', success: 12, failed: 2 },
-  { day: 'الأحد', success: 18, failed: 3 },
-  { day: 'الاثنين', success: 24, failed: 1 },
-  { day: 'الثلاثاء', success: 15, failed: 4 },
-  { day: 'الأربعاء', success: 21, failed: 2 },
-  { day: 'الخميس', success: 28, failed: 5 },
-  { day: 'الجمعة', success: 10, failed: 1 },
+  { day: 'السبت', success: 0, failed: 0 },
+  { day: 'الأحد', success: 0, failed: 0 },
+  { day: 'الاثنين', success: 0, failed: 0 },
+  { day: 'الثلاثاء', success: 0, failed: 0 },
+  { day: 'الأربعاء', success: 0, failed: 0 },
+  { day: 'الخميس', success: 0, failed: 0 },
+  { day: 'الجمعة', success: 0, failed: 0 },
 ];
 
 /* ─── Status Config ─── */
@@ -215,11 +136,11 @@ const statusConfig: Record<DeploymentStatus, {
   },
   in_progress: {
     label: 'قيد التنفيذ',
-    bgClass: 'bg-amber-500/15',
-    borderClass: 'border-amber-500/30',
-    dotClass: 'bg-amber-400',
-    textClass: 'text-amber-400',
-    timelineColor: 'bg-amber-400',
+    bgClass: 'bg-blue-500/15',
+    borderClass: 'border-blue-500/30',
+    dotClass: 'bg-blue-400',
+    textClass: 'text-blue-400',
+    timelineColor: 'bg-blue-400',
   },
   rolled_back: {
     label: 'تم التراجع',
@@ -244,7 +165,7 @@ const eventTypeConfig: Record<EventType, {
   redeploy: {
     label: 'إعادة نشر',
     icon: RotateCcw,
-    badgeClass: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    badgeClass: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
   },
   rollback: {
     label: 'تراجع',
@@ -435,7 +356,7 @@ function TimelineEntry({
             {/* Meta Row: Duration + Trigger */}
             <div className="flex items-center gap-4 flex-wrap">
               {event.status === 'in_progress' ? (
-                <span className="flex items-center gap-1.5 text-xs text-amber-400">
+                <span className="flex items-center gap-1.5 text-xs text-blue-400">
                   <Loader2 className="size-3 animate-spin" />
                   جاري النشر...
                 </span>
@@ -495,7 +416,7 @@ function TimelineEntry({
                         key={logIndex}
                         className={
                           log.includes('[ERROR]') ? 'text-red-400' :
-                          log.includes('[WARN]') ? 'text-amber-400' :
+                          log.includes('[WARN]') ? 'text-blue-400' :
                           log.includes('[SUCCESS]') ? 'text-emerald-400' :
                           'text-muted-foreground'
                         }
@@ -693,7 +614,7 @@ export function DeploymentHistory() {
             Number(stats.successRate) >= 90
               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
               : Number(stats.successRate) >= 75
-                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                 : 'bg-red-500/10 text-red-400 border-red-500/20'
           }
         />
@@ -704,8 +625,8 @@ export function DeploymentHistory() {
           change="8.5%"
           changeDirection="down"
           icon={Clock}
-          iconBgClass="bg-amber-500/15"
-          iconColorClass="text-amber-400"
+          iconBgClass="bg-blue-500/15"
+          iconColorClass="text-blue-400"
         />
         <StatsCard
           title="عمليات النشر الفاشلة"

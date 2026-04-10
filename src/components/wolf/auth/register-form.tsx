@@ -53,61 +53,27 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 } as const,
 } as const;
 
-/* ─── Wolf Head SVG Component ─── */
+/* ─── Wolf Logo Component ─── */
 function WolfLogo({ size = 48 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="wolf-svg-glow"
-    >
-      <path
-        d="M50 8L38 28L20 22L28 42L15 58L30 55L25 75L40 68L50 90L60 68L75 75L70 55L85 58L72 42L80 22L62 28L50 8Z"
-        fill="currentColor"
-        className="text-primary"
-        opacity="0.9"
-      />
-      <circle cx="38" cy="45" r="4" fill="oklch(0.98 0.005 75)" />
-      <circle cx="38" cy="45" r="2" fill="oklch(0.15 0.02 270)" />
-      <circle cx="62" cy="45" r="4" fill="oklch(0.98 0.005 75)" />
-      <circle cx="62" cy="45" r="2" fill="oklch(0.15 0.02 270)" />
-      <ellipse cx="50" cy="58" rx="4" ry="3" fill="oklch(0.15 0.02 270)" />
-      <path
-        d="M38 28L32 20L28 30Z"
-        fill="currentColor"
-        className="text-primary"
-        opacity="0.5"
-      />
-      <path
-        d="M62 28L68 20L72 30Z"
-        fill="currentColor"
-        className="text-primary"
-        opacity="0.5"
-      />
-    </svg>
+    <img
+      src="https://f.top4top.io/p_37210bgwm1.jpg"
+      alt="استضافة الذئب"
+      style={{ width: size, height: size }}
+      className="rounded-full object-cover wolf-svg-glow"
+    />
   );
 }
 
 /* ─── Wolf Silhouette Particle ─── */
 function WolfSilhouetteParticle({ size = 16, className = '', style }: { size?: number; className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      style={style}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <path
-        d="M50 15L40 30L25 25L32 42L20 55L32 52L28 70L40 64L50 82L60 64L72 70L68 52L80 55L68 42L75 25L60 30L50 15Z"
-        fill="currentColor"
-      />
-    </svg>
+    <img
+      src="https://f.top4top.io/p_37210bgwm1.jpg"
+      alt=""
+      style={{ width: size, height: size, ...style }}
+      className={`rounded-full object-cover ${className}`}
+    />
   );
 }
 
@@ -356,7 +322,7 @@ export default function RegisterForm() {
     strength === 'strong'
       ? 'text-green-400'
       : strength === 'medium'
-        ? 'text-yellow-400'
+        ? 'text-blue-400'
         : strength === 'weak'
           ? 'text-red-400'
           : 'text-muted-foreground';

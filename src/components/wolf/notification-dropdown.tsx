@@ -58,9 +58,9 @@ const typeConfig: Record<
     barColor: 'bg-red-400',
   },
   warning: {
-    iconBg: 'bg-amber-500/15',
-    iconColor: 'text-amber-400',
-    barColor: 'bg-amber-400',
+    iconBg: 'bg-blue-500/15',
+    iconColor: 'text-blue-400',
+    barColor: 'bg-blue-400',
   },
   info: {
     iconBg: 'bg-sky-500/15',
@@ -69,50 +69,9 @@ const typeConfig: Record<
   },
 };
 
-/* ─── Mock Data (5 recent items) ─── */
+/* ─── Notifications loaded from API ─── */
 
-const initialNotifications: NotificationItem[] = [
-  {
-    id: 'notif-001',
-    type: 'success',
-    icon: CheckCircle2,
-    title: 'تم تشغيل البوت بنجاح',
-    timeAgo: 'منذ 3 دقائق',
-    read: false,
-  },
-  {
-    id: 'notif-002',
-    type: 'error',
-    icon: XCircle,
-    title: 'تم رصد خطأ في البوت',
-    timeAgo: 'منذ 12 دقيقة',
-    read: false,
-  },
-  {
-    id: 'notif-003',
-    type: 'warning',
-    icon: AlertTriangle,
-    title: 'استخدام عالي للذاكرة',
-    timeAgo: 'منذ 25 دقيقة',
-    read: false,
-  },
-  {
-    id: 'notif-004',
-    type: 'info',
-    icon: Upload,
-    title: 'تم رفع ملف جديد',
-    timeAgo: 'منذ ساعة',
-    read: false,
-  },
-  {
-    id: 'notif-005',
-    type: 'success',
-    icon: RotateCcw,
-    title: 'تم إعادة تشغيل البوت تلقائياً',
-    timeAgo: 'منذ ساعتين',
-    read: false,
-  },
-];
+const initialNotifications: NotificationItem[] = [];
 
 /* ─── Animation Variants ─── */
 
@@ -143,7 +102,7 @@ export function NotificationDropdown() {
     useAppStore();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(
-    initialNotifications
+    () => initialNotifications
   );
 
   const unreadCount = useMemo(
@@ -227,7 +186,17 @@ export function NotificationDropdown() {
         <ScrollArea className="max-h-72">
           <AnimatePresence initial={false}>
             <div className="p-1.5">
-              {notifications.map((notif, index) => {
+              {notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-muted/50 mb-3">
+                    <Bell className="size-6 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">لا توجد إشعارات</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">
+                    ستظهر الإشعارات الجديدة هنا تلقائياً
+                  </p>
+                </div>
+              ) : notifications.map((notif, index) => {
                 const config = typeConfig[notif.type];
                 const NotifIcon = notif.icon;
 

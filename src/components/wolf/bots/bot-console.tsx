@@ -15,7 +15,7 @@ interface LogLine {
   timestamp: string;
 }
 
-// ─── Simulated Data ─────────────────────────────────────────────────────────
+// ─── Terminal Boot Sequence & Commands ────────────────────────────────────
 const BOOT_SEQUENCE: LogLine[] = [
   { id: 1, text: '[INFO] جاري تحضير البيئة...', type: 'info', timestamp: '' },
   { id: 2, text: '[INFO] تم تحميل التبعيات بنجاح (42 حزمة)', type: 'ok', timestamp: '' },
@@ -291,11 +291,11 @@ export function BotConsole() {
       case 'ok':
         return 'text-emerald-400';
       case 'warn':
-        return 'text-amber-400';
+        return 'text-blue-400';
       case 'error':
         return 'text-red-400';
       case 'cmd':
-        return 'text-amber-300';
+        return 'text-blue-300';
       case 'response':
         return 'text-sky-300';
       default:
@@ -304,7 +304,7 @@ export function BotConsole() {
   }
 
   const memoryColor =
-    memory < 60 ? 'bg-emerald-500' : memory < 75 ? 'bg-amber-500' : 'bg-red-500';
+    memory < 60 ? 'bg-emerald-500' : memory < 75 ? 'bg-blue-500' : 'bg-red-500';
 
   return (
     <motion.div
@@ -332,12 +332,12 @@ export function BotConsole() {
               variant="outline"
               className={
                 booting
-                  ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                  ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
                   : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
               }
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${booting ? 'bg-amber-400' : 'bg-emerald-400'} animate-pulse`}
+                className={`w-1.5 h-1.5 rounded-full ${booting ? 'bg-blue-400' : 'bg-emerald-400'} animate-pulse`}
               />
               {booting ? 'جاري التحميل' : 'يعمل'}
             </Badge>
@@ -351,7 +351,7 @@ export function BotConsole() {
         <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-2.5 flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-500/80" />
-            <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+            <div className="w-3 h-3 rounded-full bg-blue-500/80" />
             <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
           </div>
           <span className="text-xs text-zinc-400 font-mono" dir="ltr">
@@ -391,10 +391,10 @@ export function BotConsole() {
             <div className="flex gap-2 text-slate-300 mt-1">
               <span className="text-zinc-600 select-none shrink-0">{getTimestamp()}</span>
               <span>
-                <span className="text-amber-400">$</span>{' '}
+                <span className="text-blue-400">$</span>{' '}
                 {input || (
                   <span
-                    className={`inline-block w-2 h-4 bg-amber-400 align-middle transition-opacity ${
+                    className={`inline-block w-2 h-4 bg-blue-400 align-middle transition-opacity ${
                       cursorVisible ? 'opacity-100' : 'opacity-0'
                     }`}
                   />
@@ -407,7 +407,7 @@ export function BotConsole() {
         {/* Command Input Bar */}
         <div className="bg-zinc-900 border-t border-zinc-800 px-4 py-3">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
-            <span className="text-amber-400 font-mono text-sm font-bold select-none">$</span>
+            <span className="text-blue-400 font-mono text-sm font-bold select-none">$</span>
             <input
               ref={inputRef}
               type="text"
@@ -423,7 +423,7 @@ export function BotConsole() {
             />
             {input && (
               <span
-                className={`inline-block w-2 h-4 bg-amber-400 transition-opacity ${
+                className={`inline-block w-2 h-4 bg-blue-400 transition-opacity ${
                   cursorVisible ? 'opacity-100' : 'opacity-0'
                 }`}
               />

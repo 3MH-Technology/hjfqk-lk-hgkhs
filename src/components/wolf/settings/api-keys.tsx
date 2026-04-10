@@ -76,48 +76,7 @@ interface ApiKey {
   permissions: string[];
 }
 
-const MOCK_KEYS: ApiKey[] = [
-  {
-    id: '1',
-    name: 'بوت الدعم الفني',
-    prefix: 'sk-wolf-a1b2c3d4...e5f6',
-    createdAt: '2025-01-15',
-    expiresAt: '2026-01-15',
-    status: 'active',
-    lastUsed: 'منذ ساعتين',
-    permissions: ['read', 'write'],
-  },
-  {
-    id: '2',
-    name: 'الواجهة البرمجية العامة',
-    prefix: 'sk-wolf-g7h8i9j0...k1l2',
-    createdAt: '2024-10-01',
-    expiresAt: '2025-04-01',
-    status: 'expired',
-    lastUsed: 'منذ 45 يوماً',
-    permissions: ['read'],
-  },
-  {
-    id: '3',
-    name: 'نظام الإشعارات',
-    prefix: 'sk-wolf-m3n4o5p6...q7r8',
-    createdAt: '2025-02-20',
-    expiresAt: '2026-02-20',
-    status: 'active',
-    lastUsed: 'منذ 5 دقائق',
-    permissions: ['read', 'write', 'delete'],
-  },
-  {
-    id: '4',
-    name: 'وصول المدير الكامل',
-    prefix: 'sk-wolf-s9t0u1v2...w3x4',
-    createdAt: '2025-03-10',
-    expiresAt: 'لا ينتهي',
-    status: 'active',
-    lastUsed: 'منذ 10 دقائق',
-    permissions: ['read', 'write', 'delete', 'admin'],
-  },
-];
+// API keys loaded from API - initialized empty
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -164,7 +123,7 @@ function formatDate(dateStr: string): string {
 
 export default function ApiKeysPage() {
   const { user } = useAppStore();
-  const [keys, setKeys] = useState<ApiKey[]>(MOCK_KEYS);
+  const [keys, setKeys] = useState<ApiKey[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeId, setRevokeId] = useState<string | null>(null);
 
@@ -276,7 +235,7 @@ export default function ApiKeysPage() {
 
     const colorMap: Record<string, string> = {
       read: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-      write: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+      write: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
       delete: 'bg-red-500/15 text-red-400 border-red-500/30',
       admin: 'bg-primary/15 text-primary border-primary/30',
     };
@@ -335,13 +294,13 @@ export default function ApiKeysPage() {
                   className="space-y-4"
                 >
                   {/* Warning banner */}
-                  <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-                    <AlertTriangle className="size-5 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-3 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
+                    <AlertTriangle className="size-5 text-blue-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-amber-400">
+                      <p className="text-sm font-medium text-blue-400">
                         احفظ هذا المفتاح الآن
                       </p>
-                      <p className="text-xs text-amber-400/80 mt-1">
+                      <p className="text-xs text-blue-400/80 mt-1">
                         لن تتمكن من رؤية هذا المفتاح مرة أخرى بعد إغلاق هذه النافذة.
                       </p>
                     </div>
@@ -461,11 +420,11 @@ export default function ApiKeysPage() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' as const }}
-        className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4"
+        className="flex items-start gap-3 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4"
       >
-        <Shield className="size-5 text-amber-400 shrink-0 mt-0.5" />
+        <Shield className="size-5 text-blue-400 shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-medium text-amber-400">
+          <p className="text-sm font-medium text-blue-400">
             احتفظ بمفاتيح API بشكل آمن
           </p>
           <p className="text-xs text-muted-foreground mt-1">

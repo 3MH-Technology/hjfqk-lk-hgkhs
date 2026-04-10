@@ -502,7 +502,7 @@ export default function AdminPanel() {
                                 className={`h-7 text-xs ${
                                   u.isBanned
                                     ? 'text-emerald-400 hover:text-emerald-300'
-                                    : 'text-amber-400 hover:text-amber-300'
+                                    : 'text-blue-400 hover:text-blue-300'
                                 }`}
                                 title={
                                   u.isBanned ? 'تفعيل الحساب' : 'تعطيل الحساب'
@@ -594,7 +594,7 @@ export default function AdminPanel() {
               className={
                 banTarget?.isBanned
                   ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                  : 'bg-amber-600 text-white hover:bg-amber-700'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
               }
             >
               {togglingBan && (

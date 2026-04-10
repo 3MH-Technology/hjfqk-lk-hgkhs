@@ -128,10 +128,10 @@ const templates: BotTemplate[] = [
     difficulty: 3,
     category: 'advanced',
     features: ['تصويتات متعددة', 'خيارات مخصصة', 'نتائج فورية', 'تصويت مجهول', 'تصدير البيانات'],
-    gradientFrom: 'from-amber-600/20',
+    gradientFrom: 'from-blue-600/20',
     gradientTo: 'to-orange-700/5',
-    iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
-    accentColor: 'text-amber-400',
+    iconBg: 'bg-gradient-to-br from-blue-500 to-orange-600',
+    accentColor: 'text-blue-400',
   },
   {
     id: 'reminder-bot',
@@ -174,8 +174,8 @@ const templates: BotTemplate[] = [
     category: 'advanced',
     features: ['عرض المنتجات', 'سلة تسوق', 'إدارة الطلبات', 'إشعارات حالة الطلب'],
     gradientFrom: 'from-orange-600/20',
-    gradientTo: 'to-amber-700/5',
-    iconBg: 'bg-gradient-to-br from-orange-500 to-amber-600',
+    gradientTo: 'to-blue-700/5',
+    iconBg: 'bg-gradient-to-br from-orange-500 to-blue-600',
     accentColor: 'text-orange-400',
   },
 ];
@@ -190,7 +190,7 @@ function DifficultyStars({ level }: { level: Difficulty }) {
           key={i}
           className={`h-3.5 w-3.5 ${
             i < level
-              ? 'fill-amber-400 text-amber-400'
+              ? 'fill-blue-400 text-blue-400'
               : 'fill-none text-muted-foreground/30'
           }`}
         />
@@ -210,7 +210,7 @@ function DifficultyLabel({ level }: { level: Difficulty }) {
   const colors: Record<Difficulty, string> = {
     1: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
     2: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
-    3: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    3: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
     4: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
     5: 'bg-red-500/15 text-red-400 border-red-500/30',
   };
@@ -229,7 +229,7 @@ function LanguageBadge({ language }: { language: Language }) {
     return (
       <Badge
         variant="outline"
-        className="gap-1 text-[10px] px-1.5 py-0 h-5 bg-yellow-500/10 text-yellow-400 border-yellow-500/30"
+        className="gap-1 text-[10px] px-1.5 py-0 h-5 bg-blue-500/10 text-blue-400 border-blue-500/30"
       >
         <Code className="h-2.5 w-2.5" />
         Python
@@ -397,8 +397,8 @@ export default function BotTemplates() {
         animate="visible"
       >
         {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-600/10 via-transparent to-orange-600/5" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] bg-amber-500/5 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-orange-600/5" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] bg-blue-500/5 rounded-full blur-3xl" />
 
         <div className="relative p-6 sm:p-8">
           {/* Back button */}
@@ -417,11 +417,11 @@ export default function BotTemplates() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               {/* Hero icon */}
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-orange-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
                 <Bot className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-l from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-l from-blue-400 via-blue-300 to-blue-500 bg-clip-text text-transparent">
                   قوالب البوتات
                 </h1>
                 <p className="text-muted-foreground text-sm sm:text-base mt-1">
@@ -433,12 +433,12 @@ export default function BotTemplates() {
             {/* Quick stats */}
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-2 bg-muted/40 rounded-xl px-3 py-2 border border-border/30">
-                <Package className="h-4 w-4 text-amber-400" />
+                <Package className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-medium">{stats.total}</span>
                 <span className="text-xs text-muted-foreground">قالب</span>
               </div>
               <div className="flex items-center gap-2 bg-muted/40 rounded-xl px-3 py-2 border border-border/30">
-                <Code className="h-4 w-4 text-yellow-400" />
+                <Code className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-medium">{stats.pythonCount + stats.phpCount}</span>
                 <span className="text-xs text-muted-foreground">لغة</span>
               </div>
@@ -461,7 +461,7 @@ export default function BotTemplates() {
             placeholder="ابحث في القوالب... بالاسم، الوصف، أو الميزة"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-card/60 border-border/50 focus:border-amber-500/50 pr-10 pl-10 h-11 text-sm rounded-xl backdrop-blur-sm"
+            className="w-full bg-card/60 border-border/50 focus:border-blue-500/50 pr-10 pl-10 h-11 text-sm rounded-xl backdrop-blur-sm"
           />
           {searchQuery && (
             <button
@@ -484,7 +484,7 @@ export default function BotTemplates() {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium data-[state=active]:bg-gradient-to-l data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/10 data-[state=active]:text-amber-400 data-[state=active]:border-amber-500/20 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:shadow-amber-500/5 whitespace-nowrap"
+                className="gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium data-[state=active]:bg-gradient-to-l data-[state=active]:from-blue-500/20 data-[state=active]:to-orange-500/10 data-[state=active]:text-blue-400 data-[state=active]:border-blue-500/20 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:shadow-blue-500/5 whitespace-nowrap"
               >
                 {tab.icon}
                 {tab.label}
@@ -578,7 +578,7 @@ export default function BotTemplates() {
                     {/* Action Button */}
                     <Button
                       onClick={() => handleUseTemplate(template)}
-                      className="w-full gap-2 h-10 rounded-xl font-medium bg-gradient-to-l from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300 group-hover:-translate-y-0.5 active:translate-y-0"
+                      className="w-full gap-2 h-10 rounded-xl font-medium bg-gradient-to-l from-blue-500 to-orange-500 text-white hover:from-blue-600 hover:to-orange-600 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 group-hover:-translate-y-0.5 active:translate-y-0"
                     >
                       <Sparkles className="h-4 w-4" />
                       استخدام القالب
@@ -631,8 +631,8 @@ export default function BotTemplates() {
         className="rounded-xl border border-border/30 bg-gradient-to-br from-muted/20 to-muted/5 p-4 sm:p-5"
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-            <Heart className="h-5 w-5 text-amber-400" />
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+            <Heart className="h-5 w-5 text-blue-400" />
           </div>
           <div className="flex-1">
             <h4 className="text-sm font-semibold mb-0.5">نصيحة سريعة</h4>

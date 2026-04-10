@@ -160,8 +160,8 @@ const statusConfig: Record<string, { label: string; className: string; dotClass:
   },
   building: {
     label: 'جاري البناء',
-    className: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
-    dotClass: 'bg-amber-400 pulse-dot',
+    className: 'bg-blue-500/15 text-blue-400 border-blue-500/25',
+    dotClass: 'bg-blue-400 pulse-dot',
   },
   error: {
     label: 'خطأ',
@@ -172,7 +172,7 @@ const statusConfig: Record<string, { label: string; className: string; dotClass:
 
 const levelConfig: Record<string, { color: string; label: string }> = {
   info: { color: 'bg-emerald-400', label: 'معلومات' },
-  warn: { color: 'bg-amber-400', label: 'تحذير' },
+  warn: { color: 'bg-blue-400', label: 'تحذير' },
   error: { color: 'bg-red-400', label: 'خطأ' },
   debug: { color: 'bg-zinc-400', label: 'تصحيح' },
 };
@@ -682,7 +682,7 @@ export function Dashboard() {
                               log.level === 'error'
                                 ? 'text-red-400 border-red-500/25 bg-red-500/10'
                                 : log.level === 'warn'
-                                  ? 'text-amber-400 border-amber-500/25 bg-amber-500/10'
+                                  ? 'text-blue-400 border-blue-500/25 bg-blue-500/10'
                                   : 'text-emerald-400 border-emerald-500/25 bg-emerald-500/10'
                             }`}
                           >

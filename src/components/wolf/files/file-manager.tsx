@@ -81,7 +81,7 @@ function getFileIcon(path: string) {
 
   switch (ext) {
     case 'py':
-      return <FileCode className="h-5 w-5 text-yellow-400" />;
+      return <FileCode className="h-5 w-5 text-blue-400" />;
     case 'php':
       return <FileCode className="h-5 w-5 text-blue-400" />;
     case 'txt':
@@ -92,7 +92,7 @@ function getFileIcon(path: string) {
     case 'yaml':
       return <FileJson className="h-5 w-5 text-emerald-400" />;
     case 'env':
-      return <Shield className="h-5 w-5 text-amber-400" />;
+      return <Shield className="h-5 w-5 text-blue-400" />;
     default:
       return <File className="h-5 w-5 text-muted-foreground" />;
   }

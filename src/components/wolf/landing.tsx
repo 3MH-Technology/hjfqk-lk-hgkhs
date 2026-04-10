@@ -90,8 +90,8 @@ const supportedLanguages = [
     icon: Code,
     name: 'Python',
     description: 'Python 3.11+ مع مكتبات شائعة',
-    color: 'from-yellow-500/20 to-blue-500/20',
-    iconColor: 'text-yellow-400',
+    color: 'from-blue-500/20 to-blue-500/20',
+    iconColor: 'text-blue-400',
   },
   {
     icon: FileCode,
@@ -320,7 +320,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Brand — right side (RTL) */}
           <div className="flex items-center gap-2.5">
-            <span className="text-2xl">🐺</span>
+            <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-8 h-8 rounded-full object-cover" />
             <span className="font-bold gradient-text text-base md:text-lg">
               استضافة الذئب
             </span>
@@ -470,7 +470,7 @@ export default function Landing() {
               className="absolute inset-0 opacity-[0.03]"
               style={{
                 backgroundImage:
-                  'linear-gradient(oklch(0.78 0.15 75) 1px, transparent 1px), linear-gradient(90deg, oklch(0.78 0.15 75) 1px, transparent 1px)',
+                  'linear-gradient(oklch(0.60 0.20 250) 1px, transparent 1px), linear-gradient(90deg, oklch(0.60 0.20 250) 1px, transparent 1px)',
                 backgroundSize: '60px 60px',
               }}
             />
@@ -519,13 +519,13 @@ export default function Landing() {
               >
                 <div className="relative float-animation w-[140px] h-[140px] md:w-[180px] md:h-[180px]">
                   {/* Outer orbit ring */}
-                  <div className="wolf-orbit-ring absolute inset-0 rounded-full" style={{ border: '1.5px dashed oklch(0.78 0.15 75 / 15%)' }}>
+                  <div className="wolf-orbit-ring absolute inset-0 rounded-full" style={{ border: '1.5px dashed oklch(0.60 0.20 250 / 15%)' }}>
                     {/* Orbiting dot */}
                     <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/60" />
                   </div>
 
                   {/* Inner orbit ring (reverse) */}
-                  <div className="wolf-orbit-ring-reverse absolute rounded-full" style={{ inset: '18px', border: '1px solid oklch(0.78 0.15 75 / 10%)' }}>
+                  <div className="wolf-orbit-ring-reverse absolute rounded-full" style={{ inset: '18px', border: '1px solid oklch(0.60 0.20 250 / 10%)' }}>
                     {/* Orbiting dot */}
                     <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/40" />
                   </div>
@@ -535,34 +535,7 @@ export default function Landing() {
 
                   {/* Wolf Head SVG Silhouette */}
                   <div className="wolf-svg-glow absolute inset-0 flex items-center justify-center">
-                    <svg
-                      viewBox="0 0 100 100"
-                      className="w-20 h-20 md:w-24 md:h-24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <defs>
-                        <linearGradient id="wolfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="oklch(0.78 0.15 75)" />
-                          <stop offset="50%" stopColor="oklch(0.85 0.12 85)" />
-                          <stop offset="100%" stopColor="oklch(0.78 0.15 75)" />
-                        </linearGradient>
-                      </defs>
-                      {/* Wolf head silhouette - stylized */}
-                      <path
-                        d="M50 8 L38 28 L30 22 L25 35 L20 32 L22 42 L18 48 L24 50 L26 56 L32 62 L36 68 L38 72 L42 75 L48 78 L52 78 L58 75 L62 72 L64 68 L68 62 L74 56 L76 50 L82 48 L78 42 L80 32 L75 35 L70 22 L62 28 Z"
-                        fill="url(#wolfGrad)"
-                        opacity="0.9"
-                      />
-                      {/* Eyes */}
-                      <ellipse cx="38" cy="42" rx="3.5" ry="2.5" fill="oklch(0.15 0.02 270)" />
-                      <ellipse cx="62" cy="42" rx="3.5" ry="2.5" fill="oklch(0.15 0.02 270)" />
-                      {/* Eye glow */}
-                      <ellipse cx="38" cy="42" rx="2" ry="1.2" fill="oklch(0.78 0.15 75)" opacity="0.6" />
-                      <ellipse cx="62" cy="42" rx="2" ry="1.2" fill="oklch(0.78 0.15 75)" opacity="0.6" />
-                      {/* Nose */}
-                      <ellipse cx="50" cy="52" rx="2.5" ry="1.8" fill="oklch(0.15 0.02 270)" opacity="0.7" />
-                    </svg>
+                    <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover" />
                   </div>
 
                   {/* Corner accent dots */}
@@ -1281,7 +1254,7 @@ export default function Landing() {
             {/* Column 1 — Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-2.5">
-                <span className="text-2xl">🐺</span>
+                <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-8 h-8 rounded-full object-cover" />
                 <span className="font-bold gradient-text text-base">
                   استضافة الذئب
                 </span>

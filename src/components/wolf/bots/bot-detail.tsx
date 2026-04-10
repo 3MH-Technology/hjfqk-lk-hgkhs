@@ -113,14 +113,8 @@ const tabContentVariants: Variants = {
   },
 };
 
-// Mock timeline events
-const mockTimelineEvents = [
-  { id: '1', type: 'created', label: 'تم إنشاء البوت', icon: Rocket, color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/30', time: 'منذ 15 يوماً' },
-  { id: '2', type: 'started', label: 'تم التشغيل الأول', icon: Power, color: 'text-cyan-400', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/30', time: 'منذ 14 يوماً' },
-  { id: '3', type: 'restarted', label: 'إعادة تشغيل مجدولة', icon: RefreshCw, color: 'text-amber-400', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/30', time: 'منذ 3 أيام' },
-  { id: '4', type: 'error', label: 'خطأ في التشغيل - تم الإصلاح تلقائياً', icon: AlertTriangle, color: 'text-red-400', bgColor: 'bg-red-500/10', borderColor: 'border-red-500/30', time: 'منذ يوم واحد' },
-  { id: '5', type: 'restarted', label: 'إعادة تشغيل بعد التحديث', icon: RefreshCw, color: 'text-amber-400', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/30', time: 'منذ 6 ساعات' },
-];
+// Timeline events loaded from API
+const timelineEvents: { id: string; type: string; label: string; icon: typeof Rocket; color: string; bgColor: string; borderColor: string; time: string }[] = [];
 
 export function BotDetail() {
   const { selectedBotId, setCurrentPage } = useAppStore();
@@ -270,16 +264,16 @@ export function BotDetail() {
   const statusConfig: Record<string, { label: string; color: string; dotClass: string }> = {
     running: { label: 'يعمل', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', dotClass: 'bg-emerald-400 pulse-dot' },
     stopped: { label: 'متوقف', color: 'bg-slate-500/15 text-slate-400 border-slate-500/30', dotClass: 'bg-slate-400' },
-    building: { label: 'جاري البناء', color: 'bg-amber-500/15 text-amber-400 border-amber-500/30', dotClass: 'bg-amber-400 pulse-dot' },
+    building: { label: 'جاري البناء', color: 'bg-blue-500/15 text-blue-400 border-blue-500/30', dotClass: 'bg-blue-400 pulse-dot' },
     error: { label: 'خطأ', color: 'bg-red-500/15 text-red-400 border-red-500/30', dotClass: 'bg-red-400' },
   };
   const statusCfg = statusConfig[bot.status] || statusConfig.stopped;
 
-  // Mock resource usage
-  const cpuUsage = bot.status === 'running' ? 35 : 0;
-  const ramUsage = bot.status === 'running' ? 128 : 0;
-  const cpuPercent = bot.cpuLimit > 0 ? Math.min((cpuUsage / (bot.cpuLimit * 100)) * 100, 100) : 0;
-  const ramPercent = bot.ramLimit > 0 ? Math.min((ramUsage / bot.ramLimit) * 100, 100) : 0;
+  // Resource usage - loaded from API (defaults to 0 when no data)
+  const cpuUsage = 0;
+  const ramUsage = 0;
+  const cpuPercent = 0;
+  const ramPercent = 0;
 
   return (
     <motion.div
@@ -295,7 +289,7 @@ export function BotDetail() {
       >
         {/* Background decorative elements */}
         <div className="absolute top-0 left-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
 
         <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -353,7 +347,7 @@ export function BotDetail() {
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Button size="sm" onClick={() => handleAction('restart')} disabled={actionLoading} variant="outline" className="gap-2 text-amber-400 border-amber-500/30 hover:bg-amber-500/10">
+                <Button size="sm" onClick={() => handleAction('restart')} disabled={actionLoading} variant="outline" className="gap-2 text-blue-400 border-blue-500/30 hover:bg-blue-500/10">
                   {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
                   إعادة تشغيل
                 </Button>
@@ -415,8 +409,8 @@ export function BotDetail() {
         <Card className="bg-card/50 border-border/50 hover:border-primary/20 transition-colors">
           <CardContent className="p-4 space-y-2.5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <Cpu className="h-5 w-5 text-amber-400" />
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Cpu className="h-5 w-5 text-blue-400" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">الموارد</p>
@@ -444,7 +438,7 @@ export function BotDetail() {
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full rounded-full bg-amber-400"
+                    className="h-full rounded-full bg-blue-400"
                     initial={{ width: 0 }}
                     animate={{ width: `${ramPercent}%` }}
                     transition={{ delay: 0.7, duration: 1, type: 'tween' as const, ease: 'easeOut' as const }}
@@ -516,7 +510,7 @@ export function BotDetail() {
                         { label: 'اللغة', value: bot.language === 'python' ? '🐍 Python' : '🐘 PHP', icon: FileCode, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
                         { label: 'الحالة', value: statusCfg.label, icon: Zap, color: statusCfg.color.includes('emerald') ? 'text-emerald-400' : statusCfg.color.includes('red') ? 'text-red-400' : 'text-slate-400', bg: statusCfg.color.includes('emerald') ? 'bg-emerald-500/10' : statusCfg.color.includes('red') ? 'bg-red-500/10' : 'bg-slate-500/10', isBadge: true },
                         { label: 'الملفات', value: `${bot._count.files} ملف`, icon: HardDrive, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-                        { label: 'السجلات', value: `${bot._count.logs} سجل`, icon: Terminal, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+                        { label: 'السجلات', value: `${bot._count.logs} سجل`, icon: Terminal, color: 'text-blue-400', bg: 'bg-blue-500/10' },
                         { label: 'إعادة التشغيل التلقائية', value: bot.autoRestart ? 'مفعّل' : 'معطّل', icon: RefreshCw, color: bot.autoRestart ? 'text-emerald-400' : 'text-slate-400', bg: bot.autoRestart ? 'bg-emerald-500/10' : 'bg-slate-500/10' },
                         { label: 'تاريخ الإنشاء', value: format(new Date(bot.createdAt), 'dd/MM/yyyy', { locale: ar }), icon: Calendar, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
                         ...(bot.githubUrl ? [{ label: 'رابط GitHub', value: bot.githubUrl, icon: GitBranch, color: 'text-blue-400', bg: 'bg-blue-500/10', isMono: true }] : []),
@@ -555,7 +549,7 @@ export function BotDetail() {
                 <Card className="bg-card/50 border-border/50">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-amber-400" />
+                      <Zap className="h-5 w-5 text-blue-400" />
                       متغيرات البيئة
                     </CardTitle>
                     <Button
@@ -691,7 +685,7 @@ export function BotDetail() {
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="h-5 w-5 text-primary" />
               الجدول الزمني
-              <Badge variant="secondary" className="text-xs mr-2">{mockTimelineEvents.length} أحداث</Badge>
+              <Badge variant="secondary" className="text-xs mr-2">{timelineEvents.length} أحداث</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -700,7 +694,15 @@ export function BotDetail() {
               <div className="absolute right-[18px] top-2 bottom-2 w-px bg-border" />
 
               <div className="space-y-4">
-                {mockTimelineEvents.map((event, i) => (
+                {timelineEvents.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <div className="flex size-12 items-center justify-center rounded-xl bg-muted/50 mb-3">
+                      <Clock className="size-6 text-muted-foreground/40" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">لا يوجد سجل أحداث</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">ستظهر الأحداث هنا تلقائياً</p>
+                  </div>
+                ) : timelineEvents.map((event, i) => (
                   <motion.div
                     key={event.id}
                     className="relative flex gap-4 pr-12"

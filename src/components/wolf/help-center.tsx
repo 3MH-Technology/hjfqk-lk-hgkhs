@@ -80,8 +80,8 @@ const quickStartSteps = [
     icon: Rocket,
     title: 'أطلق البوت',
     description: 'شغّل بوتك وراقبه من لوحة التحكم',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/15',
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/15',
     step: 4,
   },
 ];
@@ -139,9 +139,9 @@ const categories = [
     title: 'استكشاف الأخطاء',
     description: 'حل المشاكل الشائعة والأخطاء المتكررة وأسئلة وأجوبة',
     articleCount: 14,
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/15',
-    border: 'border-amber-500/20',
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/15',
+    border: 'border-blue-500/20',
   },
 ];
 
@@ -185,8 +185,8 @@ const articles = [
     title: 'قراءة وفهم سجلات البوت',
     category: 'استكشاف الأخطاء',
     readTime: '3 دقائق',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/15',
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/15',
   },
   {
     icon: MonitorDot,
@@ -209,8 +209,8 @@ const articles = [
     title: 'حل مشكلة توقف البوت بشكل مفاجئ',
     category: 'استكشاف الأخطاء',
     readTime: '3 دقائق',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/15',
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/15',
   },
 ];
 

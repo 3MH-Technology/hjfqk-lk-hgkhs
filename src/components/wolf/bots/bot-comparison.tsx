@@ -49,97 +49,7 @@ interface BotItem {
 
 /* ─── Status Config ─── */
 
-const statusConfig: Record<string, { label: string; color: string; dotClass: string }> = {
-  running: {
-    label: 'يعمل',
-    color: 'text-emerald-400',
-    dotClass: 'bg-emerald-400 pulse-dot',
-  },
-  stopped: {
-    label: 'متوقف',
-    color: 'text-slate-400',
-    dotClass: 'bg-slate-400',
-  },
-  building: {
-    label: 'جاري البناء',
-    color: 'text-amber-400',
-    dotClass: 'bg-amber-400 pulse-dot',
-  },
-  error: {
-    label: 'خطأ',
-    color: 'text-red-400',
-    dotClass: 'bg-red-400',
-  },
-};
 
-/* ─── Mock Data ─── */
-
-const mockBots: BotItem[] = [
-  {
-    id: 'mock-1',
-    name: 'بوت المساعد الذكي',
-    description: 'بوت للإجابة على الأسئلة العامة',
-    language: 'python',
-    status: 'running',
-    containerId: 'abc123def456',
-    port: 8080,
-    createdAt: '2025-01-15T10:00:00.000Z',
-    updatedAt: '2025-06-20T14:30:00.000Z',
-    cpuLimit: 2,
-    ramLimit: 512,
-    storageLimit: 1024,
-    autoRestart: true,
-    _count: { files: 24, logs: 1523 },
-  },
-  {
-    id: 'mock-2',
-    name: 'بوت الإشعارات',
-    description: 'بوت لإرسال الإشعارات للمستخدمين',
-    language: 'python',
-    status: 'stopped',
-    containerId: null,
-    port: 8081,
-    createdAt: '2025-02-10T08:00:00.000Z',
-    updatedAt: '2025-06-18T09:15:00.000Z',
-    cpuLimit: 1,
-    ramLimit: 256,
-    storageLimit: 512,
-    autoRestart: false,
-    _count: { files: 12, logs: 856 },
-  },
-  {
-    id: 'mock-3',
-    name: 'بوت تحليل البيانات',
-    description: 'بوت لتحليل الإحصائيات والتقارير',
-    language: 'php',
-    status: 'running',
-    containerId: 'xyz789uvw012',
-    port: 8082,
-    createdAt: '2025-03-05T12:00:00.000Z',
-    updatedAt: '2025-06-21T16:45:00.000Z',
-    cpuLimit: 4,
-    ramLimit: 1024,
-    storageLimit: 2048,
-    autoRestart: true,
-    _count: { files: 38, logs: 3421 },
-  },
-  {
-    id: 'mock-4',
-    name: 'بوت الدعم الفني',
-    description: 'بوت للدعم الفني وتلقي الشكاوى',
-    language: 'python',
-    status: 'error',
-    containerId: 'err456bad789',
-    port: 8083,
-    createdAt: '2025-04-20T15:00:00.000Z',
-    updatedAt: '2025-06-19T11:00:00.000Z',
-    cpuLimit: 2,
-    ramLimit: 512,
-    storageLimit: 1024,
-    autoRestart: true,
-    _count: { files: 18, logs: 2105 },
-  },
-];
 
 /* ─── Comparison Categories ─── */
 
@@ -201,7 +111,7 @@ const comparisonCategories: ComparisonCategory[] = [
         getValue: (bot) => bot.cpuLimit ? `${bot.cpuLimit} نواة` : '—',
         getColor: (bot) => {
           if (!bot.cpuLimit) return 'text-muted-foreground';
-          return bot.cpuLimit <= 2 ? 'text-emerald-400' : bot.cpuLimit <= 4 ? 'text-amber-400' : 'text-red-400';
+          return bot.cpuLimit <= 2 ? 'text-emerald-400' : bot.cpuLimit <= 4 ? 'text-blue-400' : 'text-red-400';
         },
       },
       {
@@ -210,7 +120,7 @@ const comparisonCategories: ComparisonCategory[] = [
         getValue: (bot) => bot.ramLimit ? `${bot.ramLimit} MB` : '—',
         getColor: (bot) => {
           if (!bot.ramLimit) return 'text-muted-foreground';
-          return bot.ramLimit <= 512 ? 'text-emerald-400' : bot.ramLimit <= 1024 ? 'text-amber-400' : 'text-red-400';
+          return bot.ramLimit <= 512 ? 'text-emerald-400' : bot.ramLimit <= 1024 ? 'text-blue-400' : 'text-red-400';
         },
       },
       {
@@ -219,7 +129,7 @@ const comparisonCategories: ComparisonCategory[] = [
         getValue: (bot) => bot.storageLimit ? `${bot.storageLimit} MB` : '—',
         getColor: (bot) => {
           if (!bot.storageLimit) return 'text-muted-foreground';
-          return bot.storageLimit <= 1024 ? 'text-emerald-400' : bot.storageLimit <= 2048 ? 'text-amber-400' : 'text-red-400';
+          return bot.storageLimit <= 1024 ? 'text-emerald-400' : bot.storageLimit <= 2048 ? 'text-blue-400' : 'text-red-400';
         },
       },
       {
@@ -241,7 +151,7 @@ const comparisonCategories: ComparisonCategory[] = [
         id: 'file-count',
         label: 'عدد الملفات',
         getValue: (bot) => `${bot._count.files}`,
-        getColor: (bot) => bot._count.files > 30 ? 'text-amber-400' : 'text-emerald-400',
+        getColor: (bot) => bot._count.files > 30 ? 'text-blue-400' : 'text-emerald-400',
       },
       {
         id: 'last-update',
@@ -268,14 +178,14 @@ const comparisonCategories: ComparisonCategory[] = [
     id: 'logs',
     title: 'السجلات',
     icon: ScrollText,
-    iconBg: 'bg-amber-500/15',
-    iconColor: 'text-amber-400',
+    iconBg: 'bg-blue-500/15',
+    iconColor: 'text-blue-400',
     rows: [
       {
         id: 'log-count',
         label: 'عدد السجلات',
         getValue: (bot) => `${bot._count.logs.toLocaleString('ar-EG')}`,
-        getColor: (bot) => bot._count.logs > 2000 ? 'text-red-400' : bot._count.logs > 1000 ? 'text-amber-400' : 'text-emerald-400',
+        getColor: (bot) => bot._count.logs > 2000 ? 'text-red-400' : bot._count.logs > 1000 ? 'text-blue-400' : 'text-emerald-400',
       },
       {
         id: 'last-error',
@@ -287,7 +197,7 @@ const comparisonCategories: ComparisonCategory[] = [
         },
         getColor: (bot) => {
           if (bot.status === 'error') return 'text-red-400';
-          if (bot._count.logs > 1500) return 'text-amber-400';
+          if (bot._count.logs > 1500) return 'text-blue-400';
           return 'text-emerald-400';
         },
       },
@@ -437,16 +347,16 @@ export function BotComparison() {
       const res = await fetch('/api/bots', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setBots(data);
         } else {
-          setBots(mockBots);
+          setBots([]);
         }
       } else {
-        setBots(mockBots);
+        setBots([]);
       }
     } catch {
-      setBots(mockBots);
+      setBots([]);
     } finally {
       setLoading(false);
     }
@@ -539,15 +449,36 @@ export function BotComparison() {
               <span className="text-xs text-muted-foreground mr-auto">(2-3 بوتات)</span>
             </div>
             <div className="flex gap-3 flex-wrap">
-              {bots.map((bot, i) => (
-                <SelectionPill
-                  key={bot.id}
-                  bot={bot}
-                  selected={selectedIds.has(bot.id)}
-                  onClick={() => toggleBot(bot.id)}
-                  index={i}
-                />
-              ))}
+              {bots.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center w-full">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-muted/50 mb-3">
+                    <Bot className="size-6 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">لا توجد بوتات للمقارنة</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">
+                    أنشئ بوتات أولاً للمقارنة بينها
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 gap-2"
+                    onClick={() => setCurrentPage('bots')}
+                  >
+                    <Plus className="size-4" />
+                    إنشاء بوت
+                  </Button>
+                </div>
+              ) : (
+                bots.map((bot, i) => (
+                  <SelectionPill
+                    key={bot.id}
+                    bot={bot}
+                    selected={selectedIds.has(bot.id)}
+                    onClick={() => toggleBot(bot.id)}
+                    index={i}
+                  />
+                ))
+              )}
             </div>
 
             {/* Selection summary */}
@@ -555,7 +486,7 @@ export function BotComparison() {
               <motion.p
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-xs text-amber-400 mt-3 flex items-center gap-1.5"
+                className="text-xs text-blue-400 mt-3 flex items-center gap-1.5"
               >
                 <AlertTriangle className="size-3" />
                 اختر بوتاً آخر على الأقل (الحد الأدنى 2 بوتات)
@@ -614,13 +545,13 @@ export function BotComparison() {
                     <div className={`size-12 rounded-xl flex items-center justify-center ${
                       bot.status === 'running' ? 'bg-emerald-500/15' :
                       bot.status === 'error' ? 'bg-red-500/15' :
-                      bot.status === 'building' ? 'bg-amber-500/15' :
+                      bot.status === 'building' ? 'bg-blue-500/15' :
                       'bg-slate-500/15'
                     }`}>
                       <Bot className={`size-6 ${
                         bot.status === 'running' ? 'text-emerald-400' :
                         bot.status === 'error' ? 'text-red-400' :
-                        bot.status === 'building' ? 'text-amber-400' :
+                        bot.status === 'building' ? 'text-blue-400' :
                         'text-slate-400'
                       }`} />
                     </div>

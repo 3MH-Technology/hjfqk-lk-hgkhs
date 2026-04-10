@@ -153,31 +153,61 @@ interface ActiveBot {
   status: string;
 }
 
-// Simulated system metrics hook
+// System metrics - loaded from API
 function useSystemMetrics() {
   const [mounted, setMounted] = useState(false);
-  const [metrics] = useState<SystemMetrics>(() => ({
-    cpu: Math.floor(Math.random() * 30) + 10,
-    ram: 55 + Math.floor(Math.random() * 15),
-    activeBots: 2,
-    totalBots: 5,
-    uptime: 99.9,
-  }));
+  const [metrics, setMetrics] = useState<SystemMetrics>({
+    cpu: 0,
+    ram: 0,
+    activeBots: 0,
+    totalBots: 0,
+    uptime: 0,
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 100);
+    fetch('/api/stats', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          setMetrics({
+            cpu: data.cpu ?? 0,
+            ram: data.ram ?? 0,
+            activeBots: data.activeBots ?? 0,
+            totalBots: data.totalBots ?? 0,
+            uptime: data.uptime ?? 0,
+          });
+        }
+      })
+      .catch(() => {});
     return () => clearTimeout(timer);
   }, []);
 
   return { metrics, mounted };
 }
 
-// Active bots hook with lazy-initialized mock data
+// Active bots - loaded from API
 function useActiveBots() {
-  const [bots] = useState<ActiveBot[]>([
-    { id: '1', name: 'بوت الدعم الفني', status: 'running' },
-    { id: '2', name: 'بوت الإشعارات', status: 'running' },
-  ]);
+  const [bots, setBots] = useState<ActiveBot[]>([]);
+
+  useEffect(() => {
+    fetch('/api/bots', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data)) {
+          const running = data
+            .filter((b: { status: string }) => b.status === 'running')
+            .slice(0, 5)
+            .map((b: { id: string; name: string; status: string }) => ({
+              id: b.id,
+              name: b.name,
+              status: b.status,
+            }));
+          setBots(running);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return { bots };
 }
@@ -231,7 +261,7 @@ function SidebarContent({
       {/* Brand Header */}
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🐺</span>
+          <img src="https://f.top4top.io/p_37210bgwm1.jpg" alt="استضافة الذئب" className="w-7 h-7 rounded-full object-cover" />
           <span className="text-lg font-bold gradient-text">
             استضافة الذئب
           </span>
@@ -376,7 +406,7 @@ function SidebarContent({
               {/* RAM */}
               <div className="rounded-md bg-sidebar-accent/50 px-2.5 py-2">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <MemoryStick className="size-3 text-amber-400" />
+                  <MemoryStick className="size-3 text-blue-400" />
                   <span className="text-[10px] text-sidebar-foreground/50">RAM</span>
                 </div>
                 <motion.div
@@ -386,7 +416,7 @@ function SidebarContent({
                 >
                   <div className="h-1.5 w-full rounded-full bg-sidebar-border overflow-hidden">
                     <motion.div
-                      className="h-full rounded-full bg-amber-400"
+                      className="h-full rounded-full bg-blue-400"
                       initial={{ width: 0 }}
                       animate={{ width: mounted ? `${metrics.ram}%` : '0%' }}
                       transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
@@ -450,7 +480,7 @@ function SidebarContent({
         <div className="mb-3 flex items-center gap-3">
           {/* Avatar with animated gradient border and online indicator */}
           <div className="relative shrink-0">
-            <div className="relative rounded-full p-[2px] bg-gradient-to-tr from-primary/40 via-amber-500/40 to-primary/40 transition-all duration-500 hover:from-primary hover:via-amber-500 hover:to-primary hover:shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+            <div className="relative rounded-full p-[2px] bg-gradient-to-tr from-primary/40 via-blue-500/40 to-primary/40 transition-all duration-500 hover:from-primary hover:via-blue-500 hover:to-primary hover:shadow-[0_0_12px_rgba(59,130,246,0.3)]">
               <div className="flex size-10 items-center justify-center rounded-full bg-sidebar text-sm font-bold text-primary">
                 {user?.email?.charAt(0)?.toUpperCase() ||
                   user?.name?.charAt(0)?.toUpperCase() ||

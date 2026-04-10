@@ -175,10 +175,10 @@ const statusConfig: Record<
   },
   building: {
     label: 'جاري البناء',
-    dotClass: 'bg-amber-400 pulse-dot',
-    badgeColor: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    dotClass: 'bg-blue-400 pulse-dot',
+    badgeColor: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
     glowClass:
-      'before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-br before:from-amber-500/[0.08] before:via-transparent before:to-transparent',
+      'before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-br before:from-blue-500/[0.08] before:via-transparent before:to-transparent',
     borderPulse:
       'animate-[border-pulse-amber_2s_ease-in-out_infinite] shadow-[0_0_12px_rgba(245,158,11,0.12)]',
   },
@@ -212,7 +212,7 @@ function LanguageBadge({ language }: { language: string }) {
   return language === 'python' ? (
     <Badge
       variant="outline"
-      className="gap-1 text-xs bg-yellow-500/10 text-yellow-400 border-yellow-500/30"
+      className="gap-1 text-xs bg-blue-500/10 text-blue-400 border-blue-500/30"
     >
       🐍 Python
     </Badge>
@@ -306,7 +306,7 @@ function WolfSilhouette() {
         </defs>
       </svg>
       {/* Ambient glow behind wolf */}
-      <div className="absolute inset-0 -z-10 blur-2xl rounded-full bg-amber-500/10 scale-150" />
+      <div className="absolute inset-0 -z-10 blur-2xl rounded-full bg-blue-500/10 scale-150" />
     </motion.div>
   );
 }
@@ -880,7 +880,7 @@ export function BotList() {
                           )}
 
                           {bot.status === 'building' && (
-                            <div className="flex items-center gap-1.5 text-amber-400 text-sm">
+                            <div className="flex items-center gap-1.5 text-blue-400 text-sm">
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
                               جاري البناء...
                             </div>
@@ -1042,7 +1042,7 @@ export function BotList() {
                             </>
                           )}
                           {bot.status === 'building' && (
-                            <div className="flex items-center gap-1 text-amber-400 text-xs px-1">
+                            <div className="flex items-center gap-1 text-blue-400 text-xs px-1">
                               <Loader2 className="h-3 w-3 animate-spin" />
                             </div>
                           )}
